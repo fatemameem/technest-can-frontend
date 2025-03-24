@@ -138,12 +138,12 @@ export default function ProgramEngagement() {
   }
 
   return (
-    <div className="bg-white p-8 rounded-2xl shadow-sm">
-      <div className="flex flex-col mb-6">
-        <h3 className="text-xl font-semibold text-black">Program Engagement Trends</h3>
-        <div className="text-green-500 text-sm mt-1">(+100) more in 2024</div>
+    <div className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-sm">
+      <div className="flex flex-col mb-4 sm:mb-6">
+        <h3 className="text-lg sm:text-xl font-semibold text-black">Program Engagement Trends</h3>
+        <div className="text-green-500 text-xs sm:text-sm mt-1">(+100) more in 2024</div>
       </div>
-      <div className="h-[300px]">
+      <div className="h-[250px] sm:h-[300px]">
         <Line 
           data={{
             labels: engagementData.map(item => item.month),

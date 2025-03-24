@@ -7,21 +7,21 @@ import RecentPrograms from "@/components/RecentPrograms";
 
 export default function Home() {
   return (
-    <div className="flex flex-col gap-7">
+    <div className="flex flex-col gap-2 lg:gap-3 xl:gap-4">
       <Header />
       {/* Overview Section - Full Width */}
       <div className="w-full">
         <Overview />
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-2 gap-7">
-        {/* Left Column - Program Engagement */}
+      {/* Responsive Column Layout - Single column on mobile, two columns on larger screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-3 xl:gap-4">
+        {/* Program Engagement */}
         <div>
           <ProgramEngagement />
         </div>
 
-        {/* Right Column - Recent Programs */}
+        {/* Recent Programs */}
         <div>
           <RecentPrograms />
         </div>
