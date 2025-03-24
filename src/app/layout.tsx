@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TechNest",
+  title: "TechNest Canada",
   description: "TechNest is a platform for tech enthusiasts to learn and share their knowledge.",
   viewport: "width=device-width, initial-scale=1",
 };
