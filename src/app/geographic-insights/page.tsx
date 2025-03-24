@@ -19,7 +19,19 @@ export default function GeographicInsightsPage() {
         const newCategories = selectedCategories.includes('all') 
           ? [category] 
           : [...selectedCategories, category];
-        setSelectedCategories(newCategories);
+        
+        // Check if all individual categories are selected
+        const allCategories = ['engineering', 'mathematics', 'science', 'technology'];
+        const wouldHaveAllCategories = allCategories.every(cat => 
+          newCategories.includes(cat) || cat === category
+        );
+        
+        // If all categories would be selected, just use 'all' instead
+        if (wouldHaveAllCategories) {
+          setSelectedCategories(['all']);
+        } else {
+          setSelectedCategories(newCategories);
+        }
       }
     }
     
