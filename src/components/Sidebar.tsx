@@ -4,9 +4,11 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useMobileMenu } from '@/common/MobileMenuContext';
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const { mobileMenuOpen, toggleMobileMenu, closeMobileMenu } = useMobileMenu();
 
   const isActiveLink = (path: string) => {
     return pathname === path;
@@ -14,55 +16,120 @@ const Sidebar = () => {
 
   const getLinkStyles = (path: string) => {
     return isActiveLink(path) 
-      ? "flex items-center gap-3 px-6 py-3 rounded-lg bg-primaryBlue text-white text-sm"
-      : "flex items-center gap-3 px-6 py-3 rounded-lg bg-white text-gray-500/70 hover:bg-gray-100 text-sm";
+      ? "flex items-center gap-2 px-4 py-2 rounded-lg bg-primaryBlue text-white text-xs lg:text-sm"
+      : "flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-gray-500/70 hover:bg-gray-100 text-xs lg:text-sm";
   };
 
-  return (
-    <div className="flex flex-col h-screen bg-white border rounded-3xl sticky left-0 top-0 w-1/4 overflow-y-auto">
-      <div className="w-full py-9 px-5 border-b border-primaryGrey border-solid">
-        <div className="logo-and-name flex items-center justify-start gap-4 ">
-          <Image src="/logo.png" alt="logo" width={80} height={80} />
-          <h1 className="text-2xl font-extrabold text-primaryBlue uppercase">TechNest <br /> CANADA</h1>
+  const navLinks = [
+    { href: "/", icon: "dashboard.svg", text: "Dashboard" },
+    { href: "/programs-and-partners", icon: "programs.svg", text: "Programs & Partners" },
+    { href: "/scholarships-and-grants", icon: "scholarships.svg", text: "Scholarships & Grants" },
+    { href: "/geographic-insights", icon: "geographic.svg", text: "Geographic Insights" },
+    { href: "/long-term-impact", icon: "longtermimpact.svg", text: "Long Term Impact" },
+    { href: "/about-us", icon: "aboutus.svg", text: "About Us" },
+  ];
+
+  // Prevent clicks on the menu from closing it
+  const handleMenuClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
+  // Mobile navigation overlay
+  const mobileNavOverlay = (
+    <div 
+      className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      onClick={closeMobileMenu}
+    >
+      <div 
+        className={`fixed left-0 top-0 h-full w-3/4 sm:w-1/2 md:w-[35%] bg-white transition-transform duration-300 transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        onClick={handleMenuClick}
+      >
+        {/* Company logo and name */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <div className="flex items-center gap-2">
+            <Image src="/logo.png" alt="logo" width={30} height={30} />
+            <h1 className="text-base font-extrabold text-primaryBlue uppercase">TechNest <br /> CANADA</h1>
+          </div>
+          <button onClick={toggleMobileMenu} className="text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        {/* <hr className="relative left-0 right-0 -mx-5 w-[calc(100%+2.5rem)] border-t border-primaryGrey" /> */}
+        
+        {/* Navigation links container with flex to push login to bottom */}
+        <div className="flex flex-col h-[calc(100%-5rem)]">
+          {/* Main nav links */}
+          <nav className="flex-1 flex flex-col gap-1 p-3 overflow-y-auto">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.href}
+                href={link.href} 
+                className={isActiveLink(link.href) 
+                  ? "flex items-center gap-2 p-2 rounded-lg bg-primaryBlue text-white text-sm"
+                  : "flex items-center gap-2 p-2 rounded-lg text-gray-500 hover:bg-gray-100 text-sm"}
+                onClick={toggleMobileMenu}
+              >
+                <Image src={link.icon} alt={link.text} width={16} height={16} />
+                {link.text}
+              </Link>
+            ))}
+          </nav>
+          
+          {/* Login fixed at bottom */}
+          <div className="mt-auto border-t p-3">
+            <Link 
+              href="/login" 
+              className={`${isActiveLink("/login") ? "flex items-center gap-2 p-2 rounded-lg bg-primaryBlue text-white text-sm" : "flex items-center gap-2 p-2 rounded-lg text-gray-500 hover:bg-gray-100 text-sm"}`} 
+              onClick={toggleMobileMenu}
+            >
+              <Image src="login.svg" alt="login" width={16} height={16} />
+              Login
+            </Link>
+          </div>
+        </div>
       </div>
-      <div className="flex flex-col flex-1 px-5 py-9">
-        <nav className="flex flex-col gap-4">
-          <Link href="/" className={getLinkStyles("/")}>
-            <Image src="dashboard.svg" alt="dashboard" width={20} height={20} />
-            Dashboard
-          </Link>
-          <Link href="/programs-and-partners" className={getLinkStyles("/programs-and-partners")}>
-            <Image src="programs.svg" alt="programs" width={20} height={20} />
-            Programs & Partners
-          </Link>
-          <Link href="/scholarships-and-grants" className={getLinkStyles("/scholarships-and-grants")}>
-            <Image src="scholarships.svg" alt="scholarships" width={20} height={20} />
-            Scholarships & Grants
-          </Link>
-          <Link href="/geographic-insights" className={getLinkStyles("/geographic-insights")}>
-            <Image src="geographic.svg" alt="map-pin" width={20} height={20} />
-            Geographic Insights
-          </Link>
-          <Link href="/long-term-impact" className={getLinkStyles("/long-term-impact")}>
-            <Image src="longtermimpact.svg" alt="long-term-impact" width={20} height={20} />
-            Long Term Impact
-          </Link>
-          <Link href="/about-us" className={getLinkStyles("/about-us")}>
-            <Image src="aboutus.svg" alt="about-us" width={20} height={20} />
-            About Us
-          </Link>
+    </div>
+  );
+
+  // Desktop sidebar
+  const desktopSidebar = (
+    <div className="hidden lg:flex flex-col h-screen bg-white border rounded-xl sticky left-0 top-0 lg:w-1/5 xl:w-1/6 overflow-y-auto">
+      <div className="w-full py-3 lg:py-4 xl:py-5 px-2 lg:px-3 xl:px-4 border-b border-primaryGrey border-solid">
+        <div className="logo-and-name flex items-center justify-start gap-1 lg:gap-2">
+          <Image src="/logo.png" alt="logo" width={40} height={40} className="w-8 h-8 lg:w-10 lg:h-10 xl:w-12 xl:h-12" />
+          <h1 className="text-xs lg:text-sm xl:text-base font-extrabold text-primaryBlue uppercase">TechNest <br /> CANADA</h1>
+        </div>
+      </div>
+      <div className="flex flex-col flex-1 px-2 lg:px-3 py-2 lg:py-3 xl:py-4">
+        <nav className="flex flex-col gap-1 lg:gap-2">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.href}
+              href={link.href} 
+              className={getLinkStyles(link.href)}
+            >
+              <Image src={link.icon} alt={link.text} width={16} height={16} />
+              <span className="truncate">{link.text}</span>
+            </Link>
+          ))}
         </nav>
         
-        <div className="mt-auto mb-9">
+        <div className="mt-auto mb-2 lg:mb-3 xl:mb-4">
           <Link href="/login" className={getLinkStyles("/login")}>
-            <Image src="login.svg" alt="login" width={20} height={20} />
+            <Image src="login.svg" alt="login" width={16} height={16} />
             Login
           </Link>
         </div>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {mobileNavOverlay}
+      {desktopSidebar}
+    </>
   );
 };
 

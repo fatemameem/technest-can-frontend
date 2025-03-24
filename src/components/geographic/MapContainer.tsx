@@ -310,9 +310,9 @@ export default function MapContainer({
 
         {/* Info Panel - conditionally rendered */}
         {showInfo && (
-          <div className="absolute top-16 left-4 bg-white p-4 rounded-md shadow-md z-20 max-w-xs">
-            <h3 className="font-semibold mb-2">Geographic Insights</h3>
-            <p className="text-sm">
+          <div className="absolute top-10 sm:top-12 lg:top-16 left-2 sm:left-3 lg:left-4 bg-white p-3 sm:p-4 rounded-md shadow-md z-20 max-w-[calc(100vw-1rem)] sm:max-w-xs">
+            <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-1.5 sm:mb-2">Geographic Insights</h3>
+            <p className="text-xs sm:text-sm text-gray-600">
               This map shows STEM programs and events across Canada. Use the filter options to view 
               programs by category. Click on a marker to view more details.
             </p>
@@ -321,24 +321,24 @@ export default function MapContainer({
 
         {/* Legend Panel - conditionally rendered */}
         {showLegend && (
-          <div className="absolute bottom-8 left-4 bg-white p-4 rounded-md shadow-md z-20">
-            <h3 className="font-semibold mb-2">Map Legend</h3>
-            <div className="space-y-2">
+          <div className="absolute bottom-20 sm:bottom-24 lg:bottom-28 left-2 sm:left-3 lg:left-4 bg-white p-3 sm:p-4 rounded-md shadow-md z-20">
+            <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-1.5 sm:mb-2">Map Legend</h3>
+            <div className="space-y-1.5 sm:space-y-2">
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-orange-500 rounded-full mr-2"></div>
-                <span className="text-sm">Engineering</span>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-orange-500 rounded-full mr-2"></div>
+                <span className="text-xs sm:text-sm">Engineering</span>
               </div>
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-pink-500 rounded-full mr-2"></div>
-                <span className="text-sm">Mathematics</span>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-pink-500 rounded-full mr-2"></div>
+                <span className="text-xs sm:text-sm">Mathematics</span>
               </div>
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-sm">Science</span>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-xs sm:text-sm">Science</span>
               </div>
               <div className="flex items-center">
-                <div className="w-4 h-4 bg-purple-500 rounded-full mr-2"></div>
-                <span className="text-sm">Technology</span>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-purple-500 rounded-full mr-2"></div>
+                <span className="text-xs sm:text-sm">Technology</span>
               </div>
             </div>
           </div>
@@ -346,37 +346,63 @@ export default function MapContainer({
 
         {/* Layers Panel - conditionally rendered */}
         {showLayers && (
-          <div className="absolute top-16 left-16 bg-white p-4 rounded-md shadow-md z-20">
-            <h3 className="font-semibold mb-2">Map Layers</h3>
-            <div className="space-y-2">
+          <div className="absolute top-10 sm:top-12 lg:top-16 left-12 sm:left-14 lg:left-16 bg-white p-3 sm:p-4 rounded-md shadow-md z-20">
+            <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-1.5 sm:mb-2">Map Layers</h3>
+            <div className="space-y-1.5 sm:space-y-2">
               <div className="flex items-center">
                 <input 
                   type="checkbox" 
                   id="satellite" 
-                  className="mr-2" 
+                  className="mr-2 h-3 w-3 sm:h-4 sm:w-4" 
                   checked={mapType === "satellite"}
                   onChange={() => setMapType(mapType === "satellite" ? "roadmap" : "satellite")}
                 />
-                <label htmlFor="satellite" className="text-sm">Satellite View</label>
+                <label htmlFor="satellite" className="text-xs sm:text-sm">Satellite View</label>
               </div>
               <div className="flex items-center">
                 <input 
                   type="checkbox" 
                   id="traffic" 
-                  className="mr-2" 
+                  className="mr-2 h-3 w-3 sm:h-4 sm:w-4" 
                   checked={showTraffic}
                   onChange={() => setShowTraffic(!showTraffic)}
                 />
-                <label htmlFor="traffic" className="text-sm">Traffic</label>
+                <label htmlFor="traffic" className="text-xs sm:text-sm">Traffic</label>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Category Filters Panel - conditionally rendered */}
+        {showCategoryFilters && (
+          <div className="absolute top-10 sm:top-12 lg:top-16 left-12 sm:left-14 lg:left-16 bg-white p-3 sm:p-4 rounded-md shadow-md z-20 w-[calc(100vw-5rem)] sm:w-72">
+            <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-1.5 sm:mb-2">Category Filters</h3>
+            <div className="space-y-1.5 sm:space-y-2">
+              {categoryOptions.map(category => (
+                <div key={category.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`category-${category.id}`}
+                    className="mr-2 h-3 w-3 sm:h-4 sm:w-4"
+                    checked={selectedCategories.includes(category.id)}
+                    onChange={() => handleCategoryChange(category.id)}
+                  />
+                  <label 
+                    htmlFor={`category-${category.id}`} 
+                    className={`text-xs sm:text-sm ${getCategoryTextColor(category.id)}`}
+                  >
+                    {category.label}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
         {/* Search Panel - conditionally rendered */}
         {showSearch && (
-          <div className="absolute top-16 left-16 bg-white p-4 rounded-md shadow-md z-20 w-72">
-            <h3 className="font-semibold mb-2">Search Programs</h3>
+          <div className="absolute top-10 sm:top-12 lg:top-16 left-12 sm:left-14 lg:left-16 bg-white p-3 sm:p-4 rounded-md shadow-md z-20 w-[calc(100vw-5rem)] sm:w-72">
+            <h3 className="text-sm sm:text-base lg:text-lg font-semibold mb-1.5 sm:mb-2">Search Programs</h3>
             <div className="relative">
               <input
                 type="text"
@@ -388,10 +414,10 @@ export default function MapContainer({
                   }
                 }}
                 placeholder="Search by university..."
-                className="w-full py-3 px-4 pl-12 text-base border border-gray-300 rounded-md mb-2"
+                className="w-full py-2 px-3 pl-8 text-xs sm:text-sm border border-gray-300 rounded-md mb-2"
               />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -400,7 +426,7 @@ export default function MapContainer({
                   {suggestions.map((suggestion, idx) => (
                     <div 
                       key={idx} 
-                      className="p-2 hover:bg-gray-100 cursor-pointer"
+                      className="p-2 hover:bg-gray-100 cursor-pointer text-xs sm:text-sm"
                       onClick={() => {
                         if (!institutionFilters.some(filter => filter.toLowerCase() === suggestion.toLowerCase())) {
                           setInstitutionFilters([...institutionFilters, suggestion]);
@@ -417,17 +443,17 @@ export default function MapContainer({
             </div>
             
             {institutionFilters.length > 0 && (
-              <div className="mt-3">
-                <div className="text-sm font-medium mb-1">Filtered Institutions:</div>
+              <div className="mt-2 sm:mt-3">
+                <div className="text-xs sm:text-sm font-medium mb-1">Filtered Institutions:</div>
                 <div className="flex flex-wrap gap-1">
                   {institutionFilters.map((institution, idx) => (
-                    <div key={idx} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center">
+                    <div key={idx} className="bg-blue-100 text-blue-800 text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full flex items-center">
                       <span>{institution}</span>
                       <button 
                         onClick={() => removeInstitutionFilter(institution)}
                         className="ml-1 hover:text-red-500"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5 sm:h-3 sm:w-3" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       </button>
@@ -436,32 +462,6 @@ export default function MapContainer({
                 </div>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Category Filters Panel - conditionally rendered */}
-        {showCategoryFilters && (
-          <div className="absolute top-16 left-16 bg-white p-4 rounded-md shadow-md z-20 w-72">
-            <h3 className="font-semibold mb-2">Category Filters</h3>
-            <div className="space-y-2">
-              {categoryOptions.map(category => (
-                <div key={category.id} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id={`category-${category.id}`}
-                    className="mr-2"
-                    checked={selectedCategories.includes(category.id)}
-                    onChange={() => handleCategoryChange(category.id)}
-                  />
-                  <label 
-                    htmlFor={`category-${category.id}`} 
-                    className={`text-sm ${getCategoryTextColor(category.id)}`}
-                  >
-                    {category.label}
-                  </label>
-                </div>
-              ))}
-            </div>
           </div>
         )}
 
@@ -485,13 +485,13 @@ export default function MapContainer({
             position={selectedMarker.position}
             onCloseClick={() => setSelectedMarker(null)}
           >
-            <div className="p-2">
-              <h3 className="font-semibold text-lg">{selectedMarker.title}</h3>
+            <div className="p-2 sm:p-3">
+              <h3 className="text-sm sm:text-base lg:text-lg font-semibold">{selectedMarker.title}</h3>
               {selectedMarker.university && (
-                <p className="text-gray-600">{selectedMarker.university}</p>
+                <p className="text-xs sm:text-sm text-gray-600">{selectedMarker.university}</p>
               )}
               {selectedMarker.description && (
-                <p className="mt-2">{selectedMarker.description}</p>
+                <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm">{selectedMarker.description}</p>
               )}
             </div>
           </InfoWindow>

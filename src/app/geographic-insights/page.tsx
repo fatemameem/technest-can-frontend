@@ -4,6 +4,19 @@ import MapContainer from "@/components/geographic/MapContainer";
 import Header from "@/components/Header";
 import { useState } from "react";
 
+interface Category {
+  id: string;
+  label: string;
+}
+
+const categoryOptions: Category[] = [
+  { id: 'all', label: 'All Events' },
+  { id: 'engineering', label: 'Engineering' },
+  { id: 'mathematics', label: 'Mathematics' },
+  { id: 'science', label: 'Science' },
+  { id: 'technology', label: 'Technology' }
+];
+
 export default function GeographicInsightsPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [filtersVisible, setFiltersVisible] = useState(true);
@@ -49,71 +62,92 @@ export default function GeographicInsightsPage() {
   };
   
   return (
-    <div className="h-screen flex flex-col ">
+    <div className="h-screen flex flex-col">
       <Header/>
       
-      {/* This div will take up all remaining vertical space */}
+      {/* Main content area */}
       <div className="flex-1 bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="flex h-full">
+        <div className="h-full flex flex-col lg:flex-row">
           {/* Filters Panel - conditionally rendered based on visibility */}
           {filtersVisible && (
-            <div className="w-72 p-6 border-r border-gray-200 flex-shrink-0 h-full overflow-y-auto flex flex-col">
-              <h3 className="text-xl font-semibold mb-8">STEM Fields</h3>
-              <div className="flex flex-col justify-around flex-1 py-8">
+            <div className={`
+              ${filtersVisible ? 'block' : 'hidden'}
+              lg:w-72 
+              p-4 sm:p-5 lg:p-6 
+              lg:border-r border-gray-200 
+              flex-shrink-0 
+              lg:h-full 
+              bg-white
+              z-10
+              ${filtersVisible ? 'lg:block' : 'lg:hidden'}
+              border-b
+            `}>
+              <h3 className="text-lg sm:text-xl lg:text-xl font-semibold mb-4 lg:mb-8">STEM Fields</h3>
+              <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 justify-start">
+                {/* All Events button - always full width */}
                 <button
                   onClick={() => handleCategorySelect('all')}
-                  className={`px-6 py-3 rounded-full text-center text-lg ${
-                    isCategorySelected('all') 
+                  className={`
+                    w-full
+                    px-3 sm:px-4 lg:px-6 
+                    py-2 sm:py-2.5 lg:py-3 
+                    rounded-full 
+                    text-center 
+                    text-sm sm:text-base lg:text-lg 
+                    ${isCategorySelected('all') 
                       ? "bg-gray-800 text-white" 
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
+                  `}
                 >
                   All Events
                 </button>
                 
-                <button
-                  onClick={() => handleCategorySelect('engineering')}
-                  className={`px-6 py-3 rounded-full text-center text-lg ${
-                    isCategorySelected('engineering') 
-                      ? "bg-orange-500 text-white" 
-                      : "bg-orange-100 text-orange-700 hover:bg-orange-200"
-                  }`}
-                >
-                  Engineering
-                </button>
-                
-                <button
-                  onClick={() => handleCategorySelect('mathematics')}
-                  className={`px-6 py-3 rounded-full text-center text-lg ${
-                    isCategorySelected('mathematics') 
-                      ? "bg-pink-500 text-white" 
-                      : "bg-pink-100 text-pink-700 hover:bg-pink-200"
-                  }`}
-                >
-                  Mathematics
-                </button>
-                
-                <button
-                  onClick={() => handleCategorySelect('science')}
-                  className={`px-6 py-3 rounded-full text-center text-lg ${
-                    isCategorySelected('science') 
-                      ? "bg-green-500 text-white" 
-                      : "bg-green-100 text-green-700 hover:bg-green-200"
-                  }`}
-                >
-                  Science
-                </button>
-                
-                <button
-                  onClick={() => handleCategorySelect('technology')}
-                  className={`px-6 py-3 rounded-full text-center text-lg ${
-                    isCategorySelected('technology') 
-                      ? "bg-purple-500 text-white" 
-                      : "bg-purple-100 text-purple-700 hover:bg-purple-200"
-                  }`}
-                >
-                  Technology
-                </button>
+                {/* Other category buttons */}
+                {categoryOptions.slice(1).map((category, index, array) => {
+                  // Calculate if this button should be centered
+                  const isLastItem = index === array.length - 1;
+                  const isAloneInLastRow = isLastItem && array.length % 2 === 0;
+                  
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => handleCategorySelect(category.id)}
+                      className={`
+                        ${isAloneInLastRow ? 'w-[calc(50%-0.25rem)] sm:w-[calc(33.333%-0.67rem)] mx-auto' : 'w-[calc(50%-0.25rem)] sm:w-[calc(33.333%-0.67rem)]'}
+                        lg:w-full
+                        px-3 sm:px-4 lg:px-6 
+                        py-2 sm:py-2.5 lg:py-3 
+                        rounded-full 
+                        text-center 
+                        text-sm sm:text-base lg:text-lg
+                        ${(() => {
+                          switch(category.id) {
+                            case 'engineering':
+                              return isCategorySelected('engineering') 
+                                ? "bg-orange-500 text-white" 
+                                : "bg-orange-100 text-orange-700 hover:bg-orange-200";
+                            case 'mathematics':
+                              return isCategorySelected('mathematics') 
+                                ? "bg-pink-500 text-white" 
+                                : "bg-pink-100 text-pink-700 hover:bg-pink-200";
+                            case 'science':
+                              return isCategorySelected('science') 
+                                ? "bg-green-500 text-white" 
+                                : "bg-green-100 text-green-700 hover:bg-green-200";
+                            case 'technology':
+                              return isCategorySelected('technology') 
+                                ? "bg-purple-500 text-white" 
+                                : "bg-purple-100 text-purple-700 hover:bg-purple-200";
+                            default:
+                              return "";
+                          }
+                        })()}
+                      `}
+                    >
+                      {category.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
