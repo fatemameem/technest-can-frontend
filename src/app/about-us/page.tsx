@@ -7,8 +7,8 @@ export default function AboutUs() {
     <>
       <div className="flex flex-col w-full min-h-screen">
         <Header/>
-        <div className="flex-1 flex justify-center items-start">
-          <main className="container max-w-5xl shadow-sm overflow-y-auto p-8 max-h-[86vh] py-10 px-12 bg-white border rounded-3xl">
+        <div className="flex-1 flex justify-start w-full items-start">
+          <main className=" shadow-sm overflow-y-auto p-8 max-h-[86vh] py-10 px-12 bg-white border rounded-3xl">
             <h1 className="text-3xl font-bold text-blue-800 mb-6">About TechNest Canada</h1>
             
             <section className="mb-10">
