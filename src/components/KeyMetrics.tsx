@@ -10,12 +10,12 @@ export default function KeyMetrics() {
           <p className="text-4xl font-bold">2,508</p>
         </div>
         <div className="flex-shrink-0">
-          <Image 
-            src="/activeprograms.svg"
-            alt="Active Programs"
+        <Image 
+          src="/activeprograms.svg"
+          alt="Active Programs"
             width={36}
             height={36}
-          />
+        />
         </div>
       </div>
 
@@ -26,12 +26,12 @@ export default function KeyMetrics() {
           <p className="text-4xl font-bold">10/13</p>
         </div>
         <div className="flex-shrink-0">
-          <Image 
-            src="/regionscovered.svg"
-            alt="Regions Covered"
+        <Image 
+          src="/regionscovered.svg"
+          alt="Regions Covered"
             width={36}
             height={36}
-          />
+        />
         </div>
       </div>
 
@@ -43,12 +43,12 @@ export default function KeyMetrics() {
           <span className="text-sm">Per Year (2024)</span>
         </div>
         <div className="flex-shrink-0">
-          <Image 
-            src="/stemgraduates.svg"
-            alt="STEM Graduates"
+        <Image 
+          src="/stemgraduates.svg"
+          alt="STEM Graduates"
             width={36}
             height={36}
-          />
+        />
         </div>
       </div>
     </div>

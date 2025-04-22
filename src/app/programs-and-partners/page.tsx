@@ -122,9 +122,9 @@ export default function ProgramsAndPartners() {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-screen">
-      <Header/>
-      <div className="flex-1 flex justify-start w-full items-start">
+      <div className="flex flex-col w-full min-h-screen">
+        <Header/>
+        <div className="flex-1 flex justify-start w-full items-start">
         <main className="w-full shadow-sm overflow-y-auto bg-white border rounded-xl sm:rounded-2xl md:rounded-3xl">
           <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
             {/* Tabs */}
@@ -193,8 +193,8 @@ export default function ProgramsAndPartners() {
               </div>
             )}
           </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
   );
 }
