@@ -111,7 +111,7 @@ const Sidebar = () => {
             >
               <Image src={link.icon} alt={link.text} width={16} height={16} />
               <span className="truncate">{link.text}</span>
-            </Link>
+          </Link>
           ))}
         </nav>
         

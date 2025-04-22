@@ -109,7 +109,7 @@ export default function GeographicInsightsPage() {
                   const isAloneInLastRow = isLastItem && array.length % 2 === 0;
                   
                   return (
-                    <button
+                <button
                       key={category.id}
                       onClick={() => handleCategorySelect(category.id)}
                       className={`
@@ -124,28 +124,28 @@ export default function GeographicInsightsPage() {
                           switch(category.id) {
                             case 'engineering':
                               return isCategorySelected('engineering') 
-                                ? "bg-orange-500 text-white" 
+                      ? "bg-orange-500 text-white" 
                                 : "bg-orange-100 text-orange-700 hover:bg-orange-200";
                             case 'mathematics':
                               return isCategorySelected('mathematics') 
-                                ? "bg-pink-500 text-white" 
+                      ? "bg-pink-500 text-white" 
                                 : "bg-pink-100 text-pink-700 hover:bg-pink-200";
                             case 'science':
                               return isCategorySelected('science') 
-                                ? "bg-green-500 text-white" 
+                      ? "bg-green-500 text-white" 
                                 : "bg-green-100 text-green-700 hover:bg-green-200";
                             case 'technology':
                               return isCategorySelected('technology') 
-                                ? "bg-purple-500 text-white" 
+                      ? "bg-purple-500 text-white" 
                                 : "bg-purple-100 text-purple-700 hover:bg-purple-200";
                             default:
                               return "";
                           }
                         })()}
                       `}
-                    >
+                >
                       {category.label}
-                    </button>
+                </button>
                   );
                 })}
               </div>
