@@ -1,134 +1,154 @@
+
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { EventItem } from '../types';
-import { Button } from './ui/Button';
-import { Input } from './ui/Input';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from './ui/Card';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { z } from 'zod';
+import { EventItem } from '../types.js';
+import { useAppContext } from '../context/AppContext.js';
+import { Button } from './ui/Button.js';
+import { X, CheckCircle } from './icons.js';
+
+// Shim for zodResolver because it's not available in this environment
+const zodResolverShim = (schema: z.ZodSchema) => (values: any, _context: any, _options: any) => {
+    try {
+        schema.parse(values);
+        return { values, errors: {} };
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            const errors = error.issues.reduce((acc: Record<string, any>, curr) => {
+                if (curr.path.length > 0) {
+                    acc[curr.path[0].toString()] = { type: 'manual', message: curr.message };
+                }
+                return acc;
+            }, {});
+            return { values: {}, errors };
+        }
+        throw error;
+    }
+};
+
+const registrationSchema = z.object({
+    fullName: z.string().min(2, "Full name is required"),
+    email: z.string().email("Invalid email address"),
+    affiliation: z.string().optional(),
+    consent: z.boolean().optional(),
+});
+
+type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 interface RegisterDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  event: EventItem;
+    event: EventItem;
+    children: React.ReactElement;
 }
 
-const RegisterDialog: React.FC<RegisterDialogProps> = ({ isOpen, onClose, event }) => {
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formState, setFormState] = useState({
-    fullName: '',
-    email: '',
-    affiliation: 'individual',
-    consent: false,
-  });
+const RegisterDialog = ({ event, children }: RegisterDialogProps) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const { addRegistration, isRegistered } = useAppContext();
+    const hasRegistered = isRegistered(event.id);
 
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<RegistrationFormValues>({
+        resolver: zodResolverShim(registrationSchema),
+    });
+
+    const onSubmit: SubmitHandler<RegistrationFormValues> = (data) => {
+        addRegistration({
+            eventId: event.id,
+            fullName: data.fullName,
+            email: data.email,
+            affiliation: data.affiliation,
+            consent: data.consent || false,
+        });
+        setIsSuccess(true);
+        reset();
     };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose]);
 
-  useEffect(() => {
-    // Reset form on dialog open
-    if (isOpen) {
-      setIsSubmitted(false);
-      setFormState({ fullName: '', email: '', affiliation: 'individual', consent: false });
-    }
-  }, [isOpen]);
+    const openDialog = () => {
+        if (hasRegistered) return;
+        setIsOpen(true);
+    };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const isCheckbox = type === 'checkbox';
-    setFormState(prevState => ({
-      ...prevState,
-      [name]: isCheckbox ? (e.target as HTMLInputElement).checked : value,
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, you would send this to a backend.
-    // For this demo, we just show a success message.
-    console.log('Registration submitted:', { eventId: event.id, ...formState });
-    setIsSubmitted(true);
-  };
-  
-  if (!isOpen) return null;
+    const closeDialog = () => {
+        setIsOpen(false);
+        // Delay resetting success state to allow for exit animation
+        setTimeout(() => setIsSuccess(false), 300); 
+    };
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
-      aria-labelledby="registration-dialog-title"
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-    >
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md m-4">
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle id="registration-dialog-title">Register for Event</CardTitle>
-                <CardDescription>{event.title}</CardDescription>
-              </div>
-              <button onClick={onClose} className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close dialog">
-                <X size={20} className="text-slate-500 dark:text-slate-400" />
-              </button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isSubmitted ? (
-              <div className="text-center py-8">
-                <h3 className="text-xl font-bold text-emerald-700 dark:text-emerald-400">Registration Confirmed!</h3>
-                <p className="mt-2 text-slate-700 dark:text-slate-300">Thank you for registering. We've sent a confirmation to your email.</p>
-                <Button onClick={onClose} className="mt-6">Close</Button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
-                  <Input id="fullName" name="fullName" type="text" value={formState.fullName} onChange={handleChange} required />
+    useEffect(() => {
+        const handleEsc = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') closeDialog();
+        };
+        if (isOpen) {
+            document.addEventListener('keydown', handleEsc);
+        }
+        return () => document.removeEventListener('keydown', handleEsc);
+    }, [isOpen]);
+
+    return (
+        <>
+            {React.cloneElement(children as React.ReactElement<any>, { onClick: openDialog })}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+                    aria-labelledby="dialog-title"
+                    role="dialog"
+                    aria-modal="true"
+                    onClick={closeDialog}
+                >
+                    <div
+                        className="relative m-4 bg-dark-surface rounded-2xl shadow-xl w-full max-w-md"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-6">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="absolute top-4 right-4"
+                                onClick={closeDialog}
+                                aria-label="Close dialog"
+                            ><X /></Button>
+
+                            {!isSuccess ? (
+                                <>
+                                    <h2 id="dialog-title" className="text-xl font-bold text-dark-text-primary">Register for {event.title}</h2>
+                                    <p className="text-sm text-dark-meta mt-1">Complete the form below to secure your spot.</p>
+                                    <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+                                        <div>
+                                            <label htmlFor="fullName" className="block text-sm font-medium text-dark-text-secondary">Full Name</label>
+                                            <input {...register('fullName')} id="fullName" className="mt-1 block w-full bg-slate-800 border-slate-600 rounded-md p-2 focus:ring-dark-accent focus:border-dark-accent" />
+                                            {errors.fullName && <p className="text-sm text-dark-danger mt-1">{errors.fullName.message}</p>}
+                                        </div>
+                                        <div>
+                                            <label htmlFor="email" className="block text-sm font-medium text-dark-text-secondary">Email</label>
+                                            <input {...register('email')} id="email" type="email" className="mt-1 block w-full bg-slate-800 border-slate-600 rounded-md p-2 focus:ring-dark-accent focus:border-dark-accent" />
+                                            {errors.email && <p className="text-sm text-dark-danger mt-1">{errors.email.message}</p>}
+                                        </div>
+                                         <div>
+                                            <label htmlFor="affiliation" className="block text-sm font-medium text-dark-text-secondary">Affiliation (Optional)</label>
+                                            <input {...register('affiliation')} id="affiliation" placeholder="Company / Individual" className="mt-1 block w-full bg-slate-800 border-slate-600 rounded-md p-2 focus:ring-dark-accent focus:border-dark-accent" />
+                                        </div>
+                                        <div className="flex items-start">
+                                            <input {...register('consent')} id="consent" type="checkbox" className="h-4 w-4 rounded border-slate-600 text-dark-primary focus:ring-dark-primary" />
+                                            <div className="ml-3 text-sm">
+                                                <label htmlFor="consent" className="text-dark-text-secondary">I'd like to receive email updates from TECH-NEST.</label>
+                                            </div>
+                                        </div>
+                                        <Button type="submit" className="w-full">Confirm Registration</Button>
+                                    </form>
+                                </>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <CheckCircle className="w-16 h-16 text-dark-success mx-auto" />
+                                    <h2 className="mt-4 text-2xl font-bold text-dark-text-primary">Registration Confirmed!</h2>
+                                    <p className="mt-2 text-dark-text-secondary">Thank you for registering. We've sent a confirmation to your email.</p>
+                                    <Button onClick={closeDialog} className="mt-6">Close</Button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
-                  <Input id="email" name="email" type="email" value={formState.email} onChange={handleChange} required />
-                </div>
-                <div>
-                  <label htmlFor="affiliation" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Affiliation</label>
-                  <select
-                    id="affiliation"
-                    name="affiliation"
-                    value={formState.affiliation}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-xl border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  >
-                    <option value="individual">Individual</option>
-                    <option value="company">Company</option>
-                    <option value="education">Education</option>
-                    <option value="non-profit">Non-profit</option>
-                  </select>
-                </div>
-                 <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input id="consent" name="consent" type="checkbox" checked={formState.consent} onChange={handleChange} className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded dark:border-slate-600"/>
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <label htmlFor="consent" className="font-medium text-gray-700 dark:text-slate-300">I would like to receive emails about future events.</label>
-                  </div>
-                </div>
-                <div className="flex justify-end gap-3 pt-2">
-                    <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button type="submit">Register</Button>
-                </div>
-              </form>
             )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+        </>
+    );
 };
 
 export default RegisterDialog;

@@ -1,34 +1,35 @@
 
 [
   {
-    "id": "team-001",
-    "name": "Jasmine Kaur",
-    "role": "Founder & Executive Director",
-    "bio": "Jasmine is a passionate educator and cybersecurity advocate with over a decade of experience in making complex technical topics accessible to diverse audiences. She founded TECH-NEST to bridge the knowledge gap in digital safety.",
-    "avatarUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1974&auto=format&fit=crop",
+    "id": "tm-001",
+    "name": "Jane Doe",
+    "role": "Executive Director",
+    "bio": "With over 15 years in tech policy and community organizing, Jane leads TECH-NEST with a passion for digital equity and accessible education.",
+    "avatarUrl": "https://i.pravatar.cc/150?u=jane",
     "socials": [
-      { "platform": "LinkedIn", "url": "#" },
-      { "platform": "Twitter", "url": "#" }
+      { "platform": "linkedin", "url": "#" },
+      { "platform": "twitter", "url": "#" }
     ]
   },
   {
-    "id": "team-002",
-    "name": "Ben Carter",
-    "role": "Head of Content & Research",
-    "bio": "Ben leads the development of our educational materials, from workshop curricula to podcast episodes. He has a background in journalism and a knack for storytelling that brings cybersecurity issues to life.",
-    "avatarUrl": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=1974&auto=format&fit=crop",
+    "id": "tm-002",
+    "name": "John Smith",
+    "role": "Head of Content",
+    "bio": "A former cybersecurity journalist, John translates complex technical topics into engaging and understandable content for all audiences.",
+    "avatarUrl": "https://i.pravatar.cc/150?u=john",
     "socials": [
-      { "platform": "LinkedIn", "url": "#" }
+      { "platform": "linkedin", "url": "#" }
     ]
   },
   {
-    "id": "team-003",
-    "name": "Elena Rodriguez",
-    "role": "Community Outreach Coordinator",
-    "bio": "Elena builds partnerships with schools, libraries, and community organizations. Her work ensures that TECH-NEST's programs reach the people who need them most, fostering a more inclusive digital future.",
-    "avatarUrl": "https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?q=80&w=1974&auto=format&fit=crop",
+    "id": "tm-003",
+    "name": "Emily Chen",
+    "role": "Community Manager",
+    "bio": "Emily builds and nurtures our community through events, partnerships, and outreach, ensuring our programs meet real-world needs.",
+    "avatarUrl": "https://i.pravatar.cc/150?u=emily",
     "socials": [
-      { "platform": "Twitter", "url": "#" }
+      { "platform": "twitter", "url": "#" },
+      { "platform": "github", "url": "#" }
     ]
   }
 ]

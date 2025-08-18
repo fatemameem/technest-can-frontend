@@ -2,117 +2,75 @@
 [
   {
     "id": "evt-001",
-    "slug": "ai-ethics-for-everyone",
-    "title": "AI Ethics for Everyone: A Practical Introduction",
-    "summary": "Join us for a beginner-friendly workshop on the ethical implications of artificial intelligence in our daily lives.",
-    "description": "<p>In this interactive session, we'll explore the fundamentals of AI ethics. We'll discuss real-world examples of algorithmic bias, data privacy concerns, and the societal impact of AI technologies. Participants will leave with a clear framework for thinking critically about AI and its role in shaping our future.</p><p>No technical background is required. This workshop is designed for community leaders, parents, educators, and anyone curious about the ethical dimensions of AI.</p>",
+    "slug": "intro-to-ai-ethics-webinar",
+    "title": "Intro to AI Ethics: Navigating the Future",
+    "summary": "Join us for a foundational webinar on the ethical implications of artificial intelligence in our daily lives.",
+    "description": "This 90-minute session will cover the basics of AI ethics, including bias in algorithms, data privacy concerns, and the societal impact of automation. We'll explore real-world case studies and discuss how individuals and organizations can promote responsible AI development. This event is perfect for beginners with no prior technical knowledge.",
     "start": "2024-09-15T18:00:00Z",
-    "end": "2024-09-15T20:00:00Z",
-    "location": { "type": "virtual", "details": "Zoom Webinar", "link": "#" },
+    "end": "2024-09-15T19:30:00Z",
+    "location": {
+      "type": "virtual",
+      "details": "Zoom Webinar",
+      "link": "https://zoom.us/webinar/register/..."
+    },
     "tags": ["webinar", "community"],
-    "coverImage": "https://images.unsplash.com/photo-1677756119517-756a188d2d94?q=80&w=2070&auto=format&fit=crop",
-    "agenda": [
-      { "time": "6:00 PM", "item": "Welcome & Introduction" },
-      { "time": "6:15 PM", "item": "What is AI and Why Do Ethics Matter?" },
-      { "time": "7:00 PM", "item": "Breakout Session: Real-World Case Studies" },
-      { "time": "7:45 PM", "item": "Q&A with Panelists" }
-    ],
+    "coverImage": "https://picsum.photos/seed/ai-ethics/800/400",
     "speakers": [
-      { "name": "Dr. Anya Sharma", "title": "Ethical AI Researcher", "avatarUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1961&auto=format&fit=crop" }
+      {
+        "name": "Dr. Anya Sharma",
+        "title": "AI Ethicist",
+        "org": "Tech Ethics Initiative",
+        "avatarUrl": "https://i.pravatar.cc/150?u=anya"
+      }
     ]
   },
   {
     "id": "evt-002",
-    "slug": "phishing-prevention-masterclass",
-    "title": "Phishing Prevention Masterclass for Small Businesses",
-    "summary": "Learn to identify and protect your business from sophisticated phishing attacks in this hands-on workshop.",
-    "description": "<p>Phishing remains one of the biggest threats to small businesses. This masterclass provides practical, actionable steps to bolster your defenses. We will cover how to spot fake emails, secure your accounts with multi-factor authentication, and train your team to be the first line of defense.</p>",
-    "start": "2024-10-22T14:00:00Z",
-    "end": "2024-10-22T16:30:00Z",
-    "location": { "type": "in-person", "details": "Community Business Hub, 123 Main St" },
+    "slug": "cybersecurity-workshop-for-small-business",
+    "title": "Cybersecurity for Small Businesses",
+    "summary": "A hands-on workshop designed to equip small business owners with essential cybersecurity skills to protect their assets.",
+    "description": "In this interactive workshop, we'll cover critical topics such as phishing prevention, strong password policies, secure data storage, and incident response planning. Participants will leave with a personalized action plan to improve their business's security posture. Laptops are recommended but not required.",
+    "start": "2024-10-22T10:00:00Z",
+    "end": "2024-10-22T13:00:00Z",
+    "location": {
+      "type": "in-person",
+      "details": "Innovate Hub, 123 Tech Avenue"
+    },
     "tags": ["workshop"],
-    "coverImage": "https://images.unsplash.com/photo-1544890225-2fde0e66ea9c?q=80&w=1932&auto=format&fit=crop",
-    "speakers": [
-      { "name": "David Chen", "title": "Cybersecurity Consultant", "avatarUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=2070&auto=format&fit=crop" },
-      { "name": "Maria Rodriguez", "title": "Small Business Owner", "avatarUrl": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=2070&auto=format&fit=crop" }
+    "coverImage": "https://picsum.photos/seed/cyber-workshop/800/400",
+    "agenda": [
+      { "time": "10:00 AM", "item": "Welcome & Introduction to Cyber Threats" },
+      { "time": "10:30 AM", "item": "Securing Your Accounts: Passwords & 2FA" },
+      { "time": "11:15 AM", "item": "Spotting the Phish: Email Security" },
+      { "time": "12:00 PM", "item": "Break" },
+      { "time": "12:15 PM", "item": "Protecting Your Data: Backups & Encryption" },
+      { "time": "1:00 PM", "item": "Q&A and Action Planning" }
     ],
-    "resources": [
-      { "label": "Presentation Slides (PDF)", "url": "#" },
-      { "label": "Cybersecurity Checklist for SMBs", "url": "#" }
+    "speakers": [
+      {
+        "name": "Ben Carter",
+        "title": "Cybersecurity Consultant",
+        "avatarUrl": "https://i.pravatar.cc/150?u=ben"
+      }
     ]
   },
   {
     "id": "evt-003",
-    "slug": "navigating-the-digital-world",
-    "title": "Past Event: Navigating the Digital World Safely",
-    "summary": "A look back at our community panel on digital safety for families and seniors.",
-    "description": "<p>This community panel, held in May, brought together experts to discuss practical digital safety tips for families and seniors. Topics included social media privacy, recognizing online scams, and fostering open conversations about technology at home.</p>",
-    "start": "2024-05-10T19:00:00Z",
-    "end": "2024-05-10T20:30:00Z",
-    "location": { "type": "in-person", "details": "Oakwood Community Library" },
-    "tags": ["panel", "community"],
-    "coverImage": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop",
-    "resources": [
-      { "label": "Event Recording (YouTube)", "url": "#" },
-      { "label": "Resource Guide for Families", "url": "#" }
-    ]
-  },
-  {
-    "id": "evt-004",
-    "slug": "secure-coding-101",
-    "title": "Secure Coding 101 for Web Developers",
-    "summary": "Learn the fundamentals of writing secure code and preventing common vulnerabilities like XSS and SQL injection.",
-    "description": "<p>This hands-on workshop is designed for web developers who want to build more secure applications. We will cover the OWASP Top 10, demonstrate common attack vectors, and provide practical guidance on writing defensive code.</p>",
-    "start": "2024-11-05T17:00:00Z",
-    "end": "2024-11-05T19:30:00Z",
-    "location": { "type": "virtual", "details": "Online via Webex", "link": "#" },
-    "tags": ["workshop"],
-    "coverImage": "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop",
-    "speakers": [
-      { "name": "Emily White", "title": "Application Security Engineer", "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1964&auto=format&fit=crop" }
-    ]
-  },
-  {
-    "id": "evt-005",
-    "slug": "ai-in-cybersecurity-webinar",
-    "title": "Webinar: The Double-Edged Sword of AI in Cybersecurity",
-    "summary": "Explore how AI is being used for both defending against and orchestrating sophisticated cyber attacks.",
-    "description": "<p>Join our expert panel as they discuss the evolving role of Artificial Intelligence in cybersecurity. We'll cover AI-powered threat detection, automated response systems, and the rise of adversarial AI.</p>",
-    "start": "2024-11-20T19:00:00Z",
-    "end": "2024-11-20T20:00:00Z",
-    "location": { "type": "virtual", "details": "Live on YouTube", "link": "#" },
-    "tags": ["webinar", "panel"],
-    "coverImage": "https://images.unsplash.com/photo-1620712943543-95fc69614574?q=80&w=2070&auto=format&fit=crop",
-    "speakers": [
-      { "name": "Dr. Kenji Tanaka", "title": "AI Research Scientist", "avatarUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop" },
-      { "name": "Fatima Al-Jamil", "title": "Threat Intelligence Analyst", "avatarUrl": "https://images.unsplash.com/photo-1552056272-d5380ba99335?q=80&w=1974&auto=format&fit=crop" }
-    ]
-  },
-  {
-    "id": "evt-006",
-    "slug": "digital-footprint-meetup",
-    "title": "Past Event: Managing Your Digital Footprint",
-    "summary": "A recap of our community meetup where we discussed how to manage your online presence and protect your personal data.",
-    "description": "<p>This casual meetup focused on practical tips for individuals to understand and control their digital footprint. We covered social media privacy settings, data brokers, and tools for monitoring your online identity.</p>",
-    "start": "2024-06-18T18:30:00Z",
-    "location": { "type": "in-person", "details": "The Daily Grind Cafe" },
-    "tags": ["community"],
-    "coverImage": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1949&auto=format&fit=crop",
-    "resources": [{ "label": "Key Takeaways (Blog Post)", "url": "#" }]
-  },
-  {
-    "id": "evt-007",
-    "slug": "future-of-data-privacy",
-    "title": "Panel: The Future of Data Privacy Regulations",
-    "summary": "A deep dive into upcoming data privacy laws and what they mean for consumers and businesses.",
-    "description": "<p>With new regulations on the horizon, our panel of legal and tech experts will break down the complexities of the evolving data privacy landscape. Learn about your rights as a consumer and your responsibilities as a business.</p>",
-    "start": "2025-01-22T16:00:00Z",
-    "location": { "type": "in-person", "details": "Northwood University, Grand Hall" },
+    "slug": "future-of-privacy-panel",
+    "title": "The Future of Privacy in a Digital World",
+    "summary": "A panel discussion with industry experts on the evolving landscape of digital privacy, data rights, and surveillance.",
+    "description": "This event has concluded. Our expert panel discussed emerging privacy challenges, the impact of new regulations like GDPR and CCPA, and what the future holds for personal data protection. A full recap and recording are available.",
+    "start": "2024-05-20T17:00:00Z",
+    "end": "2024-05-20T18:30:00Z",
+    "location": {
+      "type": "virtual",
+      "details": "Online Stream"
+    },
     "tags": ["panel"],
-    "coverImage": "https://images.unsplash.com/photo-1589998059171-988d887df646?q=80&w=2076&auto=format&fit=crop",
-    "speakers": [
-      { "name": "Laura Stephens, Esq.", "title": "Technology Attorney", "avatarUrl": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop" },
-      { "name": "Marcus Bale", "title": "Chief Privacy Officer", "avatarUrl": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop" }
+    "coverImage": "https://picsum.photos/seed/privacy-panel/800/400",
+    "resources": [
+      { "label": "Event Recording (Video)", "url": "#" },
+      { "label": "Key Takeaways (PDF)", "url": "#" }
     ]
   }
 ]

@@ -1,11 +1,11 @@
 
 export type EventTag = "workshop" | "webinar" | "panel" | "community";
 
-export interface Speaker { 
-  name: string; 
-  title?: string; 
-  avatarUrl?: string; 
-  org?: string; 
+export interface Speaker {
+  name: string;
+  title?: string;
+  avatarUrl?: string;
+  org?: string;
 }
 
 export interface EventItem {
@@ -29,17 +29,25 @@ export interface PodcastEpisode {
   title: string;
   date: string; // ISO
   platforms: { name: "YouTube" | "Spotify" | "Apple" | "SoundCloud"; url: string }[];
-  embedUrl?: string; // use for iframe on supported platforms
+  embedUrl?: string;
   summary?: string;
 }
 
-export interface TeamMember { 
-  id: string; 
-  name: string; 
-  role: string; 
-  bio: string; 
-  avatarUrl?: string; 
-  socials?: { platform: string; url: string }[]; 
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  avatarUrl?: string;
+  socials?: { platform: "linkedin" | "twitter" | "github"; url: string }[];
 }
 
-export type ServiceType = "consultancy" | "content" | "newsletter" | "training";
+export interface Registration {
+  id: string;
+  eventId: string;
+  fullName: string;
+  email: string;
+  affiliation?: string;
+  consent: boolean;
+  registeredAt: string; // ISO
+}

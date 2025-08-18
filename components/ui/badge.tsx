@@ -1,23 +1,16 @@
+
 import React from 'react';
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils.js';
 
-interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'primary' | 'secondary' | 'outline';
-}
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const badgeVariants = {
-  base: 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
-  variant: {
-    primary: 'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    secondary: 'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
-    outline: 'text-slate-700 border-slate-300 dark:text-slate-300 dark:border-slate-700',
-  },
-};
-
-function Badge({ className, variant = 'primary', ...props }: BadgeProps) {
+function Badge({ className, ...props }: BadgeProps) {
   return (
     <div
-      className={cn(badgeVariants.base, badgeVariants.variant[variant], className)}
+      className={cn(
+        'inline-flex items-center rounded-full border border-dark-accent/50 bg-dark-accent/10 px-2.5 py-0.5 text-xs font-semibold text-dark-accent transition-colors focus:outline-none focus:ring-2 focus:ring-dark-accent focus:ring-offset-2',
+        className
+      )}
       {...props}
     />
   );

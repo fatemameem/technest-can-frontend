@@ -1,5 +1,5 @@
 {
-  "name": "Copy of TECH-NEST Cybersecurity Education-themed version",
-  "description": "A web application for TECH-NEST, a non-profit organization that educates people about cybersecurity and AI ethics. It features information about their services, events, team, and contact details.",
+  "name": "TECH-NEST: Cybersecurity Education - nextjs",
+  "description": "A frontend for TECH-NEST, a non-profit organization that educates people about cybersecurity and AI ethics, built with React and Tailwind CSS.",
   "requestFramePermissions": []
 }

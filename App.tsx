@@ -1,38 +1,70 @@
-import React from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import TeamPage from './pages/TeamPage';
-import ServicesPage from './pages/ServicesPage';
-import EventsPage from './pages/EventsPage';
-import EventDetailPage from './pages/EventDetailPage';
-import ContactPage from './pages/ContactPage';
-import SubscribePage from './pages/SubscribePage';
-import VideosPage from './pages/VideosPage';
-import AdminPage from './pages/AdminPage';
-import { ThemeProvider } from './contexts/ThemeContext';
 
-const App: React.FC = () => {
+import React from 'react';
+import { HashRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { AppProvider } from './context/AppContext.js';
+import { AdminProvider, useAdmin } from './context/AdminContext.js';
+import Header from './components/layout/Header.js';
+import Footer from './components/layout/Footer.js';
+
+// Static imports for all pages to fix module resolution errors
+import Home from './pages/Home.js';
+import About from './pages/About.js';
+import Team from './pages/Team.js';
+import Services from './pages/Services.js';
+import Events from './pages/Events.js';
+import EventDetail from './pages/EventDetail.js';
+import Contact from './pages/Contact.js';
+import Subscribe from './pages/Subscribe.js';
+import Videos from './pages/Videos.js';
+import AdminDashboard from './pages/admin/AdminDashboard.js';
+import AdminEvents from './pages/admin/AdminEvents.js';
+import AdminContent from './pages/admin/AdminContent.js';
+import AdminLayout from './pages/admin/AdminLayout.js';
+
+const PublicLayout = () => (
+  <div className="flex flex-col min-h-screen">
+    <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:px-4 focus:py-2 focus:bg-dark-accent focus:text-dark-background">
+      Skip to main content
+    </a>
+    <Header />
+    <main id="main-content" className="flex-grow">
+      <Outlet />
+    </main>
+    <Footer />
+  </div>
+);
+
+const AdminRouteGuard = () => {
+  const { isAdmin } = useAdmin();
+  return isAdmin ? <AdminLayout><Outlet /></AdminLayout> : <Navigate to="/" replace />;
+};
+
+const App = () => {
   return (
-    <ThemeProvider>
-      <HashRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/about/team" element={<TeamPage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/events/:slug" element={<EventDetailPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/subscribe" element={<SubscribePage />} />
-            <Route path="/videos" element={<VideosPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-          </Routes>
-        </Layout>
-      </HashRouter>
-    </ThemeProvider>
+    <AdminProvider>
+      <AppProvider>
+        <HashRouter>
+            <Routes>
+              <Route path="/" element={<PublicLayout />}>
+                <Route index element={<Home />} />
+                <Route path="about" element={<About />} />
+                <Route path="about/team" element={<Team />} />
+                <Route path="services" element={<Services />} />
+                <Route path="events" element={<Events />} />
+                <Route path="events/:slug" element={<EventDetail />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="subscribe" element={<Subscribe />} />
+                <Route path="videos" element={<Videos />} />
+              </Route>
+              <Route path="/admin" element={<AdminRouteGuard />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="events" element={<AdminEvents />} />
+                <Route path="content" element={<AdminContent />} />
+              </Route>
+            </Routes>
+        </HashRouter>
+      </AppProvider>
+    </AdminProvider>
   );
 };
 

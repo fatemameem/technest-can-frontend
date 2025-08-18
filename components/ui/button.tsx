@@ -1,46 +1,69 @@
-import React from 'react';
-import { Link, LinkProps } from 'react-router-dom';
-import { cn } from '../../lib/utils';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  as?: React.ElementType;
-  to?: LinkProps['to'];
-}
+import React from 'react';
+import { cn } from '../../lib/utils.js';
+import { Link, LinkProps } from 'react-router-dom';
 
 const buttonVariants = {
-  base: 'inline-flex items-center justify-center rounded-2xl font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-slate-950 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed',
-  size: {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-5 py-3 text-base',
-    lg: 'px-8 py-4 text-lg',
-  },
   variant: {
-    primary: 'bg-blue-700 text-slate-50 hover:bg-blue-800 focus:ring-blue-500 shadow-md dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-600',
-    secondary: 'bg-amber-500 text-white hover:bg-amber-600 focus:ring-amber-500 shadow-md dark:bg-amber-500 dark:hover:bg-amber-600 dark:focus:ring-amber-500',
-    outline: 'border border-slate-300 bg-transparent text-slate-700 hover:bg-slate-100 focus:ring-blue-500 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800',
-    ghost: 'bg-transparent text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
+    primary: 'bg-dark-primary text-white hover:bg-blue-500',
+    secondary: 'bg-dark-surface text-dark-text-primary hover:bg-slate-700 border border-slate-600',
+    destructive: 'bg-dark-danger text-white hover:bg-rose-600',
+    ghost: 'hover:bg-dark-surface hover:text-dark-text-primary',
+    link: 'text-dark-accent underline-offset-4 hover:underline',
+  },
+  size: {
+    default: 'h-10 px-4 py-2',
+    sm: 'h-9 rounded-md px-3',
+    lg: 'h-11 rounded-md px-8',
+    icon: 'h-10 w-10',
   },
 };
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', as: Comp = 'button', to, ...props }, ref) => {
-    const classes = cn(
-      buttonVariants.base,
-      buttonVariants.size[size],
-      buttonVariants.variant[variant],
-      className
-    );
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: keyof typeof buttonVariants.variant;
+  size?: keyof typeof buttonVariants.size;
+  asChild?: boolean;
+}
 
-    if (Comp === 'a' || (Comp === Link && to)) {
-      return <Link to={to as LinkProps['to']} className={classes} {...(props as any)} />;
-    }
-    
-    return <Comp className={classes} ref={ref} {...props} />;
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = 'primary', size = 'default', ...props }, ref) => {
+    return (
+      <button
+        className={cn(
+          'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-dark-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+          buttonVariants.variant[variant],
+          buttonVariants.size[size],
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
   }
 );
-
 Button.displayName = 'Button';
 
-export { Button };
+export interface ButtonLinkProps extends LinkProps {
+  variant?: keyof typeof buttonVariants.variant;
+  size?: keyof typeof buttonVariants.size;
+}
+
+const ButtonLink = React.forwardRef<HTMLAnchorElement, ButtonLinkProps>(
+  ({ className, variant = 'primary', size = 'default', ...props }, ref) => {
+    return (
+      <Link
+        className={cn(
+          'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-dark-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+          buttonVariants.variant[variant],
+          buttonVariants.size[size],
+          className
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+ButtonLink.displayName = 'ButtonLink';
+
+export { Button, ButtonLink };
