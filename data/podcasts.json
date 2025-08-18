@@ -1,0 +1,35 @@
+
+[
+  {
+    "id": "pod-001",
+    "title": "Ep. 1: The Rise of Deepfakes",
+    "date": "2024-07-20T10:00:00Z",
+    "summary": "We dive into the technology behind deepfakes, their potential for misuse in spreading misinformation, and what can be done to detect them.",
+    "platforms": [
+      { "name": "Spotify", "url": "#" },
+      { "name": "Apple", "url": "#" }
+    ],
+    "embedUrl": "https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/293&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"
+  },
+  {
+    "id": "pod-002",
+    "title": "Ep. 2: Is Your Smart Home Spying on You?",
+    "date": "2024-07-10T10:00:00Z",
+    "summary": "A look at the privacy implications of smart home devices. We discuss data collection, security vulnerabilities, and how to protect your personal information.",
+    "platforms": [
+      { "name": "YouTube", "url": "#" },
+      { "name": "Spotify", "url": "#" }
+    ],
+    "embedUrl": null
+  },
+  {
+    "id": "pod-003",
+    "title": "Ep. 3: Password Psychology",
+    "date": "2024-06-28T10:00:00Z",
+    "summary": "Why do we use weak passwords? This episode explores the psychology behind password creation and offers practical tips for creating strong, memorable credentials.",
+    "platforms": [
+      { "name": "Apple", "url": "#" }
+    ],
+    "embedUrl": null
+  }
+]
