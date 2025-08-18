@@ -1,0 +1,196 @@
+{
+  "stats": [
+    {
+      "number": "500+",
+      "label": "Organizations Protected",
+      "description": "Cybersecurity consultations delivered"
+    },
+    {
+      "number": "50+",
+      "label": "AI Ethics Frameworks",
+      "description": "Developed and implemented"
+    },
+    {
+      "number": "10K+",
+      "label": "Professionals Trained",
+      "description": "In cybersecurity best practices"
+    },
+    {
+      "number": "98%",
+      "label": "Client Satisfaction",
+      "description": "Average satisfaction rating"
+    }
+  ],
+  "services": [
+    {
+      "id": "consultancy",
+      "title": "Cybersecurity Consultancy",
+      "description": "Comprehensive security assessments and strategic guidance for your organization.",
+      "features": ["Risk Assessment", "Incident Response", "Security Architecture", "Compliance"],
+      "icon": "shield-check"
+    },
+    {
+      "id": "content",
+      "title": "Content Creation",
+      "description": "Expert content on cybersecurity trends, AI ethics, and digital safety.",
+      "features": ["Technical Writing", "Research Reports", "Whitepapers", "Blog Content"],
+      "icon": "file-text"
+    },
+    {
+      "id": "newsletter",
+      "title": "Newsletter",
+      "description": "Weekly insights on cybersecurity trends and AI ethics developments.",
+      "features": ["Weekly Digest", "Expert Analysis", "Industry News", "Best Practices"],
+      "icon": "mail"
+    },
+    {
+      "id": "training",
+      "title": "Training Programs",
+      "description": "Hands-on cybersecurity and AI ethics training for teams and individuals.",
+      "features": ["Workshops", "Certification", "Custom Curriculum", "Ongoing Support"],
+      "icon": "graduation-cap"
+    }
+  ],
+  "team": [
+    {
+      "id": "sarah-chen",
+      "name": "Dr. Sarah Chen",
+      "role": "Founder & CEO",
+      "bio": "Former CISO with 15 years in cybersecurity. PhD in Computer Science, specializing in AI ethics.",
+      "image": "https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      "social": {
+        "linkedin": "#",
+        "twitter": "#"
+      }
+    },
+    {
+      "id": "mike-rodriguez",
+      "name": "Mike Rodriguez",
+      "role": "Lead Security Consultant",
+      "bio": "Penetration testing expert with certifications in CISSP, CEH, and OSCP. Former military cybersecurity.",
+      "image": "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      "social": {
+        "linkedin": "#",
+        "github": "#"
+      }
+    },
+    {
+      "id": "aisha-patel",
+      "name": "Dr. Aisha Patel",
+      "role": "AI Ethics Researcher",
+      "bio": "Philosophy PhD focusing on technology ethics. Published researcher in AI bias and algorithmic fairness.",
+      "image": "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      "social": {
+        "linkedin": "#",
+        "twitter": "#"
+      }
+    },
+    {
+      "id": "james-kim",
+      "name": "James Kim",
+      "role": "Content Director",
+      "bio": "Technical writer and cybersecurity journalist. Former editor at major tech publications.",
+      "image": "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      "social": {
+        "linkedin": "#",
+        "twitter": "#"
+      }
+    },
+    {
+      "id": "emma-wright",
+      "name": "Emma Wright",
+      "role": "Training Coordinator",
+      "bio": "Education specialist with focus on adult learning and cybersecurity training program development.",
+      "image": "https://images.pexels.com/photos/3184398/pexels-photo-3184398.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      "social": {
+        "linkedin": "#"
+      }
+    },
+    {
+      "id": "david-liu",
+      "name": "David Liu",
+      "role": "Technical Architect",
+      "bio": "Cloud security specialist and system architect. Expert in zero-trust security implementations.",
+      "image": "https://images.pexels.com/photos/2379003/pexels-photo-2379003.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      "social": {
+        "linkedin": "#",
+        "github": "#"
+      }
+    }
+  ],
+  "events": {
+    "upcoming": [
+      {
+        "id": "cyber-summit-2024",
+        "title": "Cybersecurity Summit 2024",
+        "date": "2024-03-15",
+        "time": "09:00",
+        "location": "Virtual Event",
+        "description": "Join industry leaders for a full-day summit on the latest cybersecurity trends and AI ethics.",
+        "tags": ["Conference", "AI Ethics", "Cybersecurity"],
+        "cover": "https://images.pexels.com/photos/3184287/pexels-photo-3184287.jpeg?auto=compress&cs=tinysrgb&w=600&h=300&fit=crop"
+      },
+      {
+        "id": "ai-ethics-workshop",
+        "title": "AI Ethics Workshop",
+        "date": "2024-03-22",
+        "time": "14:00",
+        "location": "Tech Hub, San Francisco",
+        "description": "Hands-on workshop covering ethical AI development and implementation strategies.",
+        "tags": ["Workshop", "AI Ethics", "Hands-on"],
+        "cover": "https://images.pexels.com/photos/3184306/pexels-photo-3184306.jpeg?auto=compress&cs=tinysrgb&w=600&h=300&fit=crop"
+      }
+    ],
+    "past": [
+      {
+        "id": "security-training-2023",
+        "title": "Advanced Security Training",
+        "date": "2023-12-08",
+        "time": "10:00",
+        "location": "Boston Convention Center",
+        "description": "Comprehensive training on advanced threat detection and incident response.",
+        "tags": ["Training", "Incident Response", "Threat Detection"],
+        "cover": "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=600&h=300&fit=crop"
+      },
+      {
+        "id": "tech-ethics-panel",
+        "title": "Technology Ethics Panel",
+        "date": "2023-11-20",
+        "time": "18:00",
+        "location": "University Auditorium",
+        "description": "Panel discussion with experts on emerging technology ethics challenges.",
+        "tags": ["Panel", "Ethics", "Technology"],
+        "cover": "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=600&h=300&fit=crop"
+      }
+    ]
+  },
+  "podcasts": [
+    {
+      "id": "cyber-trends-ep15",
+      "title": "The Future of Zero Trust Architecture",
+      "description": "Exploring how zero trust is reshaping enterprise security strategies.",
+      "platform": "youtube",
+      "embedId": "dQw4w9WgXcQ",
+      "duration": "45:32",
+      "date": "2024-01-15"
+    },
+    {
+      "id": "ai-ethics-ep8",
+      "title": "Bias in AI: Detection and Mitigation",
+      "description": "Deep dive into identifying and addressing algorithmic bias in AI systems.",
+      "platform": "spotify",
+      "embedId": "4iV5AjLRFIU",
+      "duration": "38:20",
+      "date": "2024-01-08"
+    },
+    {
+      "id": "security-basics-ep22",
+      "title": "Incident Response Best Practices",
+      "description": "Essential strategies for effective cybersecurity incident response.",
+      "platform": "youtube",
+      "embedId": "dQw4w9WgXcQ",
+      "duration": "42:15",
+      "date": "2024-01-01"
+    }
+  ]
+}
