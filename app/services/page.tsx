@@ -15,7 +15,7 @@ export default function Services() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {sampleData.services.map((service) => (
             <div key={service.id} className="max-w-xl">
-              <ServiceCard service={service} />
+              <ServiceCard service={{ ...service, icon: service.icon as "shield-check" | "file-text" | "mail" | "graduation-cap" }} />
             </div>
           ))}
         </div>
