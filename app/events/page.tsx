@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,7 @@ export default function Events() {
       <Hero
         title="Events"
         subtitle="Join us for workshops, conferences, and training sessions focused on cybersecurity and AI ethics."
+        imageUrl='/images/events.jpg'
       />
 
       <Section>

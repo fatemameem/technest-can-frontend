@@ -3,10 +3,7 @@ import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight, Users, Target, Lightbulb } from 'lucide-react';
-export const metadata = {
-  title: "About | TECH-NEST",
-  description: "Learn more about TECH-NEST and our mission.",
-};
+
 export default function About() {
   return (
     <>
