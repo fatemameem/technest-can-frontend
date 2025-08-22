@@ -3,13 +3,17 @@ import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight, Users, Target, Lightbulb } from 'lucide-react';
-
+export const metadata = {
+  title: "About | TECH-NEST",
+  description: "Learn more about TECH-NEST and our mission.",
+};
 export default function About() {
   return (
     <>
       <Hero
         title="About TECH-NEST"
         subtitle="We are a dedicated team of cybersecurity experts and AI ethics researchers committed to building a safer digital future for everyone."
+        imageUrl="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=800&h=600&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
       >
         <Button asChild className="btn-primary">
           <Link href="/about/team">

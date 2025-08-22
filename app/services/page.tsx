@@ -9,6 +9,7 @@ export default function Services() {
       <Hero
         title="Our Services"
         subtitle="Comprehensive cybersecurity solutions and AI ethics guidance tailored to your organization's needs."
+        imageUrl='/images/services.jpeg'
       />
 
       <Section>

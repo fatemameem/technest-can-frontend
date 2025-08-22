@@ -18,6 +18,7 @@ export default function Home() {
       <Hero
         title="Securing Digital Futures"
         subtitle="Leading cybersecurity consultancy and AI ethics organization dedicated to building safer, more ethical technology for everyone."
+        imageUrl='./images/home.webp'
       >
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild className="btn-primary px-8 py-3 text-lg">
@@ -36,7 +37,7 @@ export default function Home() {
       </Hero>
 
       {/* Impact Stats */}
-      <Section className="bg-slate-900/50">
+      <Section className="hidden bg-slate-900/50">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {sampleData.stats.map((stat, index) => (
             <StatCard

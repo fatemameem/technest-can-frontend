@@ -21,36 +21,68 @@
       "description": "Average satisfaction rating"
     }
   ],
-  "services": [
-    {
-      "id": "consultancy",
-      "title": "Cybersecurity Consultancy",
-      "description": "Comprehensive security assessments and strategic guidance for your organization.",
-      "features": ["Risk Assessment", "Incident Response", "Security Architecture", "Compliance"],
-      "icon": "shield-check"
-    },
-    {
-      "id": "content",
-      "title": "Content Creation",
-      "description": "Expert content on cybersecurity trends, AI ethics, and digital safety.",
-      "features": ["Technical Writing", "Research Reports", "Whitepapers", "Blog Content"],
-      "icon": "file-text"
-    },
-    {
-      "id": "newsletter",
-      "title": "Newsletter",
-      "description": "Weekly insights on cybersecurity trends and AI ethics developments.",
-      "features": ["Weekly Digest", "Expert Analysis", "Industry News", "Best Practices"],
-      "icon": "mail"
-    },
-    {
-      "id": "training",
-      "title": "Training Programs",
-      "description": "Hands-on cybersecurity and AI ethics training for teams and individuals.",
-      "features": ["Workshops", "Certification", "Custom Curriculum", "Ongoing Support"],
-      "icon": "graduation-cap"
-    }
-  ],
+"services": [
+  {
+    "id": "consultancy",
+    "title": "Cybersecurity Consultancy",
+    "description": "Affordable consulting services tailored for small businesses, non-profits, and community organizations. We assess digital systems, identify vulnerabilities, and recommend cost-effective solutions to strengthen defenses against cyberattacks.",
+    "features": [
+      "Awareness Training",
+      "MFA Guidance",
+      "Phishing Defense",
+      "Policy Development",
+      "Compliance Support",
+      "Ongoing Support"
+    ],
+    "icon": "shield-check",
+    "available": true
+  },
+  {
+    "id": "content",
+    "title": "Content Creation",
+    "description": "Digital content and technical writing that makes cybersafety and AI ethics accessible to all. Our resources include blogs, videos, infographics, and guides covering privacy, online safety, and AI awareness.",
+    "features": [
+      "Blog Posts",
+      "Explainer Videos",
+      "Infographics",
+      "Guides",
+      "Threat Insights",
+      "Free Resources"
+    ],
+    "icon": "file-text",
+    "available": true
+  },
+  {
+    "id": "newsletter",
+    "title": "Newsletter",
+    "description": "Your source for the latest in cybersafety, digital literacy, and AI ethics. Each issue delivers real-life cyber stories, scam analyses, privacy law updates, and practical tips to build safer digital habits.",
+    "features": [
+      "Cyber Stories",
+      "Threat Analysis",
+      "Law Updates",
+      "Success Stories",
+      "Quick Tips",
+      "Community Action"
+    ],
+    "icon": "mail",
+    "available": false
+  },
+  {
+    "id": "training",
+    "title": "Training Programs",
+    "description": "Interactive workshops that equip participants with practical skills to recognize and respond to digital threats, while also exploring the ethical use of AI in everyday life.",
+    "features": [
+      "Deepfakes",
+      "Phishing",
+      "Passwords",
+      "Case Studies",
+      "Youth & Educators",
+      "AI Ethics"
+    ],
+    "icon": "graduation-cap",
+    "available": false
+  }
+],
   "team": [
     {
       "id": "sarah-chen",
