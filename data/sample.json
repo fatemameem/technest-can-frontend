@@ -223,6 +223,24 @@
       "embedId": "dQw4w9WgXcQ",
       "duration": "42:15",
       "date": "2024-01-01"
+    }, 
+        {
+      "id": "security-basics-ep24",
+      "title": "Incident Response Best Practices",
+      "description": "Essential strategies for effective cybersecurity incident response.",
+      "platform": "youtube",
+      "embedId": "dQw4w9WgXcQ",
+      "duration": "42:15",
+      "date": "2024-01-01"
+    }, 
+    {
+      "id": "security-basics-ep23",
+      "title": "Incident Response Best Practices",
+      "description": "Essential strategies for effective cybersecurity incident response.",
+      "platform": "youtube",
+      "embedId": "dQw4w9WgXcQ",
+      "duration": "42:15",
+      "date": "2024-01-01"
     }
   ]
 }

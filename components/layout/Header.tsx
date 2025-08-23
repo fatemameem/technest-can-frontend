@@ -11,6 +11,17 @@ const navigation = [
   { name: 'About', href: '/about' },
   { name: 'Services', href: '/services' },
   { name: 'Events', href: '/events' },
+  { name: 'Podcasts', href: '/podcasts' },
+  // { name: 'Blog', href: '/blog' },
+  // { name: 'Resources', href: '/resources' },
+  // { name: 'Videos', href: '/videos' },
+  { name: 'Contact', href: '/contact' },
+];
+
+const mobileNavigation = [
+  ...navigation,
+  { name: 'Blog', href: '/blog' },
+  { name: 'Resources', href: '/resources' },
   { name: 'Videos', href: '/videos' },
   { name: 'Contact', href: '/contact' },
 ];

@@ -5,11 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { StatCard } from '@/components/cards/StatCard';
 import { ServiceCard } from '@/components/cards/ServiceCard';
-import { PodcastCard } from '@/components/cards/PodcastCard';
 import { EventCallout } from '@/components/events/EventCallout';
 import Link from 'next/link';
 import sampleData from '@/data/sample.json';
-import { ArrowRight, Play, ExternalLink } from 'lucide-react';
+import { ArrowRight, Play, ExternalLink, Podcast } from 'lucide-react';
+import PodcastsSection from '@/components/sections/PodcastSection';
 
 export default function Home() {
   return (
@@ -77,8 +77,8 @@ export default function Home() {
       </Section>
 
       {/* Podcasts Section */}
-      <Section className="bg-slate-900/50">
-        <div className="text-center mb-12">
+      <Section className="">
+        {/* <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Latest Episodes</h2>
           <p className="text-slate-300 text-lg max-w-2xl mx-auto">
             Expert insights on cybersecurity and AI ethics from our podcast series.
@@ -104,7 +104,8 @@ export default function Home() {
               Apple Podcasts
             </Badge>
           </div>
-        </div>
+        </div> */}
+        <PodcastsSection />
       </Section>
 
       {/* Upcoming Event Callout */}

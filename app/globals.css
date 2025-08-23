@@ -85,3 +85,14 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* app/globals.css */
+@layer utilities {
+  @screen lg {
+
+    /* If the last row has exactly 2 items, move the first of those into column 2 */
+    .grid-3-center-last>*:nth-last-child(2):nth-child(3n+1) {
+      grid-column: 2;
+    }
+  }
+}
