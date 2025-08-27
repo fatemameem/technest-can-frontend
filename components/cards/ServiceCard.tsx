@@ -43,13 +43,13 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <p className="text-slate-300">{service.description}</p>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
-        <div className="flex flex-wrap justify-center items-center gap-2 mb-6">
+        {/* <div className="flex flex-wrap justify-center items-center gap-2 mb-6">
           {service.features.map((feature, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {feature}
             </Badge>
           ))}
-        </div>
+        </div> */}
         <div className="mt-auto">
           <Button asChild variant="outline" className={`btn-secondary w-full ${service.available ? '' : 'opacity-50 cursor-not-allowed'}`}>
             <Link href={`/contact?service=${service.id}`}>
