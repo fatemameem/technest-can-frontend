@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Shield, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useSession } from "next-auth/react";
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -28,6 +29,9 @@ const mobileNavigation = [
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: session } = useSession();
+  const role = (session?.user as any)?.role as "admin" | "moderator" | undefined;
+  const canSeeAdmin = role === "admin" || role === "moderator";
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/95 backdrop-blur-md">
@@ -50,6 +54,15 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
+            {canSeeAdmin && (
+              <Link
+                key="Admin"
+                href="/admin"
+                className="text-slate-300 hover:text-cyan-400 transition-colors focus-ring rounded px-2 py-1"
+              >
+                Admin
+              </Link>
+            )}
           </nav>
 
           {/* Mobile Menu */}
@@ -72,6 +85,16 @@ export function Header() {
                     {item.name}
                   </Link>
                 ))}
+                {canSeeAdmin && (
+                  <Link
+                    key="AdminMobile"
+                    href="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className="text-slate-300 hover:text-cyan-400 transition-colors focus-ring rounded px-2 py-2"
+                  >
+                    Admin
+                  </Link>
+                )}
               </div>
             </SheetContent>
           </Sheet>

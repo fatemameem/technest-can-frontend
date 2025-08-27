@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getValues, rowsToObjects, coerce } from "@/lib/sheets";
 import { google } from "googleapis";
+import { requireRole } from "@/lib/auth/requireRole";
 
 export const runtime = "nodejs";       // required for googleapis
 export const dynamic = "force-dynamic"; // opt out of static optimization
@@ -70,11 +71,15 @@ export async function GET(req: Request, ctx: { params: Promise<{ tab: string }> 
   const t = now();
 
   const cacheHeaderValue = invalidate === "1" ? "no-store" : `s-maxage=${TTL}, stale-while-revalidate=${MAX_STALE}`;
+  const isTeam = tab === "teamInfo";
+  const teamCacheHeader = isTeam && invalidate !== "1"
+    ? `s-maxage=${60 * 60 * 24 * 365}, stale-while-revalidate=${60 * 60 * 24 * 365}`
+    : cacheHeaderValue;
 
   const hit = cache[k];
   if (hit && t < hit.exp) {
     return NextResponse.json(hit.data, {
-      headers: { "cache-control": cacheHeaderValue },
+      headers: { "cache-control": teamCacheHeader },
     });
   }
   function pick(r: any, ...keys: string[]) {
@@ -154,6 +159,26 @@ export async function GET(req: Request, ctx: { params: Promise<{ tab: string }> 
         fullName: pick(r, "Full Name", "Name"),
         email: pick(r, "Email Address", "Email"),
       }),
+      adminInfo: (r: any) => ({
+        id: r.id,
+        timestamp: r["Timestamp"],
+        name: (r["Name"] ?? r["Full Name"] ?? r["Admin Name"] ?? "").toString(),
+        email: (r["Email"] ?? r["Email Address"] ?? r["Admin Email"] ?? "").toString(),
+        accessLevel: (r["Access Level"] ?? r["Role"] ?? r["Role/Access"] ?? "").toString(),
+      }),
+      teamInfo: (r: any) => ({
+        id: r.id,
+        timestamp: r["Timestamp"],
+        name: pick(r, "Name", "Full Name"),
+        email: pick(r, "Email", "Email Address"),
+        designation: pick(r, "Designation", "Role", "Title"),
+        description: pick(r, "Description", "Bio"),
+        linkedIn: pick(r, "LinkedIn", "LinkedIn Link", "LinkedIn URL"),
+        twitter: pick(r, "Twitter", "Twitter Link", "Twitter URL", "X", "X Link"),
+        github: pick(r, "Github", "GitHub", "Github Link", "GitHub Link"),
+        website: pick(r, "Website", "Website Link", "Site"),
+        imageLink: pick(r, "Image Link", "Image", "Photo", "Headshot"),
+      }),
     } as const;
 
     const mapper = (mapByTab as any)[tab];
@@ -170,10 +195,14 @@ export async function GET(req: Request, ctx: { params: Promise<{ tab: string }> 
       rows = rows.map((r) => Object.fromEntries(fields.map((f) => [f, (r as any)[f]])));
     }
 
-    cache[k] = { data: rows, exp: t + TTL, stale: t + TTL + MAX_STALE };
+    cache[k] = {
+      data: rows,
+      exp: isTeam ? Number.MAX_SAFE_INTEGER : t + TTL,
+      stale: isTeam ? Number.MAX_SAFE_INTEGER : t + TTL + MAX_STALE,
+    };
 
     return NextResponse.json(rows, {
-      headers: { "cache-control": cacheHeaderValue },
+      headers: { "cache-control": teamCacheHeader },
     });
   } catch (e: any) {
     // Log detailed info to your terminal
@@ -203,7 +232,17 @@ export async function POST(
   { params }: { params: Promise<{ tab: string }> }
 ) {
   const { tab } = await params;
+  // Gate by tab:
+  // - adminInfo: admins only
+  // - everything else: admins + moderators
+  const guard =
+    tab === "adminInfo"
+      ? await requireRole(["admin"])
+      : await requireRole(["admin", "moderator"]);
 
+  if (!guard.ok) {
+    return NextResponse.json(guard.json, { status: guard.status });
+  }
   // Define per-tab schemas for payloads
   const PodcastSchema = z.object({
     timestamp: z.string().optional(),
@@ -211,8 +250,9 @@ export async function POST(
     description: z.string().optional().default(""),
     linkedin: z.string().url().optional().or(z.literal("")).default(""),
     instagram: z.string().url().optional().or(z.literal("")).default(""),
-    youtube: z.string().url().optional().or(z.literal("")).default(""),
+    drive: z.string().url().optional().or(z.literal("")).default(""),
     facebook: z.string().url().optional().or(z.literal("")).default(""),
+    thumbnail: z.string().url().optional().or(z.literal("")).default(""),
   });
 
   const EventsSchema = z.object({
@@ -232,6 +272,26 @@ export async function POST(
     timestamp: z.string().optional(),
     fullName: z.string().min(1),
     email: z.string().email(),
+  });
+
+  const AdminSchema = z.object({
+    timestamp: z.string().optional(),
+    name: z.string().min(1),
+    email: z.string().email(),
+    accessLevel: z.string().min(1), // e.g., "admin"
+  });
+
+  const TeamMemberSchema = z.object({
+    timestamp: z.string().optional(),
+    name: z.string().min(1),
+    email: z.string().email(),
+    designation: z.string().optional().default(""),
+    description: z.string().optional().default(""),
+    linkedIn: z.string().url().optional().or(z.literal("")).default(""),
+    twitter: z.string().url().optional().or(z.literal("")).default(""),
+    github: z.string().url().optional().or(z.literal("")).default(""),
+    website: z.string().url().optional().or(z.literal("")).default(""),
+    imageLink: z.string().url().optional().or(z.literal("")).default(""),
   });
 
   // Parse body once
@@ -254,8 +314,9 @@ export async function POST(
         p.description,                            // Description
         p.linkedin,                               // LinkedIn link
         p.instagram,                              // Instagram link
-        p.youtube,                                // Youtube link
+        p.drive,                                  // Drive link
         p.facebook,                               // Facebook link
+        p.thumbnail,                              // Thumbnail link
       ];
     } else if (tab === "eventsInfo") {
       const e = EventsSchema.parse(json);
@@ -277,6 +338,28 @@ export async function POST(
         s.timestamp ?? new Date().toISOString(), // Timestamp
         s.fullName,                               // Full Name
         s.email,                                  // Email Address
+      ];
+    } else if (tab === "adminInfo") {
+      const a = AdminSchema.parse(json);
+      values = [
+        a.timestamp ?? new Date().toISOString(), // Timestamp
+        a.name,                                   // Name
+        a.email,                                  // Email
+        a.accessLevel,                            // Access Level
+      ];
+    } else if (tab === "teamInfo") {
+      const m = TeamMemberSchema.parse(json);
+      values = [
+        m.timestamp ?? new Date().toISOString(), // Timestamp
+        m.name,                                   // Name
+        m.email,                                  // Email
+        m.designation,                            // Designation
+        m.description,                            // Description
+        m.linkedIn,                               // LinkedIn
+        m.twitter,                                // Twitter
+        m.github,                                 // Github
+        m.website,                                // Website
+        m.imageLink,                              // Image Link
       ];
     } else {
       return NextResponse.json({ error: "Unknown tab" }, { status: 400 });
