@@ -7,6 +7,8 @@ export const runtime = "nodejs";       // required for googleapis
 export const dynamic = "force-dynamic"; // opt out of static optimization
 // or: export const revalidate = 0;
 
+const CACHE_SCHEMA_VERSION = 3; // bump to invalidate old cached shapes (e.g., slug/path changes)
+
 function getSheetsClientRW() {
   const auth = new google.auth.JWT({
     email: process.env.GOOGLE_SA_EMAIL,
@@ -16,15 +18,29 @@ function getSheetsClientRW() {
   return google.sheets({ version: "v4", auth });
 }
 
+// ⬆️ slugifying the podcast and events url
+function slugify(input: string): string {
+  return (input || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, " and ")
+    .replace(/['".,()/#!?$%^*;:{}=`~[\]\\]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
 // in-memory cache (per server instance)
 type Entry = { data: any; exp: number; stale: number };
 const cache: Record<string, Entry> =
   (globalThis as any).__sheetCache ?? ((globalThis as any).__sheetCache = {});
 
 function clearTabCache(tab: string) {
-  const prefix = `sheets:${tab}:`;
   Object.keys(cache).forEach((k) => {
-    if (k.startsWith(prefix)) delete cache[k];
+    if (k.startsWith("sheets:") && k.includes(`:${tab}:`)) {
+      delete cache[k];
+    }
   });
 }
 
@@ -49,16 +65,27 @@ export async function GET(req: Request, ctx: { params: Promise<{ tab: string }> 
   const parsed = Query.safeParse(Object.fromEntries(url.searchParams));
   if (!parsed.success) return NextResponse.json({ error: "Invalid query" }, { status: 400 });
   const q = parsed.data;
+  const invalidate = url.searchParams.get("invalidate");
   const k = key(tab, q);
   const t = now();
+
+  const cacheHeaderValue = invalidate === "1" ? "no-store" : `s-maxage=${TTL}, stale-while-revalidate=${MAX_STALE}`;
 
   const hit = cache[k];
   if (hit && t < hit.exp) {
     return NextResponse.json(hit.data, {
-      headers: { "cache-control": `s-maxage=${TTL}, stale-while-revalidate=${MAX_STALE}` },
+      headers: { "cache-control": cacheHeaderValue },
     });
   }
-
+  function pick(r: any, ...keys: string[]) {
+    for (const k of keys) {
+      const v = r?.[k];
+      if (typeof v !== "undefined" && v !== null && String(v).trim() !== "") {
+        return v;
+      }
+    }
+    return ""; // default empty string so JSON always includes the key
+  }
   try {
     const values = await getValues(tab, q.range);
     let rows = rowsToObjects(values).map(coerce);
@@ -68,37 +95,64 @@ export async function GET(req: Request, ctx: { params: Promise<{ tab: string }> 
       id: new Date(r["Timestamp"]).getTime().toString(), // numeric timestamp as string
       ...r,
     }));
-
+    
     // 🔽 put your mapping logic here
     const mapByTab = {
-      eventsInfo: (r: any) => ({
-        id: r.id,
-        timestamp: r["Timestamp"],
-        title: r["Title"],
-        topic: r["Topic"],
-        description: r["Description"],
-        date: r["Date"],
-        time: r["Time"],
-        location: r["Location"],
-        lumaLink: r["Lu.ma Link"],
-        zoomLink: r["Zoom Link"],
-        sponsors: r["Sponsors"],
-      }),
-      podcastInfo: (r: any) => ({
-        id: r.id,
-        timestamp: r["Timestamp"],
-        title: r["Title of the Podcast"],
-        description: r["Description"],
-        linkedin: r["LinkedIn link"],
-        instagram: r["Instagram link"],
-        youtube: r["Youtube link"],
-        facebook: r["Facebook link"],
-      }),
+      eventsInfo: (r: any) => {
+        const title = r["Title"];
+        const slug = slugify(title || r.id);
+
+        return {
+          id: r.id,
+          timestamp: r["Timestamp"],
+          title,
+          topic: r["Topic"],
+          description: r["Description"],
+          date: r["Date"],
+          time: r["Time"],
+          location: r["Location"],
+          lumaLink: pick(r, "Lu.ma Link", "Lu.ma link", "Luma Link", "Luma link", "Lu.ma", "Luma"),
+          zoomLink: pick(r, "Zoom Link", "Zoom link", "Zoom"),
+          sponsors: r["Sponsors"],
+          slug,
+          path: `/events/${slug}`,
+        };
+      },
+      podcastInfo: (r: any) => {
+        const title = pick(r, "Title of the Podcast", "Title", "Podcast Title");
+        const providedSlug = pick(r, "slug", "Slug");
+        const slug = (providedSlug && providedSlug.trim()) ? providedSlug : slugify(title || r.id);
+
+        return {
+          id: r.id,
+          timestamp: r["Timestamp"],
+          title,
+          description: pick(r, "Description", "Summary"),
+          // Social / platform links — accept multiple header spellings
+          linkedin: pick(r, "LinkedIn link", "LinkedIn Link", "LinkedIn"),
+          instagram: pick(r, "Instagram link", "Instagram Link", "Instagram"),
+          youtube: pick(r, "Youtube link", "YouTube link", "Youtube", "YouTube"),
+          facebook: pick(r, "Facebook link", "Facebook Link", "Facebook"),
+          driveLink: pick(r, "Drive link", "driveLink", "Drive", "Google Drive link"),
+          // Optional structured fields if you add them later
+          // tags: pick(r, "tags", "Tags"),
+          // takeaways: pick(r, "takeaways", "Takeaways"),
+          thumbnailUrl: pick(r, "thumbnailUrl", "Thumbnail", "Thumbnail URL"),
+          slug,
+          path: `/podcasts/podcast/${slug}`,
+          // durationSec: pick(r, "durationSec", "Duration (sec)", "Duration"),
+          // publishedISO: pick(r, "publishedISO", "Published ISO", "Published"),
+          // topic: pick(r, "topic", "Topic"),
+          // guests: pick(r, "guests", "Guests"),
+          // transcript: pick(r, "transcript", "Transcript"),
+          // transcriptUrl: pick(r, "transcriptUrl", "Transcript URL"),
+        };
+      },
       subscriberInfo: (r: any) => ({
         id: r.id,
         timestamp: r["Timestamp"],
-        fullName: r["Full Name"],
-        email: r["Email Address"],
+        fullName: pick(r, "Full Name", "Name"),
+        email: pick(r, "Email Address", "Email"),
       }),
     } as const;
 
@@ -119,7 +173,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ tab: string }> 
     cache[k] = { data: rows, exp: t + TTL, stale: t + TTL + MAX_STALE };
 
     return NextResponse.json(rows, {
-      headers: { "cache-control": `s-maxage=${TTL}, stale-while-revalidate=${MAX_STALE}` },
+      headers: { "cache-control": cacheHeaderValue },
     });
   } catch (e: any) {
     // Log detailed info to your terminal

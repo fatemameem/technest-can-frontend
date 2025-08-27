@@ -1,5 +1,6 @@
 import React from 'react';
-import { Play, Youtube, Mic, Apple } from 'lucide-react';
+import Link from 'next/link';
+import { Play, LinkedinIcon, FacebookIcon, InstagramIcon, Mic } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -7,16 +8,17 @@ export interface PodcastEpisode {
     id: string;
     title: string;
     date: string; // ISO
-    platforms: { name: "YouTube" | "Spotify" | "Apple" | "SoundCloud"; url: string }[];
+    platforms: { name: "LinkedIn" | "Facebook" | "Instagram" | "SoundCloud"; url: string }[];
     embedUrl?: string; // use for iframe on supported platforms
     summary?: string;
     imageUrl: string;
     bgColor: string;
+    href?: string;
 }
-const platformIcons: { [key: string]: React.ReactNode } = {
-    YouTube: <Youtube className="h-5 w-5" />,
-    Spotify: <Mic className="h-5 w-5" />,
-    Apple: <Apple className="h-5 w-5" />,
+export const platformIcons: { [key: string]: React.ReactNode } = {
+    LinkedIn: <LinkedinIcon className="h-5 w-5" />,
+    Facebook: <FacebookIcon className="h-5 w-5" />,
+    Instagram: <InstagramIcon className="h-5 w-5" />,
     SoundCloud: <Mic className="h-5 w-5" />,
 };
 
@@ -33,9 +35,13 @@ const PodcastCard: React.FC<{ podcast: PodcastEpisode }> = ({ podcast }) => {
                 loading="lazy"
             />
         </div>
-        <a href={latestPlatformUrl} target="_blank" rel="noopener noreferrer" className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/30" aria-label={`Listen to ${podcast.title}`}>
-            <Play className="h-5 w-5 text-white" />
-        </a>
+        <Link
+          href={podcast.href || latestPlatformUrl}
+          className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/30"
+          aria-label={`View ${podcast.title}`}
+        >
+          <Play className="h-5 w-5 text-white" />
+        </Link>
         <div className="absolute inset-x-0 bottom-0 p-6">
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent backdrop-blur-sm"></div>
             <div className="relative text-white">

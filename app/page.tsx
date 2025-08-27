@@ -10,8 +10,75 @@ import Link from 'next/link';
 import sampleData from '@/data/sample.json';
 import { ArrowRight, Play, ExternalLink, Podcast } from 'lucide-react';
 import PodcastsSection from '@/components/sections/PodcastSection';
+import { getEvents } from '@/lib/data';
+import { getPodcasts } from '@/lib/data';
 
-export default function Home() {
+function toDateObj(date?: string, time?: string): Date | null {
+  if (!date) return null;
+  try {
+    const iso = time ? `${date}T${time}` : date;
+    const d = new Date(iso);
+    if (!isNaN(d.getTime())) return d;
+    const alt = time ? `${date} ${time}` : date;
+    const d2 = new Date(alt);
+    return isNaN(d2.getTime()) ? null : d2;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home() {
+  // Fetch events from Sheets (server-side, cached)
+  const rawEvents: any[] = await getEvents();
+  const rawPodcasts: any[] = await getPodcasts();
+
+  // Map into the shape PodcastCard expects
+  const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
+    id: r.id,
+    title: r.title ?? "Untitled Podcast",
+    date: r.timestamp ?? "",
+    linkedin: r.linkedin ?? "",
+    instagram: r.instagram ?? "",
+    facebook: r.facebook ?? "",
+    path: r.path ?? "",
+  }));
+  // console.log("Mapped podcasts:", mappedPodcasts);
+
+  // Keep only the latest 3 podcasts, sorted descending by date
+  const podcasts = mappedPodcasts
+    .sort((a, b) => {
+      const da = toDateObj(a.date)?.getTime() ?? 0;
+      const db = toDateObj(b.date)?.getTime() ?? 0;
+      return db - da;
+    })
+    .slice(0, 5);
+
+    // console.log("Latest podcasts:", podcasts);
+
+  // Map into the shape EventCallout expects and build tags
+  const mappedEvents = (rawEvents || []).map((r: any) => ({
+    id: r.id,
+    title: r.title ?? "Untitled Event",
+    date: r.date ?? "",
+    time: r.time ?? "",
+    location: r.location ?? "",
+    description: r.description ?? "",
+    tags: [r.topic, r.location].filter(Boolean) as string[],
+  }));
+
+  // Keep only events from now forward, sorted ascending by date/time
+  const now = new Date();
+  const upcomingEvents = mappedEvents
+    .filter((e) => {
+      const d = toDateObj(e.date, e.time);
+      return d ? d.getTime() >= now.getTime() : false;
+    })
+    .sort((a, b) => {
+      const da = toDateObj(a.date, a.time)?.getTime() ?? Number.POSITIVE_INFINITY;
+      const db = toDateObj(b.date, b.time)?.getTime() ?? Number.POSITIVE_INFINITY;
+      return da - db;
+    });
+
   return (
     <>
       {/* Hero Section */}
@@ -105,12 +172,22 @@ export default function Home() {
             </Badge>
           </div>
         </div> */}
-        <PodcastsSection />
+        <PodcastsSection podcasts={podcasts} title="Latest Podcast Episodes" badge="Listen Now" description="Tune in for discussions on the latest in cybersecurity and AI ethics." showAllBtn={true} />
       </Section>
 
       {/* Upcoming Event Callout */}
       <Section>
-        <EventCallout event={sampleData.events.upcoming[0]} />
+        <div className="max-w-5xl mx-auto">
+          {upcomingEvents.length === 0 ? (
+            <div className="text-center text-slate-400">No upcoming events.</div>
+          ) : (
+            <div className="space-y-6">
+              {upcomingEvents.map((evt) => (
+                <EventCallout key={evt.id} event={evt} />
+              ))}
+            </div>
+          )}
+        </div>
       </Section>
     </>
   );

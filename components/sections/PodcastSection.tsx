@@ -6,31 +6,25 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import PodcastCard, { PodcastEpisode } from '../cards/PodcastCard';
-import sampleData from '@/data/sample.json';
-
-const PodcastsSection: React.FC = () => {
-    const [podcasts, setPodcasts] = useState<PodcastEpisode[]>([]);
-    const [loading, setLoading] = useState(true);
+interface PodcastsSectionProps {
+    podcasts: {
+        id: any;
+        title: any;
+        date: any;
+        path: any;
+        linkedin: any;
+        instagram: any;
+        facebook: any;
+    }[];
+    title: string;
+    badge?: string;
+    description?: string;
+    showAllBtn: boolean;
+}
+const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badge, description, showAllBtn }) => {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
-
-    useEffect(() => {
-        const loadData = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('/data/podcasts.json');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const data = await response.json();
-                setPodcasts(data);
-            } catch (error) {
-                console.error("Failed to load podcasts:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
-    }, []);
 
     const checkScrollButtons = () => {
         if (scrollContainerRef.current) {
@@ -41,12 +35,9 @@ const PodcastsSection: React.FC = () => {
     };
     
     useEffect(() => {
+        setTimeout(checkScrollButtons, 100);
         const scrollContainer = scrollContainerRef.current;
         if (scrollContainer) {
-            // Need a slight delay to ensure images are loaded and scrollWidth is accurate
-            setTimeout(() => {
-                checkScrollButtons();
-            }, 100);
             scrollContainer.addEventListener('scroll', checkScrollButtons, { passive: true });
         }
         window.addEventListener('resize', checkScrollButtons, { passive: true });
@@ -70,17 +61,23 @@ const PodcastsSection: React.FC = () => {
     };
     
     return (
-        <section className="bg-slate-900 rounded-3xl">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-12 lg:p-16">
+        <section className="bg-slate-900/50 rounded-3xl">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900/50 rounded-3xl p-8 md:p-12 lg:p-16">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
                     <div>
-                        <Badge variant="default" className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">Listen Now</Badge>
+                        {badge ? (
+                            <Badge variant="default" className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">
+                                {badge}
+                            </Badge>
+                        ) : null}
                         <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
-                            Latest Podcast Episodes
+                            {title}
                         </h2>
-                        <p className="mt-4 max-w-2xl text-lg text-slate-700 dark:text-slate-300">
-                            Tune in for discussions on the latest in cybersecurity and AI ethics.
-                        </p>
+                        {description ? (
+                            <p className="mt-4 max-w-2xl text-lg text-slate-700 dark:text-slate-300">
+                                {description}
+                            </p>
+                        ) : null}
                     </div>
                     <div className="flex-shrink-0 flex items-center gap-4">
                         <div className="flex items-center gap-3">
@@ -108,43 +105,45 @@ const PodcastsSection: React.FC = () => {
                     ref={scrollContainerRef}
                     className="grid grid-flow-col auto-cols-[80%] sm:auto-cols-[45%] md:auto-cols-[calc((100%-1.5rem)/2)] lg:auto-cols-[calc((100%-3rem)/3)] gap-6 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                     >
-                    {loading ? (
-                        Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="aspect-[3/4] rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
-                        ))
-                    ) : (
-                        sampleData.podcasts.map(p => (
+                    {podcasts && podcasts.length > 0 ? (
+                        podcasts.map((p) => {
+                            const platforms: NonNullable<PodcastEpisode["platforms"]> = [
+                            p.linkedin ? { name: "LinkedIn", url: p.linkedin } : null,
+                            p.facebook ? { name: "Facebook", url: p.facebook } : null,
+                            p.instagram ? { name: "Instagram", url: p.instagram } : null,
+                            ].filter(Boolean) as any;
+                    
+                            return (
                             <PodcastCard
                                 key={p.id}
                                 podcast={{
                                 id: p.id,
                                 title: p.title,
                                 date: p.date,
-                                platforms: p.platform
-                                ? [{
-                                    name:
-                                    p.platform === 'youtube' ? 'YouTube' :
-                                    p.platform === 'spotify' ? 'Spotify' :
-                                    p.platform === 'apple' ? 'Apple' :
-                                    p.platform === 'soundcloud' ? 'SoundCloud' :
-                                    'YouTube', // fallback to a valid value
-                                    url: '#'
-                                }]
-                                : [],
-                                embedUrl: p.embedId ? `https://www.youtube.com/embed/${p.embedId}` : undefined,
-                                summary: p.description,
+                                platforms,
+                                // TODO: when a dedicated episode page exists, pass its href. For now, generic:
+                                href: p.path,
+                                embedUrl: undefined,
+                                summary: "",
                                 imageUrl: 'https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
                                 bgColor: 'bg-slate-900',
                                 }}
                             />
+                            );
+                        })
+                        ) : (
+                        Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="aspect-[3/4] rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
                         ))
                     )}
                 </div>
-                <div className="flex justify-center">
-                    <Button variant="outline" size="sm">
-                        <Link href="/podcasts">View All</Link>
-                    </Button>
-                </div>
+                {showAllBtn ? (
+                    <div className="text-center mt-8">
+                        <Button asChild className="btn-primary">
+                            <Link href="/podcasts">View All Episodes</Link>
+                        </Button>
+                    </div>
+                ) : null}
             </div>
         </section>
     );

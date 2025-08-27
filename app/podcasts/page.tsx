@@ -1,12 +1,38 @@
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { Linkedin, Facebook, Instagram } from 'lucide-react';
-import sampleData from '@/data/sample.json';
+// import sampleData from '@/data/sample.json';
 import { EpisodeCard } from '@/components/cards/EpisodeCard';
+import { getPodcasts } from '@/lib/data';
+import path from 'node:path';
+import Link from 'next/link';
 
-export default function Podcasts() {
-  const latestEpisode = sampleData.podcasts[0];
-  const otherEpisodes = sampleData.podcasts.slice(1);
+export default async function Podcasts() {
+  // Use sample data for now; replace with fetched data as needed
+  // const podcasts = sampleData.podcasts;
+  // Fetch podcasts from Sheets (server-side, cached)
+  const rawPodcasts: any[] = await getPodcasts();
+
+  // Map into the shape PodcastCard expects
+  const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
+    id: r.id,
+    title: r.title ?? "Untitled Podcast",
+    description: r.description ?? "",
+    date: r.timestamp ?? "",
+    url: r.driveLink ?? "",
+    path: r.path ?? "",
+    linkedin: r.linkedin ?? "",
+    instagram: r.instagram ?? "",
+    facebook: r.facebook ?? "",
+  }));
+  // console.log("Mapped podcasts:", mappedPodcasts);
+
+  // console.log("Latest podcasts:", rawPodcasts);
+
+  // For now, use static sample data until Sheets integration is ready
+  // import sampleData from '@/data/sample.json';
+  const latestEpisode = mappedPodcasts[0];
+  const otherEpisodes = mappedPodcasts.slice(1);
 
   return (
     <>
@@ -76,10 +102,10 @@ export default function Podcasts() {
             className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 text-lg rounded-full transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(34,211,238,0.25)]"
             asChild
           >
-            <a href="#" target="_blank" rel="noopener noreferrer">
+            <Link href={latestEpisode.path} rel="noopener noreferrer">
               <Play className="mr-2 h-5 w-5" />
               Latest Episode
-            </a>
+            </Link>
           </Button>
         </div>
         
@@ -103,7 +129,7 @@ export default function Podcasts() {
           
           {/* Episodes Grid */}
           <div className="flex flex-wrap gap-8 justify-center">
-            {sampleData.podcasts.map((episode) => (
+            {otherEpisodes.map((episode) => (
               <div
                 key={episode.id}
                 className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.333rem)] flex justify-center"
