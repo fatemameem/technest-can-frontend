@@ -246,6 +246,74 @@ export default function AdminDashboard() {
   const [lastEvent, setLastEvent] = useState<{ title: string; when: string } | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
 
+  // -------- Load overview stats --------
+  useEffect(() => {
+    let mounted = true;
+    async function run() {
+      try {
+        if (!session?.user) return;
+        setStatsLoading(true);
+
+        const [pods, events, subs] = await Promise.all([
+          fetchSheet<any>("podcastInfo").catch(() => []),
+          fetchSheet<any>("eventsInfo").catch(() => []),
+          fetchSheet<any>("subscriberInfo").catch(() => []),
+        ]);
+
+        if (!mounted) return;
+        setPodcastCount(pods.length);
+        setEventCount(events.length);
+        setSubscriberCount(subs.length);
+
+        // derive most recent podcast by timestamp or id
+        if (pods.length > 0) {
+          const latestPod = [...pods].sort(
+            (a, b) =>
+              parseWhen(b.timestamp ?? b.Timestamp ?? b.id) -
+              parseWhen(a.timestamp ?? a.Timestamp ?? a.id)
+          )[0];
+          setLastPodcast({
+            title: String(
+              latestPod.title ??
+                latestPod["Title"] ??
+                latestPod["Title of the Podcast"] ??
+                "New podcast"
+            ),
+            when: formatRelative(
+              parseWhen(latestPod.timestamp ?? latestPod.Timestamp ?? latestPod.id)
+            ),
+          });
+        } else {
+          setLastPodcast(null);
+        }
+
+        if (events.length > 0) {
+          const latestEvt = [...events].sort(
+            (a, b) =>
+              parseWhen(b.timestamp ?? b.Timestamp ?? b.id) -
+              parseWhen(a.timestamp ?? a.Timestamp ?? a.id)
+          )[0];
+          setLastEvent({
+            title: String(latestEvt.title ?? latestEvt["Title"] ?? "New event"),
+            when: formatRelative(
+              parseWhen(latestEvt.timestamp ?? latestEvt.Timestamp ?? latestEvt.id)
+            ),
+          });
+        } else {
+          setLastEvent(null);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (mounted) setStatsLoading(false);
+      }
+    }
+    run();
+    return () => {
+      mounted = false;
+    };
+  }, [session?.user]);
+
 
   const canManageAdmins = role === "admin";      // only admins
   const canManageContent = role === "admin" || role === "moderator"; // both
@@ -279,57 +347,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-    // -------- Load overview stats --------
-  // Only after user is authenticated and authorized
-  // Place after the role guard
-  useEffect(() => {
-    let mounted = true;
-    async function run() {
-      try {
-        if (!session?.user) return;
-        setStatsLoading(true);
-
-        const [pods, events, subs] = await Promise.all([
-          fetchSheet<any>("podcastInfo").catch(() => []),
-          fetchSheet<any>("eventsInfo").catch(() => []),
-          fetchSheet<any>("subscriberInfo").catch(() => []),
-        ]);
-
-        if (!mounted) return;
-        setPodcastCount(pods.length);
-        setEventCount(events.length);
-        setSubscriberCount(subs.length);
-
-        // derive most recent podcast by timestamp or id
-        if (pods.length > 0) {
-          const latestPod = [...pods].sort((a, b) => parseWhen(b.timestamp ?? b.Timestamp ?? b.id) - parseWhen(a.timestamp ?? a.Timestamp ?? a.id))[0];
-          setLastPodcast({
-            title: String(latestPod.title ?? latestPod["Title"] ?? latestPod["Title of the Podcast"] ?? "New podcast"),
-            when: formatRelative(parseWhen(latestPod.timestamp ?? latestPod.Timestamp ?? latestPod.id)),
-          });
-        } else {
-          setLastPodcast(null);
-        }
-
-        if (events.length > 0) {
-          const latestEvt = [...events].sort((a, b) => parseWhen(b.timestamp ?? b.Timestamp ?? b.id) - parseWhen(a.timestamp ?? a.Timestamp ?? a.id))[0];
-          setLastEvent({
-            title: String(latestEvt.title ?? latestEvt["Title"] ?? "New event"),
-            when: formatRelative(parseWhen(latestEvt.timestamp ?? latestEvt.Timestamp ?? latestEvt.id)),
-          });
-        } else {
-          setLastEvent(null);
-        }
-      } catch (e) {
-        // best-effort; keep UI graceful
-        console.error(e);
-      } finally {
-        if (mounted) setStatsLoading(false);
-      }
-    }
-    run();
-    return () => { mounted = false; };
-  }, [session?.user]);
 
 
   // Podcast form handlers
