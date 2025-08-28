@@ -40,29 +40,54 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!formData.consent) {
       toast.error('Please accept the privacy policy');
       return;
     }
 
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast.success('Message sent successfully!', {
-      description: 'We\'ll get back to you within 24 hours.',
-    });
-    
-    setIsSubmitting(false);
-    setFormData({
-      name: '',
-      email: '',
-      organization: '',
-      subject: '',
-      message: '',
-      consent: false,
-    });
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          organization: formData.organization,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json?.ok) {
+        const errMsg =
+          (json && (json.error || json.message)) ||
+          `Failed to send message (${res.status})`;
+        toast.error('Message failed to send', { description: errMsg });
+      } else {
+        toast.success('Message sent successfully!', {
+          description: "We'll get back to you within 24 hours.",
+        });
+
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          organization: '',
+          subject: '',
+          message: '',
+          consent: false,
+        });
+      }
+    } catch (error: any) {
+      const errMsg = error?.message || 'Network error';
+      toast.error('Message failed to send', { description: errMsg });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -196,7 +221,7 @@ export default function Contact() {
                     </div>
                     <div className="flex items-center space-x-3 text-slate-300">
                       <MapPin className="h-5 w-5 text-cyan-400" />
-                      <span>San Francisco, CA</span>
+                      <span>Montreal, QC</span>
                     </div>
                   </div>
                 </CardContent>
@@ -207,7 +232,7 @@ export default function Contact() {
                   <h3 className="text-lg font-semibold mb-4">Response Time</h3>
                   <p className="text-slate-300 text-sm leading-relaxed">
                     We typically respond to all inquiries within 24 hours during business days. 
-                    For urgent security matters, please call our emergency line.
+                    For urgent security matters, please call the number mentioned above.
                   </p>
                 </CardContent>
               </Card>
