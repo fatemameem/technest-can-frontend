@@ -4,6 +4,7 @@ import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { TeamCard } from '@/components/cards/TeamCard';
 import { useEffect, useState } from 'react';
+import { API_BASE } from '@/lib/env';
 
 // Convert Google Drive sharing links to direct image URLs for <img src>
 function toDirectDriveUrl(link?: string): string | undefined {
@@ -64,7 +65,7 @@ export default function Team() {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch('/api/sheets/teamInfo', { cache: 'no-store' });
+        const res = await fetch(`${API_BASE}/sheets/teamInfo`, { cache: 'no-store' });
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         const data = await res.json();
         // Support either an array or an object with a `team` property
