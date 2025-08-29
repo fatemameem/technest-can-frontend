@@ -12,6 +12,7 @@ import { ArrowRight, Play, ExternalLink, Podcast } from 'lucide-react';
 import PodcastsSection from '@/components/sections/PodcastSection';
 import { getEvents } from '@/lib/data';
 import { getPodcasts } from '@/lib/data';
+export const dynamic = "force-dynamic";
 
 function toDateObj(date?: string, time?: string): Date | null {
   if (!date) return null;
