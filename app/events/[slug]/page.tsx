@@ -219,3 +219,5 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
     </>
   );
 }
+
+export const dynamic = "force-dynamic";
