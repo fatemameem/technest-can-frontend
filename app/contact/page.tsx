@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import sampleData from '@/data/sample.json';
 
-export default function Contact() {
+function ContactInner() {
   const searchParams = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -241,5 +241,13 @@ export default function Contact() {
         </div>
       </Section>
     </>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContactInner />
+    </Suspense>
   );
 }
