@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import sampleData from '@/data/sample.json';
+import { API_BASE } from '@/lib/env';
 
 function ContactInner() {
   const searchParams = useSearchParams();
@@ -48,7 +49,7 @@ function ContactInner() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch(`${API_BASE}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
