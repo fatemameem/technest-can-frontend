@@ -304,4 +304,4 @@ function WatchNextCard({ episode, compact = false }: WatchNextCardProps) {
     </Link>
   );
 }
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";

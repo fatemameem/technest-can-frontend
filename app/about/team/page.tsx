@@ -5,7 +5,7 @@ import { Section } from '@/components/ui/section';
 import { TeamCard } from '@/components/cards/TeamCard';
 import { useEffect, useState } from 'react';
 import { API_BASE } from '@/lib/env';
-export const dynamic = "force-dynamic";
+// // export const dynamic = "force-dynamic";
 
 // Convert Google Drive sharing links to direct image URLs for <img src>
 function toDirectDriveUrl(link?: string): string | undefined {
