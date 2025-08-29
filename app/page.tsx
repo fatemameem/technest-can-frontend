@@ -1,3 +1,4 @@
+'use client';
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
@@ -10,9 +11,10 @@ import Link from 'next/link';
 import sampleData from '@/data/sample.json';
 import { ArrowRight, Play, ExternalLink, Podcast } from 'lucide-react';
 import PodcastsSection from '@/components/sections/PodcastSection';
-import { getEvents } from '@/lib/data';
-import { getPodcasts } from '@/lib/data';
-export const dynamic = "force-dynamic";
+// import { getEvents } from '@/lib/data';
+// import { getPodcasts } from '@/lib/data';
+import { useEffect, useState } from 'react';
+// // export const dynamic = "force-dynamic";
 
 function toDateObj(date?: string, time?: string): Date | null {
   if (!date) return null;
@@ -28,10 +30,34 @@ function toDateObj(date?: string, time?: string): Date | null {
   }
 }
 
-export default async function Home() {
+export default function Home() {
   // Fetch events from Sheets (server-side, cached)
-  const rawEvents: any[] = await getEvents();
-  const rawPodcasts: any[] = await getPodcasts();
+  // const rawEvents: any[] = await getEvents();
+  // const rawPodcasts: any[] = await getPodcasts();
+
+  const [rawEvents, setRawEvents] = useState<any[] | null>(null);
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const res = await fetch('/api/sheets/eventsInfo');
+      if (res.ok) {
+        const data = await res.json();
+        setRawEvents(data);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  const [rawPodcasts, setRawPodcasts] = useState<any[] | null>(null);
+  useEffect(() => {
+    const fetchPodcasts = async () => {
+      const res = await fetch('/api/sheets/podcastInfo'); // <-- Fix endpoint!
+      if (res.ok) {
+        const data = await res.json();
+        setRawPodcasts(data);
+      }
+    };
+    fetchPodcasts();
+  }, []);
 
   // Map into the shape PodcastCard expects
   const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({

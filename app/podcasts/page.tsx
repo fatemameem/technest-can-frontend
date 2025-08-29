@@ -144,4 +144,4 @@ export default async function Podcasts() {
   );
 }
 
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";

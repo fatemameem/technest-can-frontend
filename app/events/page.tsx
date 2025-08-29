@@ -62,7 +62,8 @@ export default function Events() {
     let alive = true;
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/sheets/eventsInfo`, { cache: "no-store" });
+        const res = await fetch(`api/sheets/eventsInfo`, { cache: "no-store" });
+        console.log("Fetching events from", `${API_BASE}/sheets/eventsInfo`);
         if (!res.ok) throw new Error(`Failed to load events (${res.status})`);
         const rows: SheetEvent[] = await res.json();
 
@@ -162,4 +163,4 @@ export default function Events() {
   );
 }
 
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
