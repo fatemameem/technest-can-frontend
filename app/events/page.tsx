@@ -5,6 +5,7 @@ import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EventCard } from '@/components/cards/EventCard';
+import { API_BASE } from '@/lib/env';
 
 interface SheetEvent {
   id: string;
@@ -61,7 +62,7 @@ export default function Events() {
     let alive = true;
     (async () => {
       try {
-        const res = await fetch("/api/sheets/eventsInfo", { cache: "no-store" });
+        const res = await fetch(`${API_BASE}/sheets/eventsInfo`, { cache: "no-store" });
         if (!res.ok) throw new Error(`Failed to load events (${res.status})`);
         const rows: SheetEvent[] = await res.json();
 

@@ -26,6 +26,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { API_BASE } from '@/lib/env';
 
 interface PodcastForm {
   title: string;
@@ -96,7 +97,7 @@ async function postToSheet(tab: "podcastInfo" | "eventsInfo" | "adminInfo" | "te
   ];
 
   const attempt = async (payload: any) => {
-    const res = await fetch(`/api/sheets/${tab}`, {
+    const res = await fetch(`${API_BASE}/sheets/${tab}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -150,8 +151,8 @@ async function postToSheet(tab: "podcastInfo" | "eventsInfo" | "adminInfo" | "te
 
 // -------- Fetch helpers for stats --------
 async function fetchSheet<T = any>(tab: "podcastInfo" | "eventsInfo" | "subscriberInfo"): Promise<T[]> {
-  const res = await fetch(`/api/sheets/${tab}?cache=force`, { cache: "no-store" });
-  if (!res.ok) throw new Error(`GET /api/sheets/${tab} failed: ${res.status}`);
+  const res = await fetch(`${API_BASE}/sheets/${tab}?cache=force`, { cache: "no-store" });
+  if (!res.ok) throw new Error(`GET ${API_BASE}/sheets/${tab} failed: ${res.status}`);
   return res.json();
 }
 
