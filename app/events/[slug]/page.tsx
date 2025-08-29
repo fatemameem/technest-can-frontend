@@ -72,11 +72,12 @@ const getEventDetails = (slug: string) => {
   return eventDetails[slug as keyof typeof eventDetails];
 };
 
-export default function EventDetail({ params }: { params: { slug: string } }) {
-  const event = getEventDetails(params.slug);
+export default async function EventDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const event = getEventDetails(slug);
   
   if (!event) {
-    notFound();
+    return notFound();
   }
   
   const eventDate = new Date(`${event.date}T${event.time}`);
