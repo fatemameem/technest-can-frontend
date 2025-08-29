@@ -252,3 +252,5 @@ export default function ContactPage() {
     </Suspense>
   );
 }
+
+export const dynamic = "force-dynamic";
