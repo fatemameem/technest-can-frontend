@@ -1,6 +1,7 @@
 // lib/auth/options.ts
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { API_BASE } from "@/lib/env";
 
 /** You already have these helpers — keep them here or import them */
 function getBaseUrl() {
@@ -14,7 +15,7 @@ type Role = "admin" | "moderator";
 
 async function fetchAllowlist(): Promise<Array<{ email: string; role: Role; name?: string }>> {
   const base = getBaseUrl();
-  const res = await fetch(`${base}/api/sheets/adminInfo?select=email,accessLevel,name`, { cache: "no-store" });
+  const res = await fetch(`${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`, { cache: "no-store" });
   if (!res.ok) return [];
   const rows = (await res.json()) as AllowRow[];
   return rows
