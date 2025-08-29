@@ -8,6 +8,9 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'TECH-NEST | Cybersecurity & AI Ethics',
   description: 'Leading organization in cybersecurity consulting and AI ethics training',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
