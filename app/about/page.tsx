@@ -23,7 +23,7 @@ export default function About() {
       <Section>
         <div className="max-w-4xl mx-auto">
           <div className="prose prose-invert prose-lg mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
               <div className="text-center p-6 surface rounded-2xl">
                 <Target className="h-12 w-12 text-cyan-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-3">Our Mission</h3>
@@ -42,7 +42,7 @@ export default function About() {
                 </p>
               </div>
               
-              <div className="text-center p-6 surface rounded-2xl">
+              <div className="hidden text-center p-6 surface rounded-2xl">
                 <Users className="h-12 w-12 text-cyan-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-3">Our Impact</h3>
                 <p className="text-slate-300">
