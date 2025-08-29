@@ -1,9 +1,9 @@
 // lib/auth/requireRole.ts
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { buildAuthOptions } from "./options";
 
 export async function requireRole(allowed: Array<"admin"|"moderator">) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(buildAuthOptions());
   const role = (session?.user as any)?.role as "admin" | "moderator" | undefined;
 
   if (!session || !role || !allowed.includes(role)) {
