@@ -14,17 +14,20 @@ type AllowRow = { email?: string; accessLevel?: string; name?: string };
 type Role = "admin" | "moderator";
 
 async function fetchAllowlist(): Promise<Array<{ email: string; role: Role; name?: string }>> {
-  const base = getBaseUrl();
-  const res = await fetch(`${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`, { cache: "no-store" });
-  if (!res.ok) return [];
-  const rows = (await res.json()) as AllowRow[];
-  return rows
-    .map((r) => ({
-      email: String(r.email || "").trim().toLowerCase(),
-      role: String(r.accessLevel || "").trim().toLowerCase() as Role,
-      name: r.name ? String(r.name) : undefined,
-    }))
-    .filter((r) => r.email && (r.role === "admin" || r.role === "moderator"));
+  try {
+    const res = await fetch(`${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const rows = (await res.json()) as Array<{ email?: string; accessLevel?: string; name?: string }>;
+    return rows
+      .map(r => ({
+        email: String(r.email || "").trim().toLowerCase(),
+        role: String(r.accessLevel || "").trim().toLowerCase() as "admin" | "moderator",
+        name: r.name ? String(r.name) : undefined,
+      }))
+      .filter(r => r.email && (r.role === "admin" || r.role === "moderator"));
+  } catch {
+    return []; // don’t crash NextAuth if the API hiccups
+  }
 }
 
 /** Factory that returns a *new* options object each time to avoid TDZ/cycles */
