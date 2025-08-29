@@ -51,7 +51,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
           ))}
         </div> */}
         <div className="mt-auto">
-          <Button asChild variant="outline" className={`btn-secondary w-full ${service.available ? '' : 'opacity-50 cursor-not-allowed'}`}>
+          <Button asChild variant="outline" className={`btn-secondary w-full ${service.available ? '' : 'opacity-50 cursor-not-allowed'}`} disabled={!service.available}>
             <Link href={`/contact?service=${service.id}`}>
               {service.available ? 'Request Service' : 'Coming Soon'}
               {service.available && <ArrowRight className="ml-2 h-4 w-4" />}

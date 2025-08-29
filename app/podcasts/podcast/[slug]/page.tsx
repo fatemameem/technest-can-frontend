@@ -163,7 +163,7 @@ export default async function PodcastDetail({ params }: { params: Promise<{ slug
                 {/* Platform Links */}
                 <div>
                   <h3 className="font-semibold mb-4">Watch on other platforms</h3>
-                  <div className="flex gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                     {podcast.linkedin && (
                       <Button variant="outline" size="sm" className="btn-secondary" asChild>
                         <a href={podcast.linkedin} target="_blank" rel="noopener noreferrer">
@@ -207,7 +207,7 @@ export default async function PodcastDetail({ params }: { params: Promise<{ slug
           {/* Sidebar - Learn More */}
           <div className="lg:col-span-1 space-y-6">
             {/* Learn More Section */}
-            <Card className="surface">
+            {/* <Card className="hidden surface">
               <CardContent className="p-6">
                 <h2 className="text-lg font-semibold mb-4">Learn More</h2>
                 <div className="space-y-4">
@@ -234,7 +234,7 @@ export default async function PodcastDetail({ params }: { params: Promise<{ slug
                   ))}
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
             {/* Watch Next Section (Desktop) */}
             <div className="hidden lg:block">
