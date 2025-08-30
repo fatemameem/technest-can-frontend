@@ -49,7 +49,7 @@ function ContactInner() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/contact`, {
+      const res = await fetch(`/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
