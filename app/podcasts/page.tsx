@@ -1,3 +1,4 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { Linkedin, Facebook, Instagram } from 'lucide-react';
@@ -6,12 +7,35 @@ import { EpisodeCard } from '@/components/cards/EpisodeCard';
 import { getPodcasts } from '@/lib/data';
 import path from 'node:path';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-export default async function Podcasts() {
-  // Use sample data for now; replace with fetched data as needed
-  // const podcasts = sampleData.podcasts;
+export default function Podcasts() {
   // Fetch podcasts from Sheets (server-side, cached)
-  const rawPodcasts: any[] = await getPodcasts();
+  // const rawPodcasts: any[] = await getPodcasts();
+  // const [rawPodcasts, setRawPodcasts] = useState<any[] | null>(null);
+  const [rawPodcasts, setRawPodcasts] = useState<any[] | null>(null);
+  useEffect(() => {
+    const fetchPodcasts = async () => {
+      try {
+        // console.log("Fetching podcasts...");
+        const res = await fetch('/api/sheets/podcastInfo');
+        // console.log("API response status:", res.status);
+        
+        if (res.ok) {
+          const data = await res.json();
+          // console.log("Fetched podcasts:", data);
+          setRawPodcasts(data);
+        } else {
+          // Log the error response
+          const errorText = await res.text();
+          console.error("API error:", res.status, errorText);
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+      }
+    };
+    fetchPodcasts();
+  }, []);
 
   // Map into the shape PodcastCard expects
   const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
@@ -25,18 +49,24 @@ export default async function Podcasts() {
     instagram: r.instagram ?? "",
     facebook: r.facebook ?? "",
   }));
-  // console.log("Mapped podcasts:", mappedPodcasts);
 
-  // console.log("Latest podcasts:", rawPodcasts);
-
-  // For now, use static sample data until Sheets integration is ready
-  // import sampleData from '@/data/sample.json';
-  const latestEpisode = mappedPodcasts[0];
+  const latestEpisode = mappedPodcasts[0] || {
+    id: "placeholder",
+    title: "Loading podcast...",
+    description: "",
+    date: "",
+    url: "",
+    path: "#",
+    linkedin: "",
+    instagram: "",
+    facebook: "",
+  };
+  
   const otherEpisodes = mappedPodcasts.slice(1);
 
   return (
     <>
-      {/* Full Screen Hero */}
+      {/* Hero section */}
       <div className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div 
@@ -129,14 +159,18 @@ export default async function Podcasts() {
           
           {/* Episodes Grid */}
           <div className="flex flex-wrap gap-8 justify-center">
-            {otherEpisodes.map((episode) => (
-              <div
-                key={episode.id}
-                className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.333rem)] flex justify-center"
-              >
-                <EpisodeCard episode={episode} />
-              </div>
-            ))}
+            {otherEpisodes.length > 0 ? (
+              otherEpisodes.map((episode) => (
+                <div
+                  key={episode.id}
+                  className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.333rem)] flex justify-center"
+                >
+                  <EpisodeCard episode={episode} />
+                </div>
+              ))
+            ) : (
+              <p className="text-white/70">Loading episodes...</p>
+            )}
           </div>
         </div>
       </section>
