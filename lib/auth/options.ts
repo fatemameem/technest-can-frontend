@@ -15,18 +15,48 @@ type Role = "admin" | "moderator";
 
 async function fetchAllowlist(): Promise<Array<{ email: string; role: Role; name?: string }>> {
   try {
-    const res = await fetch(`${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`, { cache: "no-store" });
-    if (!res.ok) return [];
-    const rows = (await res.json()) as Array<{ email?: string; accessLevel?: string; name?: string }>;
-    return rows
-      .map(r => ({
+    console.log(`[Auth] Fetching allowlist from ${API_BASE}/sheets/adminInfo`);
+    const res = await fetch(`${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`, { 
+      cache: "no-store",
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    console.log(`[Auth] Allowlist API response status: ${res.status}`);
+    
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`[Auth] Failed to fetch allowlist: ${res.status} ${errorText}`);
+      return [];
+    }
+    
+    const rows = await res.json();
+    console.log(`[Auth] Fetched ${rows.length} admins from API`);
+    
+    interface AllowlistApiRow {
+      email?: string;
+      accessLevel?: string;
+      name?: string;
+    }
+
+    interface AllowlistProcessedRow {
+      email: string;
+      role: "admin" | "moderator";
+      name?: string;
+    }
+
+    const processed: AllowlistProcessedRow[] = (rows as AllowlistApiRow[])
+      .map((r: AllowlistApiRow): AllowlistProcessedRow => ({
         email: String(r.email || "").trim().toLowerCase(),
         role: String(r.accessLevel || "").trim().toLowerCase() as "admin" | "moderator",
         name: r.name ? String(r.name) : undefined,
       }))
-      .filter(r => r.email && (r.role === "admin" || r.role === "moderator"));
-  } catch {
-    return []; // don’t crash NextAuth if the API hiccups
+      .filter((r: AllowlistProcessedRow) => r.email && (r.role === "admin" || r.role === "moderator"));
+    
+    console.log(`[Auth] Processed ${processed.length} valid admins`);
+    return processed;
+  } catch (error) {
+    console.error(`[Auth] Exception in fetchAllowlist:`, error);
+    return []; // don't crash NextAuth if the API hiccups
   }
 }
 
