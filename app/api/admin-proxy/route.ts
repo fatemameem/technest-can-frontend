@@ -43,7 +43,7 @@ export async function POST(req: Request) {
       // Add bypass token in production
       const bypassToken = process.env.VERCEL_PROTECTION_BYPASS;
       if (bypassToken) {
-        apiUrl.searchParams.append('x-vercel-protection-bypass', bypassToken);
+        apiUrl.searchParams.append('__v_p', bypassToken);
       }
     }
     
