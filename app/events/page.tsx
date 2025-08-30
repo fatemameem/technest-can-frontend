@@ -63,7 +63,7 @@ export default function Events() {
     (async () => {
       try {
         const res = await fetch(`api/sheets/eventsInfo`, { cache: "no-store" });
-        console.log("Fetching events from", `${API_BASE}/sheets/eventsInfo`);
+        // console.log("Fetching events from", `${API_BASE}/sheets/eventsInfo`);
         if (!res.ok) throw new Error(`Failed to load events (${res.status})`);
         const rows: SheetEvent[] = await res.json();
 

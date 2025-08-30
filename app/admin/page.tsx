@@ -524,7 +524,7 @@ export default function AdminDashboard() {
       await postToSheet("podcastInfo", entries);
 
       toast.success(`${entries.length} podcast(s) submitted successfully!`);
-      console.log("Submitted podcasts:", entries);
+      // console.log("Submitted podcasts:", entries);
     } catch (err: any) {
       console.error(err);
       toast.error(`Failed to submit podcasts. ${err?.message ?? ""}`.trim());
@@ -590,7 +590,7 @@ export default function AdminDashboard() {
       await postToSheet("eventsInfo", entries);
 
       toast.success(`${entries.length} event(s) submitted successfully!`);
-      console.log("Submitted events:", entries);
+      // console.log("Submitted events:", entries);
     } catch (err: any) {
       console.error(err);
       toast.error(`Failed to submit events. ${err?.message ?? ""}`.trim());
@@ -636,7 +636,7 @@ export default function AdminDashboard() {
 
       await postToSheet("adminInfo", entries);
       toast.success(`${entries.length} ${entries.length === 1 ? "entry" : "entries"} added to adminInfo.`);
-      console.log("Submitted admins:", entries);
+      // console.log("Submitted admins:", entries);
     } catch (err: any) {
       console.error(err);
       toast.error(`Failed to submit admins. ${err?.message ?? ""}`.trim());
@@ -705,7 +705,7 @@ export default function AdminDashboard() {
 
       await postToSheet("teamInfo", entries);
       toast.success(`${entries.length} ${entries.length === 1 ? "member" : "members"} added to teamInfo.`);
-      console.log("Submitted team members:", entries);
+      // console.log("Submitted team members:", entries);
     } catch (err: any) {
       console.error(err);
       toast.error(`Failed to submit team members. ${err?.message ?? ""}`.trim());

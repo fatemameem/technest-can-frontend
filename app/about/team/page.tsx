@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
@@ -66,7 +66,7 @@ export default function Team() {
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch(`${API_BASE}/sheets/teamInfo`, { cache: 'no-store' });
+        const res = await fetch(`api/sheets/teamInfo`, { cache: 'no-store' });
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         const data = await res.json();
         // Support either an array or an object with a `team` property
@@ -81,7 +81,7 @@ export default function Team() {
     return () => { cancelled = true; };
   }, []);
 
-  console.log('Team members:', members, 'Error:', error);
+  // console.log('Team members:', members, 'Error:', error);
 
   return (
     <>
