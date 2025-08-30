@@ -3,14 +3,14 @@ import { buildAuthOptions } from "@/lib/auth/options";
 
 export async function POST(req: Request) {
   try {
-    // Check if there's a session (needed in production, relaxed in dev)
-    const session = await getServerSession(buildAuthOptions());
-    const isLocalDev = process.env.NODE_ENV === 'development';
+    // Get incoming request cookies - IMPORTANT
+    const cookies = req.headers.get('cookie');
     
-    if (!session?.user?.email && !isLocalDev) {
-      console.error("No authenticated session found");
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Log debug info
+    // console.log("[AdminProxy] Request headers:", {
+    //   hasCookies: !!cookies,
+    //   cookieLength: cookies?.length
+    // });
 
     // Get target API and request details
     const body = await req.json().catch(error => {
@@ -24,23 +24,19 @@ export async function POST(req: Request) {
     
     const { target, method = "GET", body: requestBody } = body;
     
-    // Validate target is an internal API
     if (!target || !target.startsWith('/api/sheets/')) {
       console.error("Invalid target:", target);
       return Response.json({ error: "Invalid target" }, { status: 400 });
     }
     
-    // Determine base URL (using relative URLs in development)
+    // Determine base URL
     let apiUrl: URL;
     if (process.env.NODE_ENV === 'development') {
-      // In dev, use a configurable base URL (default to localhost:3000 if not set)
-      const devBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.DEV_APP_URL || 'http://localhost:3000';
-      apiUrl = new URL(target, devBaseUrl);
+      apiUrl = new URL(target, 'http://localhost:3000');
     } else {
-      // In production, use the NEXTAUTH_URL
       apiUrl = new URL(target, process.env.NEXTAUTH_URL);
       
-      // Add bypass token in production
+      // Add bypass token in production if needed
       const bypassToken = process.env.VERCEL_PROTECTION_BYPASS;
       if (bypassToken) {
         apiUrl.searchParams.append('__v_p', bypassToken);
@@ -49,16 +45,16 @@ export async function POST(req: Request) {
     
     console.log(`[AdminProxy] Forwarding ${method} request to ${apiUrl.toString()}`);
 
-    // Make the actual request
+    // Forward the request WITH cookies to maintain session
     const response = await fetch(apiUrl.toString(), {
       method,
       headers: {
         'Content-Type': 'application/json',
+        'Cookie': cookies || '', // THIS IS THE KEY PART - FORWARD THE COOKIES
       },
       body: method !== "GET" ? JSON.stringify(requestBody) : undefined,
     });
     
-    // Parse and forward the response
     try {
       const data = await response.json();
       return Response.json(data, { status: response.status });
@@ -68,7 +64,7 @@ export async function POST(req: Request) {
       return Response.json({ 
         error: "Failed to parse response",
         status: response.status,
-        text: text.substring(0, 500) // Include part of the response for debugging
+        text: text.substring(0, 500)
       }, { status: 500 });
     }
   } catch (error) {

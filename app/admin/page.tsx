@@ -87,8 +87,14 @@ const sanitize = (s: string | undefined | null) => (s || "").trim();
 const buildTimestamp = () => new Date().toISOString();
 
 // Updated postToSheet function
-async function postToSheet(tab: "podcastInfo" | "eventsInfo" | "adminInfo" | "teamInfo", entries: any[]) {
-  try {
+async function postToSheet(tab: "podcastInfo" | "eventsInfo" | "adminInfo" | "teamInfo", entries: any | any[]) {
+  // Ensure entries is always an array
+  const entriesArray = Array.isArray(entries) ? entries : [entries];
+  
+  // console.log(`Sending to API (${tab}):`, entriesArray);
+  
+  // Process each entry individually
+  const results = await Promise.all(entriesArray.map(async entry => {
     const res = await fetch('/api/admin-proxy', {
       method: 'POST',
       headers: {
@@ -97,21 +103,20 @@ async function postToSheet(tab: "podcastInfo" | "eventsInfo" | "adminInfo" | "te
       body: JSON.stringify({
         target: `/api/sheets/${tab}`,
         method: 'POST',
-        body: { rows: entries },
+        body: entry, // Send each entry directly without "rows" wrapper
       }),
-      credentials: 'include', // Add this line to send cookies
+      credentials: 'include',
     });
     
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(`Failed to post: ${error.error || res.status}`);
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(`Failed to post: ${errorData.error || res.status}`);
     }
     
     return await res.json();
-  } catch (error) {
-    console.error('Error posting to sheet:', error);
-    throw error;
-  }
+  }));
+  
+  return results;
 }
 
 // -------- Fetch helpers for stats --------

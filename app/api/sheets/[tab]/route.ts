@@ -231,6 +231,16 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ tab: string }> }
 ) {
+  // Parse JSON once and reuse the result
+  let json: unknown;
+  try {
+    json = await req.json();
+    // console.log("[API Debug] Received data:", JSON.stringify(json).substring(0, 500));
+  } catch (e) {
+    console.error("JSON parse error:", e);
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+  
   const { tab } = await params;
   // Gate by tab:
   // - adminInfo: admins only
@@ -293,14 +303,6 @@ export async function POST(
     website: z.string().url().optional().or(z.literal("")).default(""),
     imageLink: z.string().url().optional().or(z.literal("")).default(""),
   });
-
-  // Parse body once
-  let json: unknown;
-  try {
-    json = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
 
   // Build values array in exact column order per tab
   let values: string[] | null = null;
