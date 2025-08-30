@@ -118,20 +118,16 @@ async function fetchSheet<T = any>(tab: "podcastInfo" | "eventsInfo" | "subscrib
   try {
     const res = await fetch('/api/admin-proxy', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         target: `/api/sheets/${tab}?cache=force`,
         method: 'GET',
       }),
+      credentials: 'include', // Add this to send cookies with request
     });
     
-    if (!res.ok) {
-      throw new Error(`GET failed: ${res.status}`);
-    }
-    
-    return await res.json();
+    if (!res.ok) throw new Error(`GET failed: ${res.status}`);
+    return res.json();
   } catch (error) {
     console.error(`Error fetching ${tab}:`, error);
     throw error;
