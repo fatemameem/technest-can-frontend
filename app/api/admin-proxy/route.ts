@@ -33,8 +33,9 @@ export async function POST(req: Request) {
     // Determine base URL (using relative URLs in development)
     let apiUrl: URL;
     if (process.env.NODE_ENV === 'development') {
-      // In dev, use a relative URL - the host header will be preserved
-      apiUrl = new URL(target, 'http://localhost:3000');
+      // In dev, use a configurable base URL (default to localhost:3000 if not set)
+      const devBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.DEV_APP_URL || 'http://localhost:3000';
+      apiUrl = new URL(target, devBaseUrl);
     } else {
       // In production, use the NEXTAUTH_URL
       apiUrl = new URL(target, process.env.NEXTAUTH_URL);
