@@ -99,6 +99,7 @@ async function postToSheet(tab: "podcastInfo" | "eventsInfo" | "adminInfo" | "te
         method: 'POST',
         body: { rows: entries },
       }),
+      credentials: 'include', // Add this line to send cookies
     });
     
     if (!res.ok) {
