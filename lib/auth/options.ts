@@ -15,13 +15,19 @@ type Role = "admin" | "moderator";
 
 async function fetchAllowlist(): Promise<Array<{ email: string; role: Role; name?: string }>> {
   try {
-    console.log(`[Auth] Fetching allowlist from ${API_BASE}/sheets/adminInfo`);
-    const res = await fetch(`${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`, { 
+    const bypassToken = process.env.VERCEL_PROTECTION_BYPASS;
+    const apiUrl = `${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`;
+    const urlWithBypass = bypassToken ? 
+      `${apiUrl}&x-vercel-protection-bypass=${bypassToken}` : 
+      apiUrl;
+    
+    // console.log(`[Auth] Fetching allowlist from ${API_BASE}/sheets/adminInfo`);
+    const res = await fetch(urlWithBypass, { 
       cache: "no-store",
       headers: { 'Content-Type': 'application/json' }
     });
     
-    console.log(`[Auth] Allowlist API response status: ${res.status}`);
+    // console.log(`[Auth] Allowlist API response status: ${res.status}`);
     
     if (!res.ok) {
       const errorText = await res.text();
@@ -30,7 +36,7 @@ async function fetchAllowlist(): Promise<Array<{ email: string; role: Role; name
     }
     
     const rows = await res.json();
-    console.log(`[Auth] Fetched ${rows.length} admins from API`);
+    // console.log(`[Auth] Fetched ${rows.length} admins from API`);
     
     interface AllowlistApiRow {
       email?: string;
@@ -52,7 +58,7 @@ async function fetchAllowlist(): Promise<Array<{ email: string; role: Role; name
       }))
       .filter((r: AllowlistProcessedRow) => r.email && (r.role === "admin" || r.role === "moderator"));
     
-    console.log(`[Auth] Processed ${processed.length} valid admins`);
+    // console.log(`[Auth] Processed ${processed.length} valid admins`);
     return processed;
   } catch (error) {
     console.error(`[Auth] Exception in fetchAllowlist:`, error);
