@@ -86,74 +86,56 @@ const sanitize = (s: string | undefined | null) => (s || "").trim();
 
 const buildTimestamp = () => new Date().toISOString();
 
-// Tries robust payload shapes and error reporting for sheet posting
+// Updated postToSheet function
 async function postToSheet(tab: "podcastInfo" | "eventsInfo" | "adminInfo" | "teamInfo", entries: any[]) {
-  const batchPayloads = [
-    entries,                 // [ { timestamp, title, ... } ]
-    { data: entries },
-    { rows: entries },
-    { values: entries },
-    { records: entries },
-  ];
-
-  const attempt = async (payload: any) => {
-    const res = await fetch(`${API_BASE}/sheets/${tab}`, {
-      method: "POST",
+  try {
+    const res = await fetch('/api/admin-proxy', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        target: `/api/sheets/${tab}`,
+        method: 'POST',
+        body: { rows: entries },
+      }),
     });
-    const text = await res.text().catch(() => "");
-    return { ok: res.ok, status: res.status, text };
-  };
-
-  // Try batch variants first
-  const batchErrors: string[] = [];
-  for (const payload of batchPayloads) {
-    try {
-      const r = await attempt(payload);
-      if (r.ok) return;
-      batchErrors.push(`Batch payload ${JSON.stringify(Object.keys(payload))} -> ${r.status} ${r.text?.slice(0, 300)}`);
-    } catch (e: any) {
-      batchErrors.push(`Batch payload ${JSON.stringify(Object.keys(payload))} -> ${String(e).slice(0, 300)}`);
+    
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(`Failed to post: ${error.error || res.status}`);
     }
-  }
-
-  // If batch failed, try item-by-item fallbacks (some handlers only accept a single row per POST)
-  const singlePayloads = [
-    (row: any) => row,           // raw object
-    (row: any) => ({ row }),     // { row: {..} }
-    (row: any) => ({ data: row }),
-    (row: any) => ({ values: row }),
-    (row: any) => ({ record: row }),
-  ];
-
-  const perItemErrors: string[] = [];
-  for (const row of entries) {
-    let sent = false;
-    for (const builder of singlePayloads) {
-      try {
-        const r = await attempt(builder(row));
-        if (r.ok) { sent = true; break; }
-        perItemErrors.push(`Single row keys ${JSON.stringify(Object.keys(row))} -> ${r.status} ${r.text?.slice(0, 300)}`);
-      } catch (e: any) {
-        perItemErrors.push(`Single row error -> ${String(e).slice(0, 300)}`);
-      }
-    }
-    if (!sent) {
-      // If one row can't be sent even after all shapes, abort early to avoid spamming
-      throw new Error(`All payload shapes failed for a row.\nBatch attempts:\n- ${batchErrors.join("\n- ")}\nPer-row attempts:\n- ${perItemErrors.join("\n- ")}`);
-    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error('Error posting to sheet:', error);
+    throw error;
   }
 }
 
 // -------- Fetch helpers for stats --------
 async function fetchSheet<T = any>(tab: "podcastInfo" | "eventsInfo" | "subscriberInfo"): Promise<T[]> {
-  const res = await fetch(`${API_BASE}/sheets/${tab}?cache=force`, { cache: "no-store" });
-  if (!res.ok) throw new Error(`GET ${API_BASE}/sheets/${tab} failed: ${res.status}`);
-  return res.json();
+  try {
+    const res = await fetch('/api/admin-proxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        target: `/api/sheets/${tab}?cache=force`,
+        method: 'GET',
+      }),
+    });
+    
+    if (!res.ok) {
+      throw new Error(`GET failed: ${res.status}`);
+    }
+    
+    return await res.json();
+  } catch (error) {
+    console.error(`Error fetching ${tab}:`, error);
+    throw error;
+  }
 }
 
 const parseWhen = (v: any): number => {
