@@ -90,6 +90,7 @@ export default function Home() {
     time: r.time ?? "",
     location: r.location ?? "",
     description: r.description ?? "",
+    links: { luma: r.lumaLink ?? "", zoom: r.zoomLink ?? "" },
     tags: [r.topic, r.location].filter(Boolean) as string[],
   }));
 

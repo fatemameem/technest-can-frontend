@@ -16,7 +16,7 @@ export function Footer() {
         </div>
         <div className="mt-4 pt-4 border-t border-white/5 text-center">
           <p className="text-slate-500 text-xs">
-            © 2024 TECH-NEST. All rights reserved.
+            © {new Date().getFullYear()} TECH-NEST. All rights reserved.
           </p>
         </div>
       </div>

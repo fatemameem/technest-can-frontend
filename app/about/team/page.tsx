@@ -81,7 +81,7 @@ export default function Team() {
     return () => { cancelled = true; };
   }, []);
 
-  console.log('Team members:', members, 'Error:', error);
+  // console.log('Team members:', members, 'Error:', error);
 
   return (
     <>
