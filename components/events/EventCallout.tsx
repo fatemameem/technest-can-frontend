@@ -1,8 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin } from 'lucide-react';
-import { RegisterDialog } from './RegisterDialog';
 
 interface EventCalloutProps {
   event: {
@@ -13,7 +11,11 @@ interface EventCalloutProps {
     location: string;
     description: string;
     tags: string[];
-  };
+    links?: {
+      luma?: string;
+      zoom?: string;
+    };
+  }
 }
 
 export function EventCallout({ event }: EventCalloutProps) {
@@ -71,11 +73,8 @@ export function EventCallout({ event }: EventCalloutProps) {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <RegisterDialog event={event}>
-            <Button className="btn-primary flex-1">
-              Register Now
-            </Button>
-          </RegisterDialog>
+          <Button className="btn-primary flex-1"> 
+            <a href={`${event.links?.luma}`} target='_blank'>Register</a> <ExternalLink className="ml-2 h-5 w-5"/></Button>
           <Button asChild variant="outline" className="btn-secondary flex-1">
             <a href="/events">View All Events</a>
           </Button>

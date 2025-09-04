@@ -7,14 +7,20 @@ import { RegisterDialog } from '@/components/events/RegisterDialog';
 
 interface EventCardProps {
   event: {
-    id: string;
-    title: string;
-    date: string;
-    time: string;
-    location: string;
-    description: string;
-    tags: string[];
-    cover: string;
+  id: string;
+  title: string;
+  cover?: string;
+  description: string;
+  date?: string;
+  time?: string;
+  location?: string;
+  topic?: string;
+  tags?: string[];
+  links?: {
+    luma?: string;
+    zoom?: string;
+  };
+  sponsors?: string[];
   };
   type: 'upcoming' | 'past';
 }
@@ -69,7 +75,7 @@ export function EventCard({ event, type }: EventCardProps) {
         </div>
         
         <div className="flex flex-wrap gap-2 mb-4">
-          {event.tags.map((tag, index) => (
+          {event.tags?.map((tag, index) => (
             <Badge key={index} variant="secondary" className="text-xs">
               {tag}
             </Badge>
@@ -78,9 +84,12 @@ export function EventCard({ event, type }: EventCardProps) {
         
         <div className="flex gap-2">
           {type === 'upcoming' ? (
-            <RegisterDialog event={event}>
-              <Button className="btn-primary flex-1">Register</Button>
-            </RegisterDialog>
+            <Button asChild className="btn-primary flex-1">
+              <a href={`${event.links?.luma}`} target="_blank" rel="noopener noreferrer">
+                Register
+                <ExternalLink className="ml-2 h-5 w-5" />
+              </a>
+            </Button>
           ) : (
             <Button asChild variant="outline" className="btn-secondary flex-1">
               <Link href={`/events/${event.id}`}>
