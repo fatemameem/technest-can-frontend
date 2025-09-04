@@ -2,19 +2,14 @@
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { StatCard } from '@/components/cards/StatCard';
 import { ServiceCard } from '@/components/cards/ServiceCard';
 import { EventCallout } from '@/components/events/EventCallout';
 import Link from 'next/link';
 import sampleData from '@/data/sample.json';
-import { ArrowRight, Play, ExternalLink, Podcast } from 'lucide-react';
+import { ArrowRight, ExternalLink, } from 'lucide-react';
 import PodcastsSection from '@/components/sections/PodcastSection';
-// import { getEvents } from '@/lib/data';
-// import { getPodcasts } from '@/lib/data';
 import { useEffect, useState } from 'react';
-// // export const dynamic = "force-dynamic";
 
 function toDateObj(date?: string, time?: string): Date | null {
   if (!date) return null;
@@ -31,10 +26,6 @@ function toDateObj(date?: string, time?: string): Date | null {
 }
 
 export default function Home() {
-  // Fetch events from Sheets (server-side, cached)
-  // const rawEvents: any[] = await getEvents();
-  // const rawPodcasts: any[] = await getPodcasts();
-
   const [rawEvents, setRawEvents] = useState<any[] | null>(null);
   useEffect(() => {
     const fetchEvents = async () => {
@@ -69,7 +60,6 @@ export default function Home() {
     facebook: r.facebook ?? "",
     path: r.path ?? "",
   }));
-  // console.log("Mapped podcasts:", mappedPodcasts);
 
   // Keep only the latest 3 podcasts, sorted descending by date
   const podcasts = mappedPodcasts
@@ -79,8 +69,6 @@ export default function Home() {
       return db - da;
     })
     .slice(0, 5);
-
-    // console.log("Latest podcasts:", podcasts);
 
   // Map into the shape EventCallout expects and build tags
   const mappedEvents = (rawEvents || []).map((r: any) => ({
@@ -116,13 +104,13 @@ export default function Home() {
         imageUrl='./images/home.webp'
       >
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild className="btn-primary px-8 py-3 text-lg">
+          <Button asChild className="btn-primary text-white px-8 py-3 text-lg">
             <Link href="/services">
               Explore Services
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
-          <Button asChild variant="outline" className="btn-secondary px-8 py-3 text-lg">
+          <Button asChild variant="outline" className="btn-secondary text-slate-300 px-8 py-3 text-lg ">
             <Link href="/events">
               Upcoming Events
               <ExternalLink className="ml-2 h-5 w-5" />
@@ -173,34 +161,13 @@ export default function Home() {
 
       {/* Podcasts Section */}
       <Section className="">
-        {/* <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Latest Episodes</h2>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            Expert insights on cybersecurity and AI ethics from our podcast series.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {sampleData.podcasts.map((podcast) => (
-            <PodcastCard key={podcast.id} podcast={podcast} />
-          ))}
-        </div>
-        <div className="text-center mt-8">
-          <div className="flex flex-wrap justify-center gap-4">
-            <Badge variant="outline" className="border-red-500/50 text-red-400">
-              <ExternalLink className="mr-1 h-3 w-3" />
-              YouTube
-            </Badge>
-            <Badge variant="outline" className="border-green-500/50 text-green-400">
-              <ExternalLink className="mr-1 h-3 w-3" />
-              Spotify
-            </Badge>
-            <Badge variant="outline" className="border-purple-500/50 text-purple-400">
-              <ExternalLink className="mr-1 h-3 w-3" />
-              Apple Podcasts
-            </Badge>
-          </div>
-        </div> */}
-        <PodcastsSection podcasts={podcasts} title="Latest Podcast Episodes" badge="Listen Now" description="Tune in for discussions on the latest in cybersecurity and AI ethics." showAllBtn={true} />
+        <PodcastsSection
+          podcasts={podcasts}
+          title="Latest Podcast Episodes"
+          badge="Listen Now"
+          description="Tune in for discussions on the latest in cybersecurity and AI ethics."
+          showAllBtn={true}
+        />
       </Section>
 
       {/* Upcoming Event Callout */}
