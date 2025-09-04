@@ -84,7 +84,12 @@ export function EventCard({ event, type }: EventCardProps) {
         
         <div className="flex gap-2">
           {type === 'upcoming' ? (
-            <Button className="btn-primary flex-1"> <a href={`${event.links?.luma}`} target='_blank'>Register</a> <ExternalLink className="ml-2 h-5 w-5"/></Button>
+            <Button asChild className="btn-primary flex-1">
+              <a href={`${event.links?.luma}`} target="_blank" rel="noopener noreferrer">
+                Register
+                <ExternalLink className="ml-2 h-5 w-5" />
+              </a>
+            </Button>
           ) : (
             <Button asChild variant="outline" className="btn-secondary flex-1">
               <Link href={`/events/${event.id}`}>
