@@ -1,8 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, ExternalLink, MapPin } from 'lucide-react';
-import { RegisterDialog } from './RegisterDialog';
 
 interface EventCalloutProps {
   event: {
