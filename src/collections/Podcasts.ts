@@ -1,4 +1,5 @@
 // collections/Podcasts.ts
+import { generateUniqueSlug } from '@/helpers/generateUniqueSlug';
 import { CollectionConfig } from 'payload'
 
 export const Podcasts: CollectionConfig = {
@@ -14,13 +15,37 @@ export const Podcasts: CollectionConfig = {
     create: ({ req: { user } }) => Boolean(user),
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
-    },
-    fields: [
+  },
+  hooks: {
+    beforeValidate: [
+      async ({ data, req, originalDoc }) => {
+        if (!data) return data;
+        
+        data.slug = await generateUniqueSlug({
+          collection: 'podcasts',
+          data,
+          req,
+          originalDoc
+        });
+        
+        return data;
+      },
+    ],
+  },
+  fields: [
     {
       name: 'title',
       type: 'text',
       label: 'Title of the Podcast',
       required: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      label: 'Slug',
+      unique: true,
+      index: true,
+      admin: { position: 'sidebar' },
     },
     {
       name: 'description',

@@ -6,8 +6,13 @@ import { Play, ExternalLink, ArrowLeft, Clock, Calendar, Users } from 'lucide-re
 import { Linkedin, Facebook, Instagram } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getPodcasts } from '@/lib/data';
+import { getPayload } from 'payload';
+import configPromise from '@payload-config';
 import PodcastsSection from '@/components/sections/PodcastSection';
+import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 
 // export async function generateStaticParams() {
@@ -54,23 +59,59 @@ const learnMore = [
 
 export default async function PodcastDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const rawPodcasts: any[] = await getPodcasts();
-    // Map into the shape PodcastCard expects
-  const podcasts = (rawPodcasts || []).map((r: any) => ({
-    id: r.id ?? crypto.randomUUID?.() ?? String(Math.random()),
-    title: r.title ?? "Untitled Podcast",
-    description: r.description ?? "Description coming soon.",
-    // Prefer timestamp if present, else fall back to 'today' so Date() is valid in the UI
-    date: r.timestamp || new Date().toISOString(),
-    url: r.driveLink ?? "",
-    path: r.path ?? "",
-    slug: r.slug ?? "",
-    linkedin: r.linkedin ?? "",
-    instagram: r.instagram ?? "",
-    facebook: r.facebook ?? "",
-    thumbnailUrl: r.thumbnailUrl ?? "https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
+  const payload = await getPayload({ config: configPromise });
+  const res = await payload.find({
+    collection: 'podcasts',
+    where: { slug: { equals: slug } },
+    limit: 1,
+    overrideAccess: true,
+  });
+  const doc = res.docs?.[0];
+  if (!doc) {
+    notFound();
+  }
+  const podcast = {
+    id: doc.id,
+    title: doc.title || 'Untitled Podcast',
+    description: doc.description || 'Description coming soon.',
+    date: doc.createdAt || new Date().toISOString(),
+    url: doc.driveLink || '',
+    path: `/podcasts/podcast/${doc.slug}`,
+    slug: doc.slug || '',
+    linkedin: doc.socialLinks?.linkedin || '',
+    instagram: doc.socialLinks?.instagram || '',
+    facebook: doc.socialLinks?.facebook || '',
+    thumbnailUrl:
+      doc.thumbnail ||
+      'https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080',
+  };
+
+  // Fetch more episodes for the "More Episodes" section
+  const othersRes = await payload.find({
+    collection: 'podcasts',
+    where: {
+      and: [
+        { published: { equals: true } },
+        { slug: { not_equals: slug } },
+      ],
+    },
+    sort: '-createdAt',
+    limit: 12,
+    overrideAccess: true,
+  });
+  const podcasts = (othersRes.docs || []).map((r: any) => ({
+    id: r.id,
+    title: r.title ?? 'Untitled Podcast',
+    date: r.createdAt ?? '',
+    linkedin: r.socialLinks?.linkedin ?? '',
+    instagram: r.socialLinks?.instagram ?? '',
+    facebook: r.socialLinks?.facebook ?? '',
+    path: r.slug ? `/podcasts/podcast/${r.slug}` : '/podcasts',
+    slug: r.slug || '',
+    thumbnailUrl:
+      r.thumbnail ||
+      'https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080',
   }));
-  const podcast = podcasts.find(p => p.slug === slug);
   
   if (!podcast) {
     notFound();

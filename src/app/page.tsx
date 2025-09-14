@@ -82,8 +82,8 @@ export default async function Home() {
     linkedin: r.socialLinks?.linkedin ?? "",
     instagram: r.socialLinks?.instagram ?? "",
     facebook: r.socialLinks?.facebook ?? "",
-    // Use driveLink if present; else default to podcasts listing
-    path: r.driveLink ?? "/podcasts",
+    // Prefer internal slug route; fallback to listing
+    path: r.slug ? `/podcasts/podcast/${r.slug}` : "/podcasts",
   }));
 
   // Keep only the latest 3 podcasts, sorted descending by date

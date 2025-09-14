@@ -34,7 +34,7 @@ export default async function Podcasts() {
     description: r.description ?? '',
     date: r.createdAt ?? '',
     url: r.driveLink ?? '',
-    path: r.driveLink ?? '/podcasts',
+    path: r.slug ? `/podcasts/podcast/${r.slug}` : '/podcasts',
     linkedin: r.socialLinks?.linkedin ?? '',
     instagram: r.socialLinks?.instagram ?? '',
     facebook: r.socialLinks?.facebook ?? '',
