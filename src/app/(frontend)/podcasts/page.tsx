@@ -1,53 +1,43 @@
-'use client';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { Linkedin, Facebook, Instagram } from 'lucide-react';
 // import sampleData from '@/data/sample.json';
 import { EpisodeCard } from '@/components/cards/EpisodeCard';
-import { getPodcasts } from '@/lib/data';
-import path from 'node:path';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { getPayload } from 'payload';
+import configPromise from '@payload-config';
+// import type { Metadata } from 'next'
 
-export default function Podcasts() {
-  // Fetch podcasts from Sheets (server-side, cached)
-  // const rawPodcasts: any[] = await getPodcasts();
-  // const [rawPodcasts, setRawPodcasts] = useState<any[] | null>(null);
-  const [rawPodcasts, setRawPodcasts] = useState<any[] | null>(null);
-  useEffect(() => {
-    const fetchPodcasts = async () => {
-      try {
-        // console.log("Fetching podcasts...");
-        const res = await fetch('/api/sheets/podcastInfo');
-        // console.log("API response status:", res.status);
-        
-        if (res.ok) {
-          const data = await res.json();
-          // console.log("Fetched podcasts:", data);
-          setRawPodcasts(data);
-        } else {
-          // Log the error response
-          const errorText = await res.text();
-          console.error("API error:", res.status, errorText);
-        }
-      } catch (error) {
-        console.error("Fetch error:", error);
-      }
-    };
-    fetchPodcasts();
-  }, []);
+export const dynamic = 'force-dynamic';
+// export const runtime = 'nodejs';
 
+// export const metadata: Metadata = {
+//   title: 'Podcasts | TECH-NEST',
+//   description: 'All podcast episodes on cybersecurity and AI ethics.',
+// };
+
+export default async function Podcasts() {
+  const payload = await getPayload({ config: configPromise });
+  const res = await payload.find({
+    collection: 'podcasts',
+    where: { published: { equals: true } },
+    sort: '-createdAt',
+    limit: 100,
+    overrideAccess: true,
+  });
+  const rawPodcasts = res.docs || [];
+  console.log("Fetched podcasts:", rawPodcasts);
   // Map into the shape PodcastCard expects
   const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
     id: r.id,
-    title: r.title ?? "Untitled Podcast",
-    description: r.description ?? "",
-    date: r.timestamp ?? "",
-    url: r.driveLink ?? "",
-    path: r.path ?? "",
-    linkedin: r.linkedin ?? "",
-    instagram: r.instagram ?? "",
-    facebook: r.facebook ?? "",
+    title: r.title ?? 'Untitled Podcast',
+    description: r.description ?? '',
+    date: r.createdAt ?? '',
+    url: r.driveLink ?? '',
+    path: r.driveLink ?? '/podcasts',
+    linkedin: r.socialLinks?.linkedin ?? '',
+    instagram: r.socialLinks?.instagram ?? '',
+    facebook: r.socialLinks?.facebook ?? '',
   }));
 
   const latestEpisode = mappedPodcasts[0] || {
@@ -62,7 +52,7 @@ export default function Podcasts() {
     facebook: "",
   };
   
-  const otherEpisodes = mappedPodcasts.slice(1);
+  // const otherEpisodes = mappedPodcasts.slice(1);
 
   return (
     <>
@@ -159,8 +149,8 @@ export default function Podcasts() {
           
           {/* Episodes Grid */}
           <div className="flex flex-wrap gap-8 justify-center">
-            {otherEpisodes.length > 0 ? (
-              otherEpisodes.map((episode) => (
+            {mappedPodcasts.length > 0 ? (
+              mappedPodcasts.map((episode) => (
                 <div
                   key={episode.id}
                   className="w-full md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.333rem)] flex justify-center"

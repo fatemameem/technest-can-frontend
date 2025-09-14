@@ -3,30 +3,14 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { RegisterDialog } from '@/components/events/RegisterDialog';
+// import { RegisterDialog } from '@/components/events/RegisterDialog';
 
-interface EventCardProps {
-  event: {
-  id: string;
-  title: string;
-  cover?: string;
-  description: string;
-  date?: string;
-  time?: string;
-  location?: string;
-  topic?: string;
-  tags?: string[];
-  links?: {
-    luma?: string;
-    zoom?: string;
-  };
-  sponsors?: string[];
-  };
-  type: 'upcoming' | 'past';
-}
+import type { EventCardProps } from '@/types';
 
 export function EventCard({ event, type }: EventCardProps) {
-  const eventDate = new Date(`${event.date}T${event.time}`);
+  // const eventDate = new Date(`${event.date}T${event.time}`);
+  const eventDate = new Date(`${event.date}`);
+
   
   return (
     <Card className="surface hover-lift overflow-hidden">

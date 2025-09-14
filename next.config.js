@@ -19,6 +19,7 @@ const nextConfig = {
 				fs: false,
 				net: false,
 				tls: false,
+				// worker_threads: false,
 			};
 		}
 		return config;
