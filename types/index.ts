@@ -76,3 +76,18 @@ export interface UIEvent {
   };
   sponsors?: string;
 }
+
+export type TeamMember = {
+  id: string | number;
+  name: string;
+  role?: string;
+  bio?: string;
+  imageUrl?: string;
+  linkedin?: string;
+  twitter?: string;
+  github?: string;
+  email?: string;
+  website?: string;
+  timestamp?: string;
+  [key: string]: any; // allow extra fields from Sheets without breaking
+};

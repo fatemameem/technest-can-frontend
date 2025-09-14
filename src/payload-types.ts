@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     podcasts: Podcast;
     events: Event;
+    'team-members': TeamMember;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -81,6 +82,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
+    'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -167,6 +169,7 @@ export interface Media {
 export interface Podcast {
   id: string;
   title: string;
+  slug?: string | null;
   description?: string | null;
   thumbnail?: string | null;
   socialLinks?: {
@@ -206,6 +209,26 @@ export interface Event {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members".
+ */
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  designation: string;
+  description?: string | null;
+  socialLinks?: {
+    linkedin?: string | null;
+    twitter?: string | null;
+    github?: string | null;
+  };
+  website?: string | null;
+  image: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -226,6 +249,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'events';
         value: string | Event;
+      } | null)
+    | ({
+        relationTo: 'team-members';
+        value: string | TeamMember;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -315,6 +342,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface PodcastsSelect<T extends boolean = true> {
   title?: T;
+  slug?: T;
   description?: T;
   thumbnail?: T;
   socialLinks?:
@@ -354,6 +382,27 @@ export interface EventsSelect<T extends boolean = true> {
       };
   sponsors?: T;
   published?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-members_select".
+ */
+export interface TeamMembersSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  designation?: T;
+  description?: T;
+  socialLinks?:
+    | T
+    | {
+        linkedin?: T;
+        twitter?: T;
+        github?: T;
+      };
+  website?: T;
+  image?: T;
   updatedAt?: T;
   createdAt?: T;
 }

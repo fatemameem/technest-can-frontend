@@ -1,11 +1,18 @@
-'use client';
-
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { TeamCard } from '@/components/cards/TeamCard';
-import { useEffect, useState } from 'react';
-import { API_BASE } from '@/lib/env';
-// // export const dynamic = "force-dynamic";
+import type { TeamMember } from '@/types';
+import { getPayload } from 'payload';
+import configPromise from '@payload-config';
+import type { Metadata } from 'next';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+export const metadata: Metadata = {
+  title: 'Team | TECH-NEST',
+  description: 'Meet the experts behind TECH-NEST.'
+};
 
 // Convert Google Drive sharing links to direct image URLs for <img src>
 function toDirectDriveUrl(link?: string): string | undefined {
@@ -18,21 +25,6 @@ function toDirectDriveUrl(link?: string): string | undefined {
   const fileId = dMatch?.[1] ?? idMatch?.[1];
   return fileId ? `https://drive.google.com/uc?export=view&id=${fileId}` : s;
 }
-
-type TeamMember = {
-  id: string | number;
-  name: string;
-  role?: string;
-  bio?: string;
-  imageUrl?: string;
-  linkedin?: string;
-  twitter?: string;
-  github?: string;
-  email?: string;
-  website?: string;
-  timestamp?: string;
-  [key: string]: any; // allow extra fields from Sheets without breaking
-};
 
 function normalizeMember(raw: any): TeamMember {
   const coerce = (v: any) => (typeof v === 'string' ? v.trim() : v);
@@ -58,30 +50,30 @@ function normalizeMember(raw: any): TeamMember {
   };
 }
 
-export default function Team() {
-  const [members, setMembers] = useState<TeamMember[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await fetch(`/api/sheets/teamInfo`, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-        const data = await res.json();
-        // Support either an array or an object with a `team` property
-        const list: TeamMember[] = Array.isArray(data) ? data : (data?.team ?? []);
-        const normalized = list.map(normalizeMember);
-        if (!cancelled) setMembers(normalized);
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message || 'Failed to load team data');
-      }
-    }
-    load();
-    return () => { cancelled = true; };
-  }, []);
-
-  // console.log('Team members:', members, 'Error:', error);
+export default async function Team() {
+  const payload = await getPayload({ config: configPromise });
+  const result = await payload.find({
+    collection: 'team-members',
+    sort: 'name',
+    limit: 500,
+    overrideAccess: true,
+  });
+  const docs = result?.docs || [];
+  const members: TeamMember[] = docs.map((raw: any) =>
+    normalizeMember({
+      id: raw.id,
+      name: raw.name,
+      designation: raw.designation,
+      description: raw.description,
+      imageLink: raw.image,
+      linkedin: raw.socialLinks?.linkedin,
+      twitter: raw.socialLinks?.twitter,
+      github: raw.socialLinks?.github,
+      email: raw.email,
+      website: raw.website,
+      timestamp: raw.createdAt,
+    })
+  );
 
   return (
     <>
@@ -92,25 +84,7 @@ export default function Team() {
       />
 
       <Section>
-        {error && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-4 text-red-700">
-            Failed to load team: {error}
-          </div>
-        )}
-
-        {!error && !members && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-lg border p-6">
-                <div className="h-40 w-full rounded-md bg-gray-200" />
-                <div className="mt-4 h-4 w-2/3 bg-gray-200 rounded" />
-                <div className="mt-2 h-4 w-1/2 bg-gray-200 rounded" />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {members && members.length > 0 && (
+        {members.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {members.map((member) => (
               <TeamCard key={member.id} member={member} />
@@ -118,7 +92,7 @@ export default function Team() {
           </div>
         )}
 
-        {members && members.length === 0 && !error && (
+        {members.length === 0 && (
           <div className="text-center text-gray-600">No team members found.</div>
         )}
       </Section>
