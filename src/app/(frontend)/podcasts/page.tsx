@@ -21,7 +21,7 @@ export default async function Podcasts() {
   const res = await payload.find({
     collection: 'podcasts',
     where: { published: { equals: true } },
-    sort: '-createdAt',
+    sort: 'createdAt',
     limit: 100,
     overrideAccess: true,
   });
@@ -40,7 +40,7 @@ export default async function Podcasts() {
     facebook: r.socialLinks?.facebook ?? '',
   }));
 
-  const latestEpisode = mappedPodcasts[0] || {
+  const latestEpisode = mappedPodcasts[mappedPodcasts.length - 1] || {
     id: "placeholder",
     title: "Loading podcast...",
     description: "",
@@ -51,6 +51,8 @@ export default async function Podcasts() {
     instagram: "",
     facebook: "",
   };
+  // const latestEpisodeTest = mappedPodcasts[-1];
+  console.log("Latest episode:", latestEpisode);
   
   // const otherEpisodes = mappedPodcasts.slice(1);
 

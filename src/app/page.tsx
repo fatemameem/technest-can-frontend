@@ -74,7 +74,7 @@ export default async function Home() {
   const rawPodcasts = podcastsRes?.docs ?? [];
 
   // Map into the shape PodcastCard expects
-  const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
+  const podcasts = (rawPodcasts || []).map((r: any) => ({
     id: r.id,
     title: r.title ?? "Untitled Podcast",
     // Use createdAt as a date surrogate if no explicit date field exists
@@ -87,13 +87,13 @@ export default async function Home() {
   }));
 
   // Keep only the latest 3 podcasts, sorted descending by date
-  const podcasts = mappedPodcasts
-    .sort((a, b) => {
-      const da = toDateObj(a.date)?.getTime() ?? 0;
-      const db = toDateObj(b.date)?.getTime() ?? 0;
-      return db - da;
-    })
-    .slice(0, 5);
+  // const podcasts = mappedPodcasts
+  //   .sort((a, b) => {
+  //     const da = toDateObj(a.date)?.getTime() ?? 0;
+  //     const db = toDateObj(b.date)?.getTime() ?? 0;
+  //     return db - da;
+  //   })
+  //   .slice(0, 5);
 
   // Map into the shape EventCallout expects and build tags
   const mappedEvents = (rawEvents || []).map((r: any) => ({
