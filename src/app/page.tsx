@@ -1,4 +1,3 @@
-'use client';
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,32 @@ import Link from 'next/link';
 import sampleData from '@/data/sample.json';
 import { ArrowRight, ExternalLink, } from 'lucide-react';
 import PodcastsSection from '@/components/sections/PodcastSection';
-import { useEffect, useState } from 'react';
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
+// import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic';
+
+// export const metadata: Metadata = {
+//   title: 'Securing Digital Futures | STEM Canada',
+//   description:
+//     'Cybersecurity consultancy and AI ethics organization building safer, more ethical technology for everyone. Explore services, events, and podcasts.',
+//   openGraph: {
+//     title: 'Securing Digital Futures | STEM Canada',
+//     description:
+//       'Cybersecurity consultancy and AI ethics organization building safer, more ethical technology for everyone.',
+//     url: '/',
+//     type: 'website',
+//     images: [{ url: '/images/home.webp' }],
+//   },
+//   twitter: {
+//     card: 'summary_large_image',
+//     title: 'Securing Digital Futures | STEM Canada',
+//     description:
+//       'Cybersecurity consultancy and AI ethics organization building safer, more ethical technology for everyone.',
+//     images: ['/images/home.webp'],
+//   },
+// };
 
 function toDateObj(date?: string, time?: string): Date | null {
   if (!date) return null;
@@ -25,40 +49,41 @@ function toDateObj(date?: string, time?: string): Date | null {
   }
 }
 
-export default function Home() {
-  const [rawEvents, setRawEvents] = useState<any[] | null>(null);
-  useEffect(() => {
-    const fetchEvents = async () => {
-      const res = await fetch('/api/sheets/eventsInfo');
-      if (res.ok) {
-        const data = await res.json();
-        setRawEvents(data);
-      }
-    };
-    fetchEvents();
-  }, []);
+export default async function Home() {
+  const payload = await getPayload({ config: configPromise });
 
-  const [rawPodcasts, setRawPodcasts] = useState<any[] | null>(null);
-  useEffect(() => {
-    const fetchPodcasts = async () => {
-      const res = await fetch('/api/sheets/podcastInfo'); // <-- Fix endpoint!
-      if (res.ok) {
-        const data = await res.json();
-        setRawPodcasts(data);
-      }
-    };
-    fetchPodcasts();
-  }, []);
+  // Server-side fetch via Payload Node API (no public REST exposure)
+  const [eventsRes, podcastsRes] = await Promise.all([
+    payload.find({
+      collection: 'events',
+      where: { published: { equals: true } },
+      sort: 'eventDetails.date',
+      limit: 3,
+      overrideAccess: true,
+    }),
+    payload.find({
+      collection: 'podcasts',
+      where: { published: { equals: true } },
+      sort: '-createdAt',
+      limit: 5,
+      overrideAccess: true,
+    }),
+  ]);
+  const rawEvents = eventsRes?.docs ?? [];
+  // console.log("Fetched events:", rawEvents);
+  const rawPodcasts = podcastsRes?.docs ?? [];
 
   // Map into the shape PodcastCard expects
   const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
     id: r.id,
     title: r.title ?? "Untitled Podcast",
-    date: r.timestamp ?? "",
-    linkedin: r.linkedin ?? "",
-    instagram: r.instagram ?? "",
-    facebook: r.facebook ?? "",
-    path: r.path ?? "",
+    // Use createdAt as a date surrogate if no explicit date field exists
+    date: r.createdAt ?? "",
+    linkedin: r.socialLinks?.linkedin ?? "",
+    instagram: r.socialLinks?.instagram ?? "",
+    facebook: r.socialLinks?.facebook ?? "",
+    // Use driveLink if present; else default to podcasts listing
+    path: r.driveLink ?? "/podcasts",
   }));
 
   // Keep only the latest 3 podcasts, sorted descending by date
@@ -74,26 +99,41 @@ export default function Home() {
   const mappedEvents = (rawEvents || []).map((r: any) => ({
     id: r.id,
     title: r.title ?? "Untitled Event",
-    date: r.date ?? "",
-    time: r.time ?? "",
-    location: r.location ?? "",
+    // Keep the original date for display formatting
+    date: r.eventDetails?.date
+      ? new Date(r.eventDetails.date).toISOString().split('T')[0]
+      : "",
+    // Store the original ISO date for comparison
+    rawDate: r.eventDetails?.date,
+    // time: r.eventDetails?.time ?? "",
+    timeStart: r.eventDetails?.timeStart ?? "",
+    timeEnd: r.eventDetails?.timeEnd ?? "",
+    timeZone: r.eventDetails?.timeZone ?? "",
+    location: r.eventDetails?.location ?? "",
     description: r.description ?? "",
-    links: { luma: r.lumaLink ?? "", zoom: r.zoomLink ?? "" },
-    tags: [r.topic, r.location].filter(Boolean) as string[],
+    links: { luma: r.links?.lumaLink ?? "", zoom: r.links?.zoomLink ?? "" },
+    tags: [r.topic, r.eventDetails?.location].filter(Boolean) as string[],
   }));
 
   // Keep only events from now forward, sorted ascending by date/time
   const now = new Date();
   const upcomingEvents = mappedEvents
     .filter((e) => {
-      const d = toDateObj(e.date, e.time);
+      // Use the original date directly if available
+      if (e.rawDate) {
+        return new Date(e.rawDate).getTime() >= now.getTime();
+      }
+      // Fall back to the parsed date+time if needed
+      const d = toDateObj(e.date, e.timeStart);
       return d ? d.getTime() >= now.getTime() : false;
     })
     .sort((a, b) => {
-      const da = toDateObj(a.date, a.time)?.getTime() ?? Number.POSITIVE_INFINITY;
-      const db = toDateObj(b.date, b.time)?.getTime() ?? Number.POSITIVE_INFINITY;
+      const da = toDateObj(a.date, a.timeStart)?.getTime() ?? Number.POSITIVE_INFINITY;
+      const db = toDateObj(b.date, b.timeStart)?.getTime() ?? Number.POSITIVE_INFINITY;
       return da - db;
     });
+
+    // console.log("upcomingEvents:", upcomingEvents); 
 
   return (
     <>
@@ -161,6 +201,10 @@ export default function Home() {
 
       {/* Podcasts Section */}
       <Section className="">
+      {podcasts.length === 0 && (
+        <div className="text-center text-slate-400">No podcasts available.</div>
+      )}
+      {podcasts.length > 0 && (
         <PodcastsSection
           podcasts={podcasts}
           title="Latest Podcast Episodes"
@@ -168,6 +212,7 @@ export default function Home() {
           description="Tune in for discussions on the latest in cybersecurity and AI ethics."
           showAllBtn={true}
         />
+      )}
       </Section>
 
       {/* Upcoming Event Callout */}

@@ -8,7 +8,11 @@ interface EventCalloutProps {
     id: string;
     title: string;
     date: string;
-    time: string;
+    rawDate: string;
+    // time: string;
+    timeStart: string;
+    timeEnd: string;
+    timeZone: string;
     location: string;
     description: string;
     tags: string[];
@@ -20,8 +24,9 @@ interface EventCalloutProps {
 }
 
 export function EventCallout({ event }: EventCalloutProps) {
-  const eventDate = new Date(`${event.date}T${event.time}`);
-  
+  const eventDate = new Date(`${event.rawDate}`);
+  // console.log(event.rawDate, event.timeStart, eventDate);
+
   return (
     <Card className="surface glow-cyan max-w-4xl mx-auto">
       <CardHeader>
@@ -54,10 +59,11 @@ export function EventCallout({ event }: EventCalloutProps) {
           </div>
           <div className="flex items-center text-slate-300">
             <Clock className="mr-2 h-4 w-4 text-cyan-400" />
-            {eventDate.toLocaleTimeString('en-US', { 
+            {/* {eventDate.toLocaleTimeString('en-US', { 
               hour: '2-digit', 
               minute: '2-digit' 
-            })}
+            })} */}
+            {event.timeStart} - {event.timeEnd} {event.timeZone}
           </div>
           <div className="flex items-center text-slate-300">
             <MapPin className="mr-2 h-4 w-4 text-cyan-400" />
