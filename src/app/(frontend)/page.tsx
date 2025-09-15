@@ -10,30 +10,8 @@ import { ArrowRight, ExternalLink, } from 'lucide-react';
 import PodcastsSection from '@/components/sections/PodcastSection';
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-// import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic';
-
-// export const metadata: Metadata = {
-//   title: 'Securing Digital Futures | STEM Canada',
-//   description:
-//     'Cybersecurity consultancy and AI ethics organization building safer, more ethical technology for everyone. Explore services, events, and podcasts.',
-//   openGraph: {
-//     title: 'Securing Digital Futures | STEM Canada',
-//     description:
-//       'Cybersecurity consultancy and AI ethics organization building safer, more ethical technology for everyone.',
-//     url: '/',
-//     type: 'website',
-//     images: [{ url: '/images/home.webp' }],
-//   },
-//   twitter: {
-//     card: 'summary_large_image',
-//     title: 'Securing Digital Futures | STEM Canada',
-//     description:
-//       'Cybersecurity consultancy and AI ethics organization building safer, more ethical technology for everyone.',
-//     images: ['/images/home.webp'],
-//   },
-// };
 
 function toDateObj(date?: string, time?: string): Date | null {
   if (!date) return null;
@@ -70,11 +48,10 @@ export default async function Home() {
     }),
   ]);
   const rawEvents = eventsRes?.docs ?? [];
-  // console.log("Fetched events:", rawEvents);
   const rawPodcasts = podcastsRes?.docs ?? [];
 
   // Map into the shape PodcastCard expects
-  const podcasts = (rawPodcasts || []).map((r: any) => ({
+  const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
     id: r.id,
     title: r.title ?? "Untitled Podcast",
     // Use createdAt as a date surrogate if no explicit date field exists
@@ -87,13 +64,13 @@ export default async function Home() {
   }));
 
   // Keep only the latest 3 podcasts, sorted descending by date
-  // const podcasts = mappedPodcasts
-  //   .sort((a, b) => {
-  //     const da = toDateObj(a.date)?.getTime() ?? 0;
-  //     const db = toDateObj(b.date)?.getTime() ?? 0;
-  //     return db - da;
-  //   })
-  //   .slice(0, 5);
+  const podcasts = mappedPodcasts
+    .sort((a, b) => {
+      const da = toDateObj(a.date)?.getTime() ?? 0;
+      const db = toDateObj(b.date)?.getTime() ?? 0;
+      return db - da;
+    })
+    .slice(0, 5);
 
   // Map into the shape EventCallout expects and build tags
   const mappedEvents = (rawEvents || []).map((r: any) => ({
@@ -105,7 +82,6 @@ export default async function Home() {
       : "",
     // Store the original ISO date for comparison
     rawDate: r.eventDetails?.date,
-    // time: r.eventDetails?.time ?? "",
     timeStart: r.eventDetails?.timeStart ?? "",
     timeEnd: r.eventDetails?.timeEnd ?? "",
     timeZone: r.eventDetails?.timeZone ?? "",
@@ -119,11 +95,9 @@ export default async function Home() {
   const now = new Date();
   const upcomingEvents = mappedEvents
     .filter((e) => {
-      // Use the original date directly if available
       if (e.rawDate) {
         return new Date(e.rawDate).getTime() >= now.getTime();
       }
-      // Fall back to the parsed date+time if needed
       const d = toDateObj(e.date, e.timeStart);
       return d ? d.getTime() >= now.getTime() : false;
     })
@@ -133,11 +107,8 @@ export default async function Home() {
       return da - db;
     });
 
-    // console.log("upcomingEvents:", upcomingEvents); 
-
   return (
     <>
-      {/* Hero Section */}
       <Hero
         title="Securing Digital Futures"
         subtitle="Leading cybersecurity consultancy and AI ethics organization dedicated to building safer, more ethical technology for everyone."
@@ -159,7 +130,6 @@ export default async function Home() {
         </div>
       </Hero>
 
-      {/* Impact Stats */}
       <Section className="hidden bg-slate-900/50">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {sampleData.stats.map((stat, index) => (
@@ -173,7 +143,6 @@ export default async function Home() {
         </div>
       </Section>
 
-      {/* Featured Services */}
       <Section>
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Our Services</h2>
@@ -199,7 +168,6 @@ export default async function Home() {
         </div>
       </Section>
 
-      {/* Podcasts Section */}
       <Section className="">
       {podcasts.length === 0 && (
         <div className="text-center text-slate-400">No podcasts available.</div>
@@ -215,7 +183,6 @@ export default async function Home() {
       )}
       </Section>
 
-      {/* Upcoming Event Callout */}
       <Section>
         <div className="max-w-5xl mx-auto">
           {upcomingEvents.length === 0 ? (
