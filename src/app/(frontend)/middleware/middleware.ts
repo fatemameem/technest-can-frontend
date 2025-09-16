@@ -13,14 +13,14 @@ export async function middleware(req: NextRequest) {
     if (!token) return NextResponse.redirect(new URL("/admin/login", req.url));
   }
 
-  // Protect write APIs
-  if (pathname.startsWith("/api/sheets/")) {
-    // adminInfo POST must be admin
-    if (pathname.includes("/adminInfo") && req.method === "POST") {
+  // Protect new admin APIs (Payload-backed)
+  if (pathname.startsWith("/api/admin/")) {
+    // /api/admin/users upserts roles → admin only
+    if (pathname.startsWith("/api/admin/users") && req.method === "POST") {
       if (role !== "admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // other tabs: admin or moderator can POST
-    if (req.method === "POST" && (!role || !["admin","moderator"].includes(role))) {
+    // other admin APIs: admin or moderator can POST
+    if (req.method === "POST" && (!role || !["admin", "moderator"].includes(role))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }
@@ -29,5 +29,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/sheets/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

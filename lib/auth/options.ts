@@ -1,7 +1,8 @@
 // lib/auth/options.ts
 import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { API_BASE } from "@/lib/env";
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
 
 /** You already have these helpers — keep them here or import them */
 function getBaseUrl() {
@@ -10,59 +11,25 @@ function getBaseUrl() {
   return url.replace(/\/$/, "");
 }
 
-type AllowRow = { email?: string; accessLevel?: string; name?: string };
-type Role = "admin" | "moderator";
+type Role = 'admin' | 'moderator'
 
-async function fetchAllowlist(): Promise<Array<{ email: string; role: Role; name?: string }>> {
+async function getUserRoleByEmail(email: string): Promise<{ role?: Role; name?: string } | null> {
   try {
-    const bypassToken = process.env.VERCEL_PROTECTION_BYPASS;
-    const apiUrl = `${API_BASE}/sheets/adminInfo?select=email,accessLevel,name`;
-    const urlWithBypass = bypassToken ? 
-      `${apiUrl}&x-vercel-protection-bypass=${bypassToken}` : 
-      apiUrl;
-    
-    // console.log(`[Auth] Fetching allowlist from ${API_BASE}/sheets/adminInfo`);
-    const res = await fetch(urlWithBypass, { 
-      cache: "no-store",
-      headers: { 'Content-Type': 'application/json' }
+    const payload = await getPayload({ config: configPromise });
+    const res = await payload.find({
+      collection: 'users',
+      where: { email: { equals: email } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
     });
-    
-    // console.log(`[Auth] Allowlist API response status: ${res.status}`);
-    
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error(`[Auth] Failed to fetch allowlist: ${res.status} ${errorText}`);
-      return [];
-    }
-    
-    const rows = await res.json();
-    // console.log(`[Auth] Fetched ${rows.length} admins from API`);
-    
-    interface AllowlistApiRow {
-      email?: string;
-      accessLevel?: string;
-      name?: string;
-    }
-
-    interface AllowlistProcessedRow {
-      email: string;
-      role: "admin" | "moderator";
-      name?: string;
-    }
-
-    const processed: AllowlistProcessedRow[] = (rows as AllowlistApiRow[])
-      .map((r: AllowlistApiRow): AllowlistProcessedRow => ({
-        email: String(r.email || "").trim().toLowerCase(),
-        role: String(r.accessLevel || "").trim().toLowerCase() as "admin" | "moderator",
-        name: r.name ? String(r.name) : undefined,
-      }))
-      .filter((r: AllowlistProcessedRow) => r.email && (r.role === "admin" || r.role === "moderator"));
-    
-    // console.log(`[Auth] Processed ${processed.length} valid admins`);
-    return processed;
-  } catch (error) {
-    console.error(`[Auth] Exception in fetchAllowlist:`, error);
-    return []; // don't crash NextAuth if the API hiccups
+    const doc = res.docs?.[0] as any;
+    if (!doc) return null;
+    const role = doc.role as Role | undefined;
+    return role ? { role, name: doc?.name } : null;
+  } catch (e) {
+    console.error('[Auth] Failed to read user role from Payload:', e);
+    return null;
   }
 }
 
@@ -84,17 +51,16 @@ export function buildAuthOptions(): NextAuthOptions {
       async signIn({ user }) {
         const email = user?.email?.toLowerCase();
         if (!email) return false;
-        const list = await fetchAllowlist();
-        return !!list.find((r) => r.email === email);
+        const match = await getUserRoleByEmail(email);
+        return !!match?.role;
       },
       async jwt({ token, account }) {
         if (account || !(token as any).role) {
           if (token.email) {
-            const list = await fetchAllowlist();
-            const m = list.find((r) => r.email === String(token.email).toLowerCase());
-            if (m) {
+            const m = await getUserRoleByEmail(String(token.email).toLowerCase());
+            if (m?.role) {
               (token as any).role = m.role;
-              if (m.name) token.name = m.name;
+              if (m.name) token.name = m.name as string;
             } else {
               delete (token as any).role;
             }

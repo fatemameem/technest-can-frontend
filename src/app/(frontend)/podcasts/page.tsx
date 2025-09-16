@@ -26,7 +26,7 @@ export default async function Podcasts() {
     overrideAccess: true,
   });
   const rawPodcasts = res.docs || [];
-  console.log("Fetched podcasts:", rawPodcasts);
+  // console.log("Fetched podcasts:", rawPodcasts);
   // Map into the shape PodcastCard expects
   const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
     id: r.id,
@@ -52,7 +52,7 @@ export default async function Podcasts() {
     facebook: "",
   };
   // const latestEpisodeTest = mappedPodcasts[-1];
-  console.log("Latest episode:", latestEpisode);
+  // console.log("Latest episode:", latestEpisode);
   
   // const otherEpisodes = mappedPodcasts.slice(1);
 

@@ -6,8 +6,25 @@ export const Users: CollectionConfig = {
     useAsTitle: 'email',
   },
   auth: true,
+  access: {
+    read: () => true, // allow public read
+    create: ({ req: { user } }) => Boolean(user),
+    // create: () => true, // allow public create
+    update: ({ req: { user } }) => Boolean(user),
+    delete: ({ req: { user } }) => Boolean(user),
+  },
   fields: [
     // Email added by default
-    // Add more fields as needed
+    {
+      name: 'role',
+      type: 'select',
+      label: 'Role',
+      options: [
+        { label: 'Admin', value: 'admin' },
+        { label: 'Moderator', value: 'moderator' },
+      ],
+      required: false,
+      admin: { position: 'sidebar' },
+    },
   ],
 }
