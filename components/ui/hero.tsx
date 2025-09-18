@@ -1,4 +1,7 @@
+// 'use client';
 import { ReactNode } from 'react';
+// import LetterGlitch from './LetterGlitch';
+// import DecryptedText from './DecryptedText';
 
 interface HeroProps {
   title: string;
@@ -30,6 +33,14 @@ export function Hero({
       {imageUrl && (
         <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
       )}
+      {/* <LetterGlitch
+          glitchSpeed={50}
+          centerVignette={true}
+          outerVignette={false}
+          smooth={true}
+          glitchColors={['#2b4539', '#61dca3', '#61b3dc']}
+          characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        /> */}
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h1 className="leading-tight text-4xl lg:text-6xl lg:leading-tight font-bold mb-6 bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent ">
           {title}

@@ -58,7 +58,7 @@ export default function OverviewSection({
         </Card>
       </div>
 
-      <Card className="surface">
+      <Card className="surface mt-6">
         <CardContent className="p-6">
           <div className="space-y-4">
             <div className="flex items-center space-x-3 p-3 border border-white/10 rounded-lg">
