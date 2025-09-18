@@ -34,7 +34,7 @@ export default function DecryptedText({
   const [isScrambling, setIsScrambling] = useState<boolean>(false);
   const [revealedIndices, setRevealedIndices] = useState<Set<number>>(new Set());
   const [hasAnimated, setHasAnimated] = useState<boolean>(false);
-  const containerRef = useRef<HTMLSpanElement>(null);
+  const containerRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -183,10 +183,10 @@ export default function DecryptedText({
 
   return (
     <motion.span
-      ref={containerRef}
       className={`inline-block whitespace-pre-wrap ${parentClassName}`}
+      ref={containerRef}
       {...hoverProps}
-      {...props}
+      {...(props as any)} // Type assertion to bypass ref type checking issues
     >
       <span className="sr-only">{displayText}</span>
 
