@@ -104,21 +104,24 @@ export default function BlogPage() {
         />
       </div>
       {/* Card Section for blog posts: so here if the user selects a genre, we are going to show the filtered posts, otherwise all blog posts will be shown. We need to add pagination here once blog numbers grow to 25. each page will show a maximum of 12 posts. */}
-      <div className="flex-wrap gap-4 justify-center card-responsive mx-auto container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 my-20">
-      {cardData.map((card, index) => (
-        <ParticleCard 
-          className="min-h-[200px] aspect-[4/3] border border-solid rounded-[20px] p-4 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)]"
-          enableBorderGlow={true}
-          enableTilt={false}
-          clickEffect={true}
-          enableMagnetism={true}
-          particleCount={12}
-          glowColor="87, 238, 255"
-        >
-          <h3 className="text-white font-normal text-base mb-1">My Card Title</h3>
-          <p className="text-white text-xs leading-5 opacity-90">Card content goes here</p>
-        </ParticleCard>
-      ))}
+      <div className="my-20">
+        <div className="flex-wrap gap-4 justify-center card-responsive mx-auto container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {cardData.map((card, index) => (
+          <ParticleCard
+            key={index} 
+            className="min-h-[200px] aspect-[4/3] border border-solid rounded-[20px] p-4 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)]"
+            enableBorderGlow={true}
+            enableTilt={false}
+            clickEffect={true}
+            enableMagnetism={true}
+            particleCount={12}
+            glowColor="87, 238, 255"
+          >
+            <h3 className="text-white font-normal text-base mb-1">My Card Title</h3>
+            <p className="text-white text-xs leading-5 opacity-90">Card content goes here</p>
+          </ParticleCard>
+        ))}
+        </div>
       </div>
     </>
   )

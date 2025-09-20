@@ -9,11 +9,11 @@ import { useSession } from "next-auth/react";
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Services', href: '/services' },
   { name: 'Events', href: '/events' },
   { name: 'Podcasts', href: '/podcasts' },
-  // { name: 'Blog', href: '/blog' },
+  { name: 'Blogs', href: '/blogs' },
+  { name: 'About', href: '/about' },
+  { name: 'Services', href: '/services' },
   // { name: 'Resources', href: '/resources' },
   // { name: 'Videos', href: '/videos' },
   { name: 'Contact', href: '/contact' },
@@ -21,9 +21,8 @@ const navigation = [
 
 const mobileNavigation = [
   ...navigation,
-  { name: 'Blog', href: '/blog' },
-  { name: 'Resources', href: '/resources' },
-  { name: 'Videos', href: '/videos' },
+  { name: 'Blogs', href: '/blogs' },
+  // { name: 'Videos', href: '/videos' },
   { name: 'Contact', href: '/contact' },
 ];
 
