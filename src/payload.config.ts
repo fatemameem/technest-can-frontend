@@ -1,4 +1,4 @@
-// storage-adapter-import-placeholder
+﻿// storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 // import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -10,6 +10,7 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Podcasts } from './collections/Podcasts'
+import { Blogs } from './collections/Blogs'
 import { Events } from './collections/Events'
 import Team from './collections/Team'
 
@@ -23,7 +24,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Podcasts, Events, Team],
+  collections: [Users, Media, Podcasts, Events, Team, Blogs],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

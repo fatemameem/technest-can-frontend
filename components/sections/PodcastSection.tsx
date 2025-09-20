@@ -61,7 +61,7 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
     };
     
     return (
-        <section className="bg-slate-900/50 rounded-3xl">
+        <section className="bg-slate-900 rounded-3xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900/50 rounded-3xl p-8 md:p-12 lg:p-16">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
                     <div>

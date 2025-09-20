@@ -72,6 +72,7 @@ export interface Config {
     podcasts: Podcast;
     events: Event;
     'team-members': TeamMember;
+    blogs: Blog;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -83,6 +84,7 @@ export interface Config {
     podcasts: PodcastsSelect<false> | PodcastsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     'team-members': TeamMembersSelect<false> | TeamMembersSelect<true>;
+    blogs: BlogsSelect<false> | BlogsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -230,6 +232,77 @@ export interface TeamMember {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogs".
+ */
+export interface Blog {
+  id: string;
+  title?: string | null;
+  meta: {
+    title: string;
+    subtitle?: string | null;
+    authorRef?: string | null;
+    author?: (string | null) | User;
+    slug?: string | null;
+    tags?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    categories?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    readingTime?: number | null;
+    status?: ('Draft' | 'Scheduled' | 'Published') | null;
+    publishedAt?: string | null;
+    updatedAt?: string | null;
+    seo?: {
+      title?: string | null;
+      description?: string | null;
+      ogImageRef?: string | null;
+    };
+  };
+  layout?: {
+    preset?: ('classic' | 'tech-guide' | 'default' | 'magazine-rail') | null;
+  };
+  blocks?:
+    | {
+        type:
+          | 'HeroMedia'
+          | 'LeadParagraph'
+          | 'RichText'
+          | 'ImageFigure'
+          | 'CodeBlock'
+          | 'Quote'
+          | 'Callout'
+          | 'Divider'
+          | 'VideoEmbed';
+        props?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -254,6 +327,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'team-members';
         value: string | TeamMember;
+      } | null)
+    | ({
+        relationTo: 'blogs';
+        value: string | Blog;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -405,6 +482,49 @@ export interface TeamMembersSelect<T extends boolean = true> {
       };
   website?: T;
   image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blogs_select".
+ */
+export interface BlogsSelect<T extends boolean = true> {
+  title?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        subtitle?: T;
+        authorRef?: T;
+        author?: T;
+        slug?: T;
+        tags?: T;
+        categories?: T;
+        readingTime?: T;
+        status?: T;
+        publishedAt?: T;
+        updatedAt?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              ogImageRef?: T;
+            };
+      };
+  layout?:
+    | T
+    | {
+        preset?: T;
+      };
+  blocks?:
+    | T
+    | {
+        type?: T;
+        props?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

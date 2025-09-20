@@ -26,6 +26,7 @@ import {
   ChevronRight,
   Edit
 } from 'lucide-react';
+import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import PodcastFormCard from '@/components/admin/forms/PodcastFormCard';
@@ -1288,10 +1289,9 @@ export default function AdminDashboard() {
             {activeTab === 'blogs' && (
               <Button 
                 className="bg-blue-600 hover:bg-blue-500 text-white"
-                onClick={addBlogForm}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add a new blog post
+                <Link href="/admin/blogs/new">Add a new blog post</Link>
               </Button>
             )}
             {(activeTab !== 'overview' && activeTab !== 'settings' && 

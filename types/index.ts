@@ -91,3 +91,159 @@ export type TeamMember = {
   timestamp?: string;
   [key: string]: any; // allow extra fields from Sheets without breaking
 };
+
+// Types
+export interface BlogMeta {
+  title: string;
+  subtitle?: string;
+  authorRef: string;
+  slug: string;
+  coverImageRef?: string;
+  tags: string[];
+  category: string;
+  readingTime: number;
+  status: 'draft' | 'scheduled' | 'published';
+  publishedAt?: string | null;
+  updatedAt: string;
+  seo: {
+    title: string;
+    description: string;
+    ogImageRef?: string | null;
+  };
+}
+
+export interface BlogLayout {
+  preset: 'classic' | 'tech-guide' | 'default' | 'magazine-rail';
+  columns: 'single' | 'two-column' | 'content+toc';
+  sidebar?: {
+    widgets: string[];
+  };
+}
+
+export interface BlogBlock {
+  id: string;
+  type: string;
+  props: Record<string, any>;
+}
+
+export interface BlogData {
+  id?: string;
+  meta: BlogMeta;
+  layout: BlogLayout;
+  blocks: BlogBlock[];
+}
+
+interface BlogEditorProps {
+  mode: 'create' | 'edit';
+  initialData?: BlogData;
+}
+
+export enum PostStatus {
+  DRAFT = 'Draft',
+  SCHEDULED = 'Scheduled',
+  PUBLISHED = 'Published',
+}
+
+export enum LayoutPreset {
+  CLASSIC = 'classic',
+  TECH_GUIDE = 'tech-guide',
+  DEFAULT = 'default',
+  MAGAZINE_RAIL = 'magazine-rail',
+}
+
+export enum BlockType {
+  HERO_MEDIA = 'HeroMedia',
+  LEAD_PARAGRAPH = 'LeadParagraph',
+  RICH_TEXT = 'RichText',
+  IMAGE_FIGURE = 'ImageFigure',
+  CODE_BLOCK = 'CodeBlock',
+  QUOTE = 'Quote',
+  CALLOUT = 'Callout',
+  DIVIDER = 'Divider',
+  VIDEO_EMBED = 'VideoEmbed',
+}
+
+export interface SEO {
+  title: string;
+  description: string;
+  ogImageRef?: string;
+}
+
+export interface MetaData {
+  title: string;
+  subtitle?: string;
+  authorRef: string;
+  slug: string;
+  coverImageRef?: string;
+  tags: string[];
+  categories: string[];
+  readingTime: number;
+  status: PostStatus;
+  publishedAt?: string;
+  updatedAt: string;
+  seo: SEO;
+}
+
+export interface Layout {
+  preset: LayoutPreset;
+}
+
+export interface Block {
+  id: string;
+  type: BlockType;
+  props: any;
+}
+
+export interface HeroMediaProps {
+  mediaRef: string;
+  alt: string;
+  caption?: string;
+}
+
+export interface LeadParagraphProps {
+  text: string;
+}
+
+export interface RichTextProps {
+  content: string; // Markdown or HTML content
+}
+
+export interface ImageFigureProps {
+  mediaRef: string;
+  alt: string;
+  caption?: string;
+  widthMode: 'full' | 'wide' | 'inline';
+}
+
+export interface CodeBlockProps {
+  language: string;
+  code: string;
+  filename?: string;
+}
+
+export interface QuoteProps {
+    quote: string;
+    attribution?: string;
+}
+
+export interface CalloutProps {
+    variant: 'info' | 'tip' | 'warning';
+    title?: string;
+    content: string;
+}
+
+export interface DividerProps {
+    style: 'solid' | 'dashed' | 'dotted';
+}
+
+export interface VideoEmbedProps {
+  url: string;
+  caption?: string;
+}
+
+export interface BlogPost {
+  id: string;
+  meta: MetaData;
+  layout: Layout;
+  blocks: Block[];
+}
