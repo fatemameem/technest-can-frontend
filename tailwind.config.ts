@@ -92,6 +92,10 @@ const config: Config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.5s ease-out',
       },
+      fontFamily: {
+        'poppins': ['var(--font-poppins)'],
+        // Inter will be the default sans font via inter.className
+      },
     },
   },
   plugins: [animate, typography],

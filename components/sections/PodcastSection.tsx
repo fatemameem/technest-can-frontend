@@ -66,7 +66,7 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
                     <div>
                         {badge ? (
-                            <Badge variant="default" className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300">
+                            <Badge variant="default" className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 font-poppins">
                                 {badge}
                             </Badge>
                         ) : null}
@@ -74,7 +74,7 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
                             {title}
                         </h2>
                         {description ? (
-                            <p className="mt-4 max-w-2xl text-lg text-slate-700 dark:text-slate-300">
+                            <p className="mt-4 max-w-2xl text-lg text-slate-700 dark:text-slate-300 font-poppins">
                                 {description}
                             </p>
                         ) : null}
@@ -139,7 +139,7 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
                 </div>
                 {showAllBtn ? (
                     <div className="text-center mt-8">
-                        <Button asChild className="btn-primary">
+                        <Button asChild className="btn-primary font-poppins">
                             <Link href="/podcasts">View All Episodes</Link>
                         </Button>
                     </div>

@@ -35,7 +35,7 @@ export function Hero({
           {title}
         </h1>
         {subtitle && (
-          <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-poppins text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
             {subtitle}
           </p>
         )}

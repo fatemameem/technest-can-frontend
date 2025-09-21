@@ -2,6 +2,7 @@
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { StatCard } from '@/components/cards/StatCard';
 import { ServiceCard } from '@/components/cards/ServiceCard';
 import { EventCallout } from '@/components/events/EventCallout';
@@ -95,6 +96,8 @@ export default function Home() {
       return da - db;
     });
 
+    const embedUrl = "https://www.youtube.com/embed/S1e1oRZXRIA?si=pSXxiWWhQIpC3fck"; // Replace with your podcast embed URL
+
   return (
     <>
       {/* Hero Section */}
@@ -103,7 +106,7 @@ export default function Home() {
         subtitle="Leading cybersecurity consultancy and AI ethics organization dedicated to building safer, more ethical technology for everyone."
         imageUrl='./images/home.webp'
       >
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="font-poppins flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild className="btn-primary text-white px-8 py-3 text-lg">
             <Link href="/services">
               Explore Services
@@ -120,7 +123,7 @@ export default function Home() {
       </Hero>
 
       {/* Impact Stats */}
-      <Section className="hidden bg-slate-900/50">
+      {/* <Section className="hidden bg-slate-900/50">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {sampleData.stats.map((stat, index) => (
             <StatCard
@@ -131,17 +134,17 @@ export default function Home() {
             />
           ))}
         </div>
-      </Section>
+      </Section> */}
 
       {/* Featured Services */}
       <Section>
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Our Services</h2>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto">
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto font-poppins">
             Comprehensive cybersecurity solutions and AI ethics guidance for organizations of all sizes.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ">
           {sampleData.services.map((service) => (
             <ServiceCard
               key={service.id}
@@ -153,9 +156,42 @@ export default function Home() {
           ))}
         </div>
         <div className="text-center mt-12">
-          <Button asChild className="btn-primary">
+          <Button asChild className="btn-primary font-poppins">
             <Link href="/services">View All Services</Link>
           </Button>
+        </div>
+      </Section>
+      
+      {/* Our Vision */}
+      <Section className="pt-8 lg:pt-12">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Our Vision</h2>
+          <p className="text-slate-300 text-lg max-w-4xl mx-auto font-poppins">
+            Our mission is straightforward: to make cyber security <span className="">accessible, practical and community-driven</span>. <br/>
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <Card className="col-span-3 surface overflow-hidden">
+              <CardContent className="p-0">
+                <div className="aspect-video bg-slate-900">
+                  <iframe 
+                    src={embedUrl} 
+                    className="w-full h-full"
+                    title="YouTube video player" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    referrerPolicy="strict-origin-when-cross-origin" 
+                    allowFullScreen
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          <p className="text-slate-300 col-span-2 text-base max-w-2xl mx-auto font-poppins">
+            We at TECH-NEST recognize the urgent need for awareness surrounding cyber security and AI ethics, especially given that Canadians are deeply concerned about AI's negative consequences and have lost millions due to cyber fraud.<br/><br/>
+
+            We actively address this need by running <span className="font-semibold">workshops</span> in various community hubs and at Concordia University, where we talk with people about important topics like <span className="font-semibold">AI ethics and cyber security</span>. We believe Canadians deserve better support for their cyber safety.<br/><br/>
+
+            <span className="">To that end</span>, we are currently planning to build a <span className="font-semibold ">24/7 support framework</span> accessed through our <span className="font-semibold">website and call center</span>, which can help anyone instantly. Customers can avail this essential support by paying a minimum subscription fee. We are committed to providing the awareness and tools necessary to navigate this digital era.
+          </p>
         </div>
       </Section>
 
@@ -171,19 +207,17 @@ export default function Home() {
       </Section>
 
       {/* Upcoming Event Callout */}
-      <Section>
-        <div className="max-w-5xl mx-auto">
-          {upcomingEvents.length === 0 ? (
-            <div className="text-center text-slate-400">No upcoming events.</div>
-          ) : (
+      {upcomingEvents.length !== 0 ? (
+        <Section>
+          <div className="max-w-5xl mx-auto">
             <div className="space-y-6">
               {upcomingEvents.map((evt) => (
                 <EventCallout key={evt.id} event={evt} />
               ))}
             </div>
-          )}
-        </div>
-      </Section>
+          </div>
+        </Section>
+      ) : null}
     </>
   );
 }
