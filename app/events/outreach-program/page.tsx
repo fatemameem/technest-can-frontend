@@ -21,47 +21,47 @@ export default function OutreachProgramPage() {
           </div>
 
         
-        {/* Hero Content - Title, category badge, and author info overlaid on image */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto absolute bottom-0 left-1/2 transform -translate-x-1/2 pb-12">
-            
-            
-            {/* Main Article Title */}
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">
-              Empowering Communities: From Campus to Market, Building Digital Confidence Together
-            </h1>
-            {/* Category Badge - Shows event/article category */}
-            <Badge className="bg-blue-600 text-white mb-4">
-              Events
-            </Badge>
-            <Badge className="bg-blue-600 mx-5 text-white mb-4">
-              Outreach Program
-            </Badge>
-            
-            {/* Author Information and Metadata */}
-            <div className="flex items-center gap-6 text-slate-300">
-              <div className="flex items-center gap-3">
-                {/* Author Avatar - Circular gradient background */}
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full flex items-center justify-center">
-                  {/* Author initial could be displayed here if needed */}
-                  TN
-                </div>
-                
-                {/* Author Name and Article Metadata */}
-                <div>
-                  <p className="font-medium text-white">Tech-Nest Team</p>
-                  <p className="text-sm text-slate-400">Sun Sep 21, 2025 · 5 min read</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </div>
 
       {/* Main Content Area - Contains article content, tags, and related posts */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mx-auto">
-          
+          { /* Hero Content - Title, category badge, and author info overlaid on image */}
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto pb-12">
+              
+              
+              {/* Main Article Title */}
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">
+                Empowering Communities: From Campus to Market, Building Digital Confidence Together
+              </h1>
+              {/* Category Badge - Shows event/article category */}
+              <Badge className="bg-blue-600 text-white mb-4">
+                Events
+              </Badge>
+              <Badge className="bg-blue-600 mx-5 text-white mb-4">
+                Outreach Program
+              </Badge>
+              
+              {/* Author Information and Metadata */}
+              <div className="flex items-center gap-6 text-slate-300">
+                <div className="flex items-center gap-3">
+                  {/* Author Avatar - Circular gradient background */}
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full flex items-center justify-center">
+                    {/* Author initial could be displayed here if needed */}
+                    TN
+                  </div>
+                  
+                  {/* Author Name and Article Metadata */}
+                  <div>
+                    <p className="font-medium text-white">Tech-Nest Team</p>
+                    <p className="text-sm text-slate-400">Sun Sep 21, 2025 · 5 min read</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           {/* Article Content Card - Main content container */}
           <article className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 mb-12">
             
