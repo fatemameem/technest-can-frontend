@@ -15,6 +15,7 @@ interface EpisodeCardProps {
     instagram: string;
     facebook: string;
     date: string;
+    thumbnailUrl: string;
   };
 }
 
@@ -32,7 +33,7 @@ export function EpisodeCard({ episode }: EpisodeCardProps) {
       <div 
         className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
         style={{ 
-          backgroundImage: `url(https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop)`
+          backgroundImage: `url(${episode.thumbnailUrl})`
         }}
       />
       

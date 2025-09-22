@@ -40,7 +40,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
           </div>
           <CardTitle className="text-xl">{service.title}</CardTitle>
         </div>
-        <p className="text-slate-300">{service.description}</p>
+        <p className="text-slate-300 font-poppins">{service.description}</p>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         {/* <div className="flex flex-wrap justify-center items-center gap-2 mb-6">
@@ -53,7 +53,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <div className="mt-auto">
           {service.available ? (
             // Render button with link when available
-            <Button asChild variant="outline" className="btn-secondary w-full">
+            <Button asChild variant="outline" className="font-poppins btn-secondary w-full">
               <Link href={`/contact?service=${service.id}`}>
                 Request Service
                 <ArrowRight className="ml-2 h-4 w-4" />
