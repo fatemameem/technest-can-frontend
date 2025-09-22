@@ -3,7 +3,6 @@ import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { StatCard } from '@/components/cards/StatCard';
 import { ServiceCard } from '@/components/cards/ServiceCard';
 import { EventCallout } from '@/components/events/EventCallout';
 import Link from 'next/link';
@@ -60,6 +59,7 @@ export default function Home() {
     instagram: r.instagram ?? "",
     facebook: r.facebook ?? "",
     path: r.path ?? "",
+    imageUrl: r.imageUrl ?? "",
   }));
 
   // Keep only the latest 3 podcasts, sorted descending by date
@@ -185,7 +185,7 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
-          <p className="text-slate-300 col-span-2 text-base max-w-2xl mx-auto font-poppins">
+          <p className="text-slate-300 col-span-2 text-lg max-w-2xl mx-auto font-poppins">
             We at TECH-NEST recognize the urgent need for awareness surrounding cyber security and AI ethics, especially given that Canadians are deeply concerned about AI's negative consequences and have lost millions due to cyber fraud.<br/><br/>
 
             We actively address this need by running <span className="font-semibold">workshops</span> in various community hubs and at Concordia University, where we talk with people about important topics like <span className="font-semibold">AI ethics and cyber security</span>. We believe Canadians deserve better support for their cyber safety.<br/><br/>
@@ -204,6 +204,71 @@ export default function Home() {
           description="Tune in for discussions on the latest in cybersecurity and AI ethics."
           showAllBtn={true}
         />
+      </Section>
+      {/* Recent News & Events Section */}
+      <Section className="">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Recent News & Events</h2>
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto font-poppins">
+            Stay updated with the latest news and events in the world of cybersecurity and AI ethics.
+          </p>
+        </div>
+        <div className="flex gap-16 justify-left items-center flex-col md:flex-row">
+          <div className="lg:col-span-1 space-y-6">
+            <Card className=" surface">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                    <Link
+                      href="/events/outreach-program"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group hover-lift"
+                    >
+                      <div className="flex items-center gap-7">
+                        <div 
+                          className="w-24 h-16 bg-cover bg-center rounded-lg flex-shrink-0"
+                          style={{ backgroundImage: `url(/images/outreach.png)` }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm md:text-base line-clamp-2 group-hover:text-cyan-400 transition-colors">
+                            <span>Empowering Communities: From Campus to Market, Building Digital Confidence Together</span>
+                            <ExternalLink className="inline-block ml-1 mb-1 h-4 w-4" />
+                          </h3>
+                        </div>
+                      </div>
+                    </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div> 
+          <div className="lg:col-span-1 space-y-6">
+            <Card className=" surface">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                    <Link
+                      href="https://thelinknewspaper.ca/article/why-i-stopped-waiting-for-tech-to-save-us"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group hover-lift"
+                    >
+                      <div className="flex items-center gap-7">
+                        <div 
+                          className="w-24 h-16 bg-cover bg-center rounded-lg flex-shrink-0"
+                          style={{ backgroundImage: `url(/images/link_paper.jpeg)` }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm md:text-base line-clamp-2 group-hover:text-cyan-400 transition-colors">
+                            <span>Why I stopped waiting for tech to save us: Turning personal loss into a collective fight against online scams</span>
+                            <ExternalLink className="inline-block ml-1 mb-1 h-4 w-4" />
+                          </h3>
+                        </div>
+                      </div>
+                    </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div> 
+        </div>
       </Section>
 
       {/* Upcoming Event Callout */}

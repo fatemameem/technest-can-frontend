@@ -15,6 +15,7 @@ interface PodcastsSectionProps {
         linkedin: any;
         instagram: any;
         facebook: any;
+        imageUrl: any;
     }[];
     title: string;
     badge?: string;
@@ -61,8 +62,8 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
     };
     
     return (
-        <section className="bg-slate-900/50 rounded-3xl">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900/50 rounded-3xl p-8 md:p-12 lg:p-16">
+        <section className="bg-slate-900 rounded-3xl">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-12 lg:p-16">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
                     <div>
                         {badge ? (
@@ -125,7 +126,7 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
                                 href: p.path,
                                 embedUrl: undefined,
                                 summary: "",
-                                imageUrl: 'https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop',
+                                imageUrl: "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
                                 bgColor: 'bg-slate-900',
                                 }}
                             />

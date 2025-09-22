@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User, Clock } from 'lucide-react';
 
@@ -43,11 +43,11 @@ export default function BlogStyle4({
       {/* Hero Section - Large banner area with featured image and title overlay */}
       <div className="relative mx-auto container">
         {/* Featured Image Container - Displays main article image */}
-          <div className="bg-slate-800 overflow-hidden relative">
+          <div className="bg-slate-800 hidden md:block  overflow-hidden relative">
             <img 
               src="/images/outreach.png" 
               alt={title}
-              className="w-full h-screen object-cover "
+              className="w-full h-screen object-cover object-center"
             />
             {/* Dark gradient overlay for better text readability */}
             {/* <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" /> */}
@@ -56,17 +56,20 @@ export default function BlogStyle4({
         
         {/* Hero Content - Title, category badge, and author info overlaid on image */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`max-w-4xl mx-auto ${featuredImage ? 'absolute bottom-0 left-1/2 transform -translate-x-1/2 pb-12' : 'pt-12'}`}>
+          <div className={`mx-auto ${featuredImage ? 'absolute bottom-0 left-1/2 transform -translate-x-1/2 pb-12' : 'pt-12'}`}>
             
-            {/* Category Badge - Shows event/article category */}
-            <Badge className="bg-blue-600 text-white mb-4">
-              {category}
-            </Badge>
             
             {/* Main Article Title */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-              {title}
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">
+              Empowering Communities: From Campus to Market, Building Digital Confidence Together
             </h1>
+            {/* Category Badge - Shows event/article category */}
+            <Badge className="bg-blue-600 text-white mb-4">
+              Events
+            </Badge>
+            <Badge className="bg-blue-600 mx-5 text-white mb-4">
+              Outreach Program
+            </Badge>
             
             {/* Author Information and Metadata */}
             <div className="flex items-center gap-6 text-slate-300">
@@ -74,12 +77,13 @@ export default function BlogStyle4({
                 {/* Author Avatar - Circular gradient background */}
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-full flex items-center justify-center">
                   {/* Author initial could be displayed here if needed */}
+                  TN
                 </div>
                 
                 {/* Author Name and Article Metadata */}
                 <div>
-                  <p className="font-medium text-white">{author}</p>
-                  <p className="text-sm text-slate-400">{date} · {estimatedReadTime}</p>
+                  <p className="font-medium text-white">Tech-Nest Team</p>
+                  <p className="text-sm text-slate-400">Sun Sep 21, 2025 · 5 min read</p>
                 </div>
               </div>
             </div>
@@ -89,15 +93,53 @@ export default function BlogStyle4({
 
       {/* Main Content Area - Contains article content, tags, and related posts */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto">
           
           {/* Article Content Card - Main content container */}
           <article className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-8 mb-12">
             
             {/* Article Body - Main text content with prose styling */}
             <div className="prose prose-lg dark:prose-invert max-w-none">
-              <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-                {content}
+              <p>
+                Every year, Canadians lose over $638 million to cybercrime, and 79% of Canadians are concerned about the impact of AI on privacy and security. At Tech-Nest, we recognize these challenges and are committed to empowering our communities with the knowledge and tools to navigate the digital world safely and confidently.
+              </p>
+
+              <h3>Empowering Through Community Workshops</h3>
+              <p>
+                In partnership with Concordia University, we have launched a series of community workshops aimed at demystifying technology and promoting digital literacy. These workshops are hosted at various community hubs, including the St. Jack Church and the <strong>Khadija Islamic Center for kids</strong>, where we engage participants of all ages in hands-on learning experiences.
+              </p>
+
+              <h4>Workshops Highlights:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <Card className="flex justify-center items-center surface overflow-hidden">
+                    <CardContent className=" aspect-square p-0">
+                      <img src="/images/concordia.png" className="w-full h-full object-cover object-center" alt="" />
+                    </CardContent>
+                  </Card>
+                <Card className="flex justify-center items-center surface overflow-hidden">
+                    <CardContent className="p-0 aspect-square">
+                      <img src="/images/concordia-children-workshop.png" className="w-full h-full object-cover object-center" alt="" />
+                    </CardContent>
+                  </Card>
+                <Card className="flex justify-center items-center surface overflow-hidden">
+                    <CardContent className="p-0 aspect-square">
+                      <img src="/images/concordia-workshop.png" className="w-full h-full object-cover object-center" alt="" />
+                    </CardContent>
+                  </Card>
+                <Card className="flex justify-center items-center surface overflow-hidden">
+                    <CardContent className="p-0 aspect-square">
+                      <img src="/images/khadija-mosque.png" className="w-full h-full object-cover object-center" alt="" />
+                    </CardContent>
+                  </Card>
+              </div>
+              <h3>Setting Up Practical Learning Booths</h3>
+              <p>
+                Alongside workshops, we have established practical learning booths at local markets and community centers. These booths provide attendees with the opportunity to explore new technologies, ask questions, and receive personalized guidance from our team of experts and volunteers.
+              </p>
+
+              <h3>A Shared Responsibility</h3>
+              <p>
+                Building digital confidence is a shared responsibility. We invite community members, local organizations, and educational institutions to join us in this mission. Together, we can foster a safer, more informed, and connected society.
               </p>
             </div>
 
