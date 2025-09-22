@@ -93,6 +93,7 @@ export default function PodcastDetailPage({ params }: { params: string }) {
     instagram: r.instagram ?? "",
     facebook: r.facebook ?? "",
     thumbnailUrl: r.thumbnailUrl ?? "https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
+    imageUrl: r.thumbnailUrl ?? "https://images.pexels.com/photos/1181263/pexels-photo-1181263.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080", // Add imageUrl for PodcastsSection
   }));
 
   const podcast = podcasts.find(p => p.slug === slug);
