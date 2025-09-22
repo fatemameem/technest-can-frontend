@@ -138,32 +138,6 @@ export default function Home() {
         </div>
       </Section> */}
 
-      {/* Featured Services */}
-      <Section>
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Our Services</h2>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto font-poppins">
-            Comprehensive cybersecurity solutions and AI ethics guidance for organizations of all sizes.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ">
-          {sampleData.services.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={{
-                ...service,
-                icon: service.icon as "shield-check" | "file-text" | "mail" | "graduation-cap"
-              }}
-            />
-          ))}
-        </div>
-        <div className="text-center mt-12">
-          <Button asChild className="btn-primary font-poppins">
-            <Link href="/services">View All Services</Link>
-          </Button>
-        </div>
-      </Section>
-      
       {/* Our Vision */}
       <Section className="pt-8 lg:pt-12">
         <div className="text-center mb-12">
@@ -197,16 +171,6 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* Podcasts Section */}
-      <Section className="">
-        <PodcastsSection
-          podcasts={podcasts}
-          title="Latest Podcast Episodes"
-          badge="Listen Now"
-          description="Tune in for discussions on the latest in cybersecurity and AI ethics."
-          showAllBtn={true}
-        />
-      </Section>
       {/* Recent News & Events Section */}
       <Section className="">
         <div className="text-center mb-12">
@@ -271,6 +235,43 @@ export default function Home() {
             </Card>
           </div> 
         </div>
+      </Section>
+
+      {/* Featured Services */}
+      <Section>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Our Services</h2>
+          <p className="text-slate-300 text-lg max-w-2xl mx-auto font-poppins">
+            Comprehensive cybersecurity solutions and AI ethics guidance for organizations of all sizes.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 ">
+          {sampleData.services.map((service) => (
+            <ServiceCard
+              key={service.id}
+              service={{
+                ...service,
+                icon: service.icon as "shield-check" | "file-text" | "mail" | "graduation-cap"
+              }}
+            />
+          ))}
+        </div>
+        <div className="text-center mt-12">
+          <Button asChild className="btn-primary font-poppins">
+            <Link href="/services">View All Services</Link>
+          </Button>
+        </div>
+      </Section>
+      
+      {/* Podcasts Section */}
+      <Section className="">
+        <PodcastsSection
+          podcasts={podcasts}
+          title="Latest Podcast Episodes"
+          badge="Listen Now"
+          description="Tune in for discussions on the latest in cybersecurity and AI ethics."
+          showAllBtn={true}
+        />
       </Section>
 
       {/* Upcoming Event Callout */}

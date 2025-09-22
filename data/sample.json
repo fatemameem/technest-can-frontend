@@ -22,6 +22,21 @@
     }
   ],
 "services": [
+    {
+    "id": "training",
+    "title": "Training Programs",
+    "description": "Interactive workshops that equip participants with practical skills to recognize and respond to digital threats, while also exploring the ethical use of AI in everyday life.",
+    "features": [
+      "Deepfakes",
+      "Phishing",
+      "Passwords",
+      "Case Studies",
+      "Youth & Educators",
+      "AI Ethics"
+    ],
+    "icon": "graduation-cap",
+    "available": true
+  },
   {
     "id": "consultancy",
     "title": "Cybersecurity Consultancy",
@@ -65,21 +80,6 @@
       "Community Action"
     ],
     "icon": "mail",
-    "available": false
-  },
-  {
-    "id": "training",
-    "title": "Training Programs",
-    "description": "Interactive workshops that equip participants with practical skills to recognize and respond to digital threats, while also exploring the ethical use of AI in everyday life.",
-    "features": [
-      "Deepfakes",
-      "Phishing",
-      "Passwords",
-      "Case Studies",
-      "Youth & Educators",
-      "AI Ethics"
-    ],
-    "icon": "graduation-cap",
     "available": false
   }
 ],

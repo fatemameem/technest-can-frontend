@@ -99,10 +99,10 @@ function ContactInner() {
       />
 
       <Section>
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="">
             {/* Contact Form */}
-            <div className="lg:col-span-2">
+            <div className="">
               <Card className="surface">
                 <CardHeader>
                   <CardTitle>Send us a message</CardTitle>
@@ -207,7 +207,7 @@ function ContactInner() {
             </div>
             
             {/* Contact Info */}
-            <div className="space-y-6">
+            {/* <div className="space-y-6">
               <Card className="surface">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
@@ -237,7 +237,7 @@ function ContactInner() {
                   </p>
                 </CardContent>
               </Card>
-            </div>
+            </div> */}
           </div>
         </div>
       </Section>
