@@ -15,7 +15,7 @@ interface PodcastsSectionProps {
         linkedin: any;
         instagram: any;
         facebook: any;
-        imageUrl: any;
+        thumbnailUrl: any;
     }[];
     title: string;
     badge?: string;
@@ -126,7 +126,7 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
                                 href: p.path,
                                 embedUrl: undefined,
                                 summary: "",
-                                imageUrl: "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
+                                thumbnailUrl: p.thumbnailUrl ?? "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
                                 bgColor: 'bg-slate-900',
                                 }}
                             />

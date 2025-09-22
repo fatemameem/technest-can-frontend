@@ -7,6 +7,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EventCard } from '@/components/cards/EventCard';
 import { API_BASE } from '@/lib/env';
 
+// Mock past event for testing
+const MOCK_PAST_EVENT: UIEvent = {
+  id: 'mock-past-1',
+  title: 'Empowering Communities: From Campus to Market, Building Digital Confidence Together',
+  description: 'A collaborative event focused on digital literacy and cybersecurity awareness in diverse community settings.',
+  date: 'July, 2025',
+  location: 'Concordia University, St. Jacques Church, Khadija Islamic Center',
+  topic: 'Cybersecurity & AI Ethics',
+  tags: ['AI Ethics', 'Cybersecurity', 'Community'],
+  links: {
+    url: 'outreach-program' // Link to the detailed recap page
+  },
+  sponsors: 'Tech-Nest',
+  thumbnailUrl:'/images/outreach.png'
+};
+
 interface SheetEvent {
   id: string;
   timestamp?: string;
@@ -18,7 +34,9 @@ interface SheetEvent {
   location?: string;
   lumaLink?: string;
   zoomLink?: string;
+  url?: string; // For past events, link to recap page
   sponsors?: string;
+  thumbnailUrl?: string; // Add this line
 }
 
 interface UIEvent {
@@ -33,8 +51,10 @@ interface UIEvent {
   links?: {
     luma?: string;
     zoom?: string;
+    url?: string; // For past events, link to recap page
   };
   sponsors?: string;
+  thumbnailUrl?: string;
 }
 
 function toDateObj(date?: string, time?: string): Date | null {
@@ -63,7 +83,6 @@ export default function Events() {
     (async () => {
       try {
         const res = await fetch(`api/sheets/eventsInfo`, { cache: "no-store" });
-        // console.log("Fetching events from", `${API_BASE}/sheets/eventsInfo`);
         if (!res.ok) throw new Error(`Failed to load events (${res.status})`);
         const rows: SheetEvent[] = await res.json();
 
@@ -80,6 +99,7 @@ export default function Events() {
             links: { luma: r.lumaLink, zoom: r.zoomLink },
             sponsors: r.sponsors,
             tags, // ensure EventCard receives an array
+            thumbnailUrl: r.thumbnailUrl || '/images/events.jpg', // Add thumbnailUrl with fallback
           };
         });
 
@@ -95,16 +115,18 @@ export default function Events() {
             return da - db;
           });
 
-        const pastEvents = mapped
-          .filter((e) => {
-            const d = toDateObj(e.date, e.time);
-            return d ? d.getTime() < now.getTime() : false;
-          })
-          .sort((a, b) => {
-            const da = toDateObj(a.date, a.time)?.getTime() ?? 0;
-            const db = toDateObj(b.date, b.time)?.getTime() ?? 0;
-            return db - da;
-          });
+        const pastEvents = [
+          MOCK_PAST_EVENT, // Add mock event to past events
+          ...mapped
+            .filter((e) => {
+              const d = toDateObj(e.date, e.time);
+              return d ? d.getTime() < now.getTime() : false;
+            })
+        ].sort((a, b) => {
+          const da = toDateObj(a.date, a.time)?.getTime() ?? 0;
+          const db = toDateObj(b.date, b.time)?.getTime() ?? 0;
+          return db - da;
+        });
 
         if (alive) {
           setUpcoming(upcomingEvents);
@@ -118,6 +140,7 @@ export default function Events() {
       alive = false;
     };
   }, []);
+  const defaultTab = (upcoming && upcoming.length > 0) ? "upcoming" : "past";
 
   return (
     <>
@@ -128,7 +151,7 @@ export default function Events() {
       />
 
       <Section>
-        <Tabs defaultValue="upcoming" className="max-w-6xl mx-auto">
+        <Tabs defaultValue={defaultTab} className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-2 surface">
             <TabsTrigger value="upcoming" className="focus-ring">Upcoming Events</TabsTrigger>
             <TabsTrigger value="past" className="focus-ring">Past Events</TabsTrigger>
@@ -137,7 +160,12 @@ export default function Events() {
           <TabsContent value="upcoming" className="mt-8">
             {error && <div className="text-red-600">Error: {error}</div>}
             {!upcoming && !error && <div>Loading events…</div>}
-            {upcoming && (
+            {upcoming && upcoming.length === 0 && (
+              <div className="text-center py-8 text-slate-400">
+                No upcoming events at the moment. Check back soon!
+              </div>
+            )}
+            {upcoming && upcoming.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {upcoming.map((event) => (
                   <EventCard key={event.id} event={event as any} type="upcoming" />

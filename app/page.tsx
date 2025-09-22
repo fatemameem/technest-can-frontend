@@ -49,6 +49,7 @@ export default function Home() {
     };
     fetchPodcasts();
   }, []);
+  console.log('Raw Podcasts:', rawPodcasts);
 
   // Map into the shape PodcastCard expects
   const mappedPodcasts = (rawPodcasts || []).map((r: any) => ({
@@ -59,8 +60,9 @@ export default function Home() {
     instagram: r.instagram ?? "",
     facebook: r.facebook ?? "",
     path: r.path ?? "",
-    imageUrl: r.imageUrl ?? "",
+    thumbnailUrl: r.thumbnailUrl ?? "",
   }));
+  console.log('Mapped Podcasts:', mappedPodcasts);
 
   // Keep only the latest 3 podcasts, sorted descending by date
   const podcasts = mappedPodcasts

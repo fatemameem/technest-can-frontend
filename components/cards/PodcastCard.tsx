@@ -11,7 +11,7 @@ export interface PodcastEpisode {
     platforms: { name: "LinkedIn" | "Facebook" | "Instagram" | "SoundCloud"; url: string }[];
     embedUrl?: string; // use for iframe on supported platforms
     summary?: string;
-    imageUrl: string;
+    thumbnailUrl: string;
     bgColor: string;
     href?: string;
 }
@@ -29,7 +29,7 @@ const PodcastCard: React.FC<{ podcast: PodcastEpisode }> = ({ podcast }) => {
         <div className="relative aspect-[3/4] overflow-hidden rounded-3xl snap-start">
         <div className={cn("absolute inset-0", podcast.bgColor)}>
             <img
-                src={podcast.imageUrl}
+                src={podcast.thumbnailUrl}
                 alt={`Cover art for ${podcast.title}`}
                 className="h-full w-full object-cover"
                 loading="lazy"
@@ -37,15 +37,15 @@ const PodcastCard: React.FC<{ podcast: PodcastEpisode }> = ({ podcast }) => {
         </div>
         <Link
           href={podcast.href || latestPlatformUrl}
-          className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/30"
+          className="absolute text-slate-900 top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-slate-900/20 backdrop-blur-sm transition-colors hover:bg-white/30"
           aria-label={`View ${podcast.title}`}
         >
-          <Play className="h-5 w-5 text-white" />
+          <Play className="h-5 w-5 text-slate-900" />
         </Link>
         <div className="absolute inset-x-0 bottom-0 p-6">
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent backdrop-blur-sm"></div>
-            <div className="relative text-white">
-                <h3 className="text-lg font-bold">{podcast.title}</h3>
+            <div className="relative text-slate-900">
+                <h3 className="text-lg text-slate-900 font-bold">{podcast.title}</h3>
                 {/* <p className="text-sm text-slate-200 mt-1">{formatDate(podcast.date, { month: 'long', day: 'numeric', year: 'numeric'})}</p> */}
                 <div className="flex gap-3 mt-3">
                 {podcast.platforms.map((platform) => (

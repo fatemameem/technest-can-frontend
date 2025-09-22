@@ -73,7 +73,7 @@ export default function OutreachProgramPage() {
 
               <h3>Empowering Through Community Workshops</h3>
               <p>
-                In partnership with Concordia University, we have launched a series of community workshops aimed at demystifying technology and promoting digital literacy. These workshops are hosted at various community hubs, including the St. Jack Church and the <strong>Khadija Islamic Center for kids</strong>, where we engage participants of all ages in hands-on learning experiences.
+                In partnership with Concordia University, we have launched a series of community workshops aimed at demystifying technology and promoting digital literacy. These workshops are hosted at various community hubs, including the <strong>St. Jacques Church</strong> and the <strong>Khadija Islamic Center for kids</strong>, where we engage participants of all ages in hands-on learning experiences.
               </p>
 
               <h4>Workshops Highlights:</h4>

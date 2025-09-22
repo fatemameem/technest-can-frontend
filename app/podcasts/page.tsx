@@ -48,6 +48,7 @@ export default function Podcasts() {
     linkedin: r.linkedin ?? "",
     instagram: r.instagram ?? "",
     facebook: r.facebook ?? "",
+    thumbnailUrl: r.thumbnailUrl ?? "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
   }));
 
   const latestEpisode = mappedPodcasts[0] || {
@@ -72,7 +73,7 @@ export default function Podcasts() {
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: `url(https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop)`
+            backgroundImage: `url(${latestEpisode.thumbnailUrl})`,
           }}
         />
         
