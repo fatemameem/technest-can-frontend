@@ -1,42 +1,9 @@
-'use client';
-
-import { Button } from '@/components/ui/button';
+// Import necessary components and libraries
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, Clock } from 'lucide-react';
 
-// Interface defining the props structure for the blog-style page component
-interface BlogStyle4Props {
-  title: string;
-  author: string;
-  date: string;
-  readTime: string;
-  category: string;
-  content: string;
-  featuredImage: string;
-  estimatedReadTime: string;
-  tags?: string[];
-  relatedPosts?: Array<{
-    title: string;
-    excerpt: string;
-    image: string;
-  }>;
-}
-
-// Main component for displaying a blog-style article page
-// This component renders an outreach program event page in a blog format
-export default function BlogStyle4({ 
-  title, 
-  author, 
-  date, 
-  readTime,
-  category,
-  content, 
-  tags = [],
-  relatedPosts = [],
-  featuredImage,
-  estimatedReadTime,
-}: BlogStyle4Props) {
+// Main component for displaying the outreach program event page
+export default function OutreachProgramPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       
@@ -46,7 +13,7 @@ export default function BlogStyle4({
           <div className="bg-slate-800 hidden md:block  overflow-hidden relative">
             <img 
               src="/images/outreach.png" 
-              alt={title}
+              alt="Outreach Program"
               className="w-full h-screen object-cover object-center"
             />
             {/* Dark gradient overlay for better text readability */}
@@ -56,7 +23,7 @@ export default function BlogStyle4({
         
         {/* Hero Content - Title, category badge, and author info overlaid on image */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`mx-auto ${featuredImage ? 'absolute bottom-0 left-1/2 transform -translate-x-1/2 pb-12' : 'pt-12'}`}>
+          <div className="mx-auto absolute bottom-0 left-1/2 transform -translate-x-1/2 pb-12">
             
             
             {/* Main Article Title */}
@@ -143,53 +110,18 @@ export default function BlogStyle4({
               </p>
             </div>
 
-            {/* Tags Section - Displays article tags if available */}
-            {tags.length > 0 && (
-              <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag, index) => (
-                    <Badge key={index} variant="secondary" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </article>
-
-          {/* Related Posts Section - Shows related articles if available */}
-          {relatedPosts.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">Related Articles</h2>
-              
-              {/* Related Posts Grid - Responsive grid layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {relatedPosts.map((post, index) => (
-                  <Card key={index} className="bg-white dark:bg-slate-900 hover:shadow-lg transition-shadow">
-                    <CardContent className="p-0">
-                      
-                      <div className="aspect-video bg-slate-200 dark:bg-slate-700 rounded-t-lg">
-                        <img 
-                          src={post.image} 
-                          alt={post.title}
-                          className="w-full h-full object-cover rounded-t-lg"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <h3 className="font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2">
-                          {post.title}
-                        </h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3">
-                          {post.excerpt}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+            {/* Tags Section - Displays article tags */}
+            <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Tags</h3>
+              <div className="flex flex-wrap gap-2">
+                {['Community Outreach', 'Digital Literacy', 'Cybersecurity', 'AI Ethics', 'Education'].map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800">
+                    {tag}
+                  </Badge>
                 ))}
               </div>
-            </section>
-          )}
+            </div>
+          </article>
         </div>
       </div>
     </div>
