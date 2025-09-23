@@ -61,8 +61,9 @@ export default async function Home() {
     facebook: r.socialLinks?.facebook ?? "",
     // Prefer internal slug route; fallback to listing
     path: r.slug ? `/podcasts/podcast/${r.slug}` : "/podcasts",
+    thumbnailUrl: r.thumbnail?.url || r.featuredImage?.url || "/images/default-podcast.jpg",
   }));
-  console.log('Mapped Podcasts:', mappedPodcasts);
+  // console.log('Mapped Podcasts:', mappedPodcasts);
 
   // Keep only the latest 3 podcasts, sorted descending by date
   const podcasts = mappedPodcasts
@@ -88,7 +89,7 @@ export default async function Home() {
     timeZone: r.eventDetails?.timeZone ?? "",
     location: r.eventDetails?.location ?? "",
     description: r.description ?? "",
-    links: { luma: r.links?.lumaLink ?? "", zoom: r.links?.zoomLink ?? "" },
+    links: { luma: r.links?.lumaLink ?? "", zoom: r.links?.zoomLink ?? "", recapUrl: r.links?.recapUrl ?? "" },
     tags: [r.topic, r.eventDetails?.location].filter(Boolean) as string[],
   }));
 

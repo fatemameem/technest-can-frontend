@@ -16,6 +16,20 @@ export const Users: CollectionConfig = {
   fields: [
     // Email added by default
     {
+      name: 'name',
+      type: 'text',
+      label: 'Name',
+      required: true,
+      admin: { position: 'sidebar' },
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      required: true,
+      admin: { position: 'sidebar' },
+    },
+    {
       name: 'role',
       type: 'select',
       label: 'Role',
@@ -23,7 +37,7 @@ export const Users: CollectionConfig = {
         { label: 'Admin', value: 'admin' },
         { label: 'Moderator', value: 'moderator' },
       ],
-      required: false,
+      required: true,
       admin: { position: 'sidebar' },
     },
   ],

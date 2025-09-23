@@ -17,6 +17,7 @@ import {
   Trash2,
   ChevronUp,
   ChevronDown,
+  X,
 } from 'lucide-react';
 
 import type { BlogPost, Block, MetaData, Layout } from '@/types';
@@ -35,6 +36,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 const DEFAULT_BACK_URL = '/admin';
@@ -56,7 +65,7 @@ const Card = ({ children, className }: { children: React.ReactNode; className?: 
 
 const CardHeader = ({ children }: { children: React.ReactNode }) => (
   <div className="p-4 border-b border-slate-700">
-    <h3 className="text-lg font-semibold text-white">{children}</h3>
+    <div className="text-lg font-semibold text-white">{children}</div>
   </div>
 );
 
@@ -82,20 +91,7 @@ const Textarea = (props: React.ComponentPropsWithoutRef<'textarea'>) => (
   />
 );
 
-const Select = ({ children, ...props }: React.ComponentPropsWithoutRef<'select'>) => (
-  <select
-    className="w-full bg-slate-900 border border-slate-600 text-white rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
-    {...props}
-  >
-    {children}
-  </select>
-);
-
 function deepClone<T>(value: T): T {
-  const clone = (globalThis as any).structuredClone;
-  if (typeof clone === 'function') {
-    return clone(value);
-  }
   return JSON.parse(JSON.stringify(value));
 }
 
@@ -113,26 +109,18 @@ type BlogPostPatch = Partial<Omit<BlogPost, 'meta' | 'layout' | 'blocks'>> & {
   meta?: Partial<MetaData>;
   layout?: Partial<Layout>;
   blocks?: Block[];
+  linkedEvent?: string | null; // Add linkedEvent to patch type
 };
 
 function mergeBlogPost(base: BlogPost, patch?: BlogPostPatch): BlogPost {
-  const cloned = deepClone(base);
-  if (!patch) return cloned;
-
+  if (!patch) return base;
   return {
-    ...cloned,
+    ...base,
     ...patch,
-    meta: {
-      ...cloned.meta,
-      ...(patch.meta ?? {}),
-    },
-    layout: {
-      ...cloned.layout,
-      ...(patch.layout ?? {}),
-    },
-    blocks: patch.blocks
-      ? patch.blocks.map((block) => ({ ...block, props: { ...(block.props ?? {}) } }))
-      : cloned.blocks,
+    linkedEvent: patch.linkedEvent !== undefined ? patch.linkedEvent : base.linkedEvent, // Handle linkedEvent
+    meta: { ...base.meta, ...patch.meta },
+    layout: { ...base.layout, ...patch.layout },
+    blocks: patch.blocks !== undefined ? patch.blocks : base.blocks,
   };
 }
 
@@ -159,6 +147,7 @@ function normalizeBlogDoc(input: any): BlogPost {
 
   const normalized: BlogPost = {
     id: input?.id ?? 'new',
+    linkedEvent: input?.linkedEvent || null, // Normalize linkedEvent
     meta: {
       title: meta.title ?? '',
       subtitle: meta.subtitle ?? undefined,
@@ -174,7 +163,7 @@ function normalizeBlogDoc(input: any): BlogPost {
       seo: {
         title: meta.seo?.title ?? '',
         description: meta.seo?.description ?? '',
-        ogImageRef: meta.seo?.ogImageRef ?? meta.seo?.ogImage ?? undefined,
+        ogImageRef: meta.seo?.ogImageRef ?? undefined,
       },
     },
     layout: {
@@ -183,21 +172,16 @@ function normalizeBlogDoc(input: any): BlogPost {
     blocks: blocks.map((block: any) => ({
       id: block.id ?? crypto.randomUUID(),
       type: block.type ?? BlockType.RICH_TEXT,
-      props: { ...(block.props ?? {}) },
+      props: block.props ?? {},
     })),
   };
 
-  return {
-    ...normalized,
-    meta: {
-      ...normalized.meta,
-      readingTime: calculateReadingTime(normalized.blocks),
-    },
-  };
+  return normalized;
 }
 
 const derivePost = (post: BlogPost): BlogPost => ({
   ...post,
+  linkedEvent: post.linkedEvent, // Ensure linkedEvent is preserved
   meta: {
     ...post.meta,
     readingTime: calculateReadingTime(post.blocks),
@@ -316,6 +300,81 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
             </div>
           </>
         );
+      case BlockType.CALLOUT:
+        return (
+          <>
+            <div>
+              <Label htmlFor="type">Callout Type</Label>
+              <Select 
+                value={block.props.type || 'info'} 
+                onValueChange={(value) => updateProp('type', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select callout type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="warning">Warning</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                  <SelectItem value="success">Success</SelectItem>
+                  <SelectItem value="tip">Tip</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="title">Callout Title (optional)</Label>
+              <Input
+                id="title"
+                value={block.props.title || ''}
+                onChange={(e) => updateProp('title', e.target.value)}
+                placeholder="e.g., Important Note"
+              />
+            </div>
+            <div>
+              <Label htmlFor="content">Callout Content</Label>
+              <Textarea 
+                id="content" 
+                value={block.props.content || ''} 
+                onChange={(e) => updateProp('content', e.target.value)} 
+                rows={4}
+                placeholder="Enter your callout message..."
+              />
+            </div>
+          </>
+        );
+      case BlockType.QUOTE:
+        return (
+          <>
+            <div>
+              <Label htmlFor="text">Quote Text</Label>
+              <Textarea 
+                id="text" 
+                value={block.props.text || ''} 
+                onChange={(e) => updateProp('text', e.target.value)} 
+                rows={4}
+                placeholder="Enter the quote text..."
+              />
+            </div>
+            <div>
+              <Label htmlFor="author">Author (optional)</Label>
+              <Input
+                id="author"
+                value={block.props.author || ''}
+                onChange={(e) => updateProp('author', e.target.value)}
+                placeholder="e.g., John Doe"
+              />
+            </div>
+            <div>
+              <Label htmlFor="source">Source (optional)</Label>
+              <Input
+                id="source"
+                value={block.props.source || ''}
+                onChange={(e) => updateProp('source', e.target.value)}
+                placeholder="e.g., Book Title, Company Name"
+              />
+            </div>
+          </>
+        );
       default:
         return <p className="text-slate-400">This block type has no editable properties.</p>;
     }
@@ -350,6 +409,11 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
+
+  // New state for events
+  const [pastEvents, setPastEvents] = useState<any[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+  const [selectedEventDetails, setSelectedEventDetails] = useState<any>(null);
 
   const baseDraftKey = useMemo(() => `blog-editor:${initialPost?.id ?? 'new'}`, [initialPost?.id]);
   const draftKey = useMemo(() => {
@@ -525,13 +589,26 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
           publishedAt: new Date().toISOString(),
         },
       });
-      toast.success('Blog published');
-      router.push(`/blogs/blog/${doc.meta.slug}`);
+      
+      // Update the current state to reflect the published status
+      setBlogPost(doc);
+      setHasUnsavedChanges(false);
+      setLastSaved(new Date());
+      
+      // Show success toast
+      toast.success('Blog published successfully!');
+      
+      // Clear draft and redirect to admin page after a short delay
+      clearDraft();
+      setTimeout(() => {
+        router.push('/admin');
+      }, 1500);
+      
     } catch (error: any) {
       console.error(error);
       toast.error(error?.message || 'Failed to publish blog');
     }
-  }, [blogPost.meta.title, persistBlog, router]);
+  }, [blogPost.meta.title, persistBlog, router, clearDraft]);
 
   const updateMeta = useCallback(
     (field: keyof MetaData, value: any) => {
@@ -575,6 +652,12 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
         break;
       case BlockType.VIDEO_EMBED:
         newBlock.props = { url: '', caption: '' };
+        break;
+      case BlockType.CALLOUT:
+        newBlock.props = { type: 'info', title: '', content: 'Enter your callout message...' };
+        break;
+      case BlockType.QUOTE:
+        newBlock.props = { text: 'Enter your quote here...', author: '', source: '' };
         break;
       default:
         break;
@@ -671,6 +754,10 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
         return block.props.alt || 'Image';
       case BlockType.VIDEO_EMBED:
         return block.props.url || 'Video Embed';
+      case BlockType.CALLOUT:
+        return `${block.props.type || 'info'}: ${block.props.content || 'Callout'}`.substring(0, 50) + '...';
+      case BlockType.QUOTE:
+        return `"${block.props.text || 'Quote'}"`.substring(0, 50) + '...';
       default:
         return block.type;
     }
@@ -714,26 +801,89 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
     setSlugManuallyEdited(true);
     updateMeta('slug', slugify(value));
   };
+  const updateLinkedEvent = useCallback((eventId: string | null) => {
+    // Update the linkedEvent property in the blog post
+    updateLocalPost((prev) => ({
+      ...prev,
+      linkedEvent: eventId
+    }));
+
+    // Update selectedEventDetails based on the event ID
+    if (eventId === null) {
+      setSelectedEventDetails(null);
+    } else {
+      // Find the event details in pastEvents
+      const eventDetails = pastEvents.find(event => event.id === eventId);
+      setSelectedEventDetails(eventDetails || null);
+    }
+  }, [pastEvents, updateLocalPost]);
+
+  // Fetch past events
+  useEffect(() => {
+    const fetchPastEvents = async () => {
+      setLoadingEvents(true);
+      try {
+        const response = await fetch('/api/admin/events');
+        if (response.ok) {
+          const data = await response.json();
+          const events = data.docs || [];
+          
+          // Filter past events (events before today)
+          const now = new Date();
+          const pastEventsFiltered = events.filter((event: any) => {
+            if (!event.eventDetails?.date) return false;
+            const eventDate = new Date(event.eventDetails.date);
+            return eventDate < now;
+          });
+          
+          // Sort by date descending (most recent first)
+          pastEventsFiltered.sort((a: any, b: any) => {
+            const dateA = new Date(a.eventDetails?.date || 0);
+            const dateB = new Date(b.eventDetails?.date || 0);
+            return dateB.getTime() - dateA.getTime();
+          });
+          
+          setPastEvents(pastEventsFiltered);
+        } else {
+          console.error('Failed to fetch events:', response.status);
+          toast.error('Failed to load events');
+        }
+      } catch (error) {
+        console.error('Failed to fetch events:', error);
+        toast.error('Failed to load events');
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+
+    fetchPastEvents();
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Update selected event details when linkedEvent changes
+  useEffect(() => {
+    if (blogPost.linkedEvent && pastEvents.length > 0) {
+      const eventDetails = pastEvents.find(event => event.id === blogPost.linkedEvent);
+      setSelectedEventDetails(eventDetails || null);
+    } else {
+      setSelectedEventDetails(null);
+    }
+  }, [blogPost.linkedEvent, pastEvents]);
+
   return (
     <>
       <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col">
         <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
           <div className="flex items-center justify-between p-4 h-16">
             <div className="flex items-center gap-4">
+              <Link href="/admin" className="text-sm font-medium">
               <button
                 type="button"
                 className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
               >
-                <ArrowLeft className="h-4 w-4" /> <Link href="/admin" className="text-sm font-medium">Back to Admin</Link>
+                <ArrowLeft className="h-4 w-4" /> 
+                Back to Admin
               </button>
-            </div>
-            <div className="flex-1 px-4">
-              <Input
-                value={blogPost.meta.title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                placeholder="Blog title..."
-                className="text-lg font-semibold bg-transparent border-none p-0 h-auto focus-visible:ring-0 text-white placeholder:text-slate-500 w-full"
-              />
+              </Link>
             </div>
             <div className="flex items-center gap-3">
               {lastSaved && <span className="text-sm text-slate-400">Saved: {lastSaved.toLocaleTimeString()}</span>}
@@ -771,9 +921,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
         </div>
 
         <div className="flex-1 flex overflow-hidden">
-          <div className="w-96 border-r border-slate-800 bg-slate-900/30 overflow-y-auto flex flex-col">
-            <div className="p-4 border-b border-slate-800">
-              <div className="grid grid-cols-3 gap-2 bg-slate-800/50 rounded-lg p-1">
+          <div className="w-80 border-r border-slate-800 bg-slate-900/50 overflow-y-auto">
+            <div className="p-4">
+              <div className="flex space-x-1 mb-6">
                 <TabButton active={activeTab === 'page'} onClick={() => setActiveTab('page')}>
                   Page
                 </TabButton>
@@ -784,74 +934,195 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
                   Inspector
                 </TabButton>
               </div>
-            </div>
-            <div className="flex-1 p-4 overflow-y-auto">
+
               {activeTab === 'page' && (
                 <div className="space-y-6">
                   <Card>
-                    <CardHeader>Page Settings</CardHeader>
+                    <CardHeader>
+                      <h3 className="text-lg font-semibold text-white">Basic Info</h3>
+                    </CardHeader>
                     <CardContent>
-                      <div>
-                        <Label htmlFor="slug">Slug</Label>
-                        <Input id="slug" value={blogPost.meta.slug} onChange={(e) => handleSlugChange(e.target.value)} />
-                      </div>
-                      <div>
-                        <Label>Categories</Label>
-                        <div className="p-2 border border-slate-600 rounded-md bg-slate-900 min-h-[40px]">
-                          <div className="flex flex-wrap gap-2">
-                            {blogPost.meta.categories.map((category) => (
-                              <span
-                                key={category}
-                                className="flex items-center gap-1 bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full"
-                              >
-                                {category}
-                                <button
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="title">Title</Label>
+                          <Input 
+                            id="title" 
+                            value={blogPost.meta.title} 
+                            onChange={(e) => handleTitleChange(e.target.value)} 
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="subtitle">Subtitle</Label>
+                          <Input 
+                            id="subtitle" 
+                            value={blogPost.meta.subtitle || ''} 
+                            onChange={(e) => updateMeta('subtitle', e.target.value)} 
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="author">Author</Label>
+                          <Input 
+                            id="author" 
+                            value={blogPost.meta.authorRef} 
+                            onChange={(e) => updateMeta('authorRef', e.target.value)} 
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="slug">Slug</Label>
+                          <Input 
+                            id="slug" 
+                            value={blogPost.meta.slug} 
+                            onChange={(e) => handleSlugChange(e.target.value)} 
+                          />
+                        </div>
+
+                        {/* Linked Event Section */}
+                        <div>
+                          <Label>Linked Event</Label>
+                          <p className="text-xs text-slate-400 mb-2">
+                            Link this blog to an event as a recap post
+                          </p>
+                          
+                          {selectedEventDetails && (
+                            <div className="mb-3 p-3 bg-slate-800 rounded-md border border-slate-600">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-white text-sm">
+                                    {selectedEventDetails.title}
+                                  </h4>
+                                  <p className="text-xs text-slate-400 mt-1">
+                                    {selectedEventDetails.eventDetails?.date && 
+                                      new Date(selectedEventDetails.eventDetails.date).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                      })
+                                    }
+                                  </p>
+                                  {selectedEventDetails.eventDetails?.location && (
+                                    <p className="text-xs text-slate-400">
+                                      {selectedEventDetails.eventDetails.location}
+                                    </p>
+                                  )}
+                                </div>
+                                <Button
                                   type="button"
-                                  onClick={() =>
-                                    updateMeta(
-                                      'categories',
-                                      blogPost.meta.categories.filter((item) => item !== category)
-                                    )
-                                  }
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => updateLinkedEvent(null)}
+                                  className="text-slate-400 hover:text-white p-1"
                                 >
-                                  &times;
-                                </button>
-                              </span>
-                            ))}
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+
+                          <Select
+                            value={blogPost.linkedEvent || ''}
+                            onValueChange={(value) => updateLinkedEvent(value || null)}
+                            disabled={loadingEvents}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={
+                                loadingEvents 
+                                  ? "Loading events..." 
+                                  : selectedEventDetails 
+                                    ? "Change linked event..." 
+                                    : "Select a past event..."
+                              } />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {pastEvents.length === 0 && !loadingEvents && (
+                                <div className="px-2 py-1.5 text-sm text-slate-400">
+                                  No past events available
+                                </div>
+                              )}
+                              {pastEvents.map((event) => (
+                                <SelectItem key={event.id} value={event.id}>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{event.title}</span>
+                                    <span className="text-xs text-slate-400">
+                                      {event.eventDetails?.date && 
+                                        new Date(event.eventDetails.date).toLocaleDateString('en-US', {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric'
+                                        })
+                                      }
+                                    </span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div>
+                          <Label>Categories</Label>
+                          <div className="p-2 border border-slate-600 rounded-md bg-slate-900 min-h-[40px]">
+                            <div className="flex flex-wrap gap-2">
+                              {blogPost.meta.categories.map((category) => (
+                                <span
+                                  key={category}
+                                  className="flex items-center gap-1 bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full"
+                                >
+                                  {category}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      updateMeta(
+                                        'categories',
+                                        blogPost.meta.categories.filter((item) => item !== category)
+                                      )
+                                    }
+                                  >
+                                    &times;
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            <Select
+                              value=""
+                              onValueChange={(value) => {
+                                if (value && !blogPost.meta.categories.includes(value)) {
+                                  updateMeta('categories', [...blogPost.meta.categories, value]);
+                                }
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Add a category..." />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CATEGORIES.filter((category) => !blogPost.meta.categories.includes(category)).map((category) => (
+                                  <SelectItem key={category} value={category}>
+                                    {category}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
-                        <Select
-                          className="mt-2"
-                          value=""
-                          onChange={(e) => {
-                            const category = e.target.value;
-                            if (category && !blogPost.meta.categories.includes(category)) {
-                              updateMeta('categories', [...blogPost.meta.categories, category]);
-                            }
-                          }}
-                        >
-                          <option value="" disabled>
-                            Add a category...
-                          </option>
-                          {CATEGORIES.filter((category) => !blogPost.meta.categories.includes(category)).map((category) => (
-                            <option key={category} value={category}>
-                              {category}
-                            </option>
-                          ))}
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>Layout Preset</Label>
-                        <Select
-                          value={blogPost.layout.preset}
-                          onChange={(e) => updateLayout('preset', e.target.value as LayoutPreset)}
-                        >
-                          {LAYOUT_PRESETS.map((preset) => (
-                            <option key={preset.value} value={preset.value}>
-                              {preset.name}
-                            </option>
-                          ))}
-                        </Select>
+                        <div>
+                          <Label>Layout Preset</Label>
+                          <Select
+                            value={blogPost.layout.preset}
+                            onValueChange={(value) => updateLayout('preset', value as LayoutPreset)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select layout preset" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {LAYOUT_PRESETS.map((preset) => (
+                                <SelectItem key={preset.value} value={preset.value}>
+                                  {preset.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -859,20 +1130,24 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
               )}
               {activeTab === 'blocks' && (
                 <div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex justify-between flex-col gap-4 mb-4">
                     <h3 className="text-lg font-semibold text-white">Content Blocks</h3>
-                    <Select onChange={(e) => addBlock(e.target.value as BlockType)} value="">
-                      <option value="" disabled>
-                        Add a new block...
-                      </option>
-                      {Object.values(BlockType).map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
+                    <div className="w-full">
+                      <Select onValueChange={(value) => addBlock(value as BlockType)} value="" >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Add a new block..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(BlockType).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
+                    </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     {blogPost.blocks.map((block, index) => (
                       <div
                         key={block.id}

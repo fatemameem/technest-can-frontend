@@ -127,7 +127,8 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
-  role?: ('admin' | 'moderator') | null;
+  name: string;
+  role: 'admin' | 'moderator';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -204,6 +205,10 @@ export interface Event {
   links?: {
     lumaLink?: string | null;
     zoomLink?: string | null;
+    /**
+     * Auto-generated link to the event recap blog post
+     */
+    recapUrl?: string | null;
   };
   sponsors?: string | null;
   published?: boolean | null;
@@ -237,6 +242,10 @@ export interface TeamMember {
 export interface Blog {
   id: string;
   title?: string | null;
+  /**
+   * Link this blog to an event as a recap post
+   */
+  linkedEvent?: (string | null) | Event;
   meta: {
     title: string;
     subtitle?: string | null;
@@ -379,6 +388,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
   role?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -458,6 +468,7 @@ export interface EventsSelect<T extends boolean = true> {
     | {
         lumaLink?: T;
         zoomLink?: T;
+        recapUrl?: T;
       };
   sponsors?: T;
   published?: T;
@@ -491,6 +502,7 @@ export interface TeamMembersSelect<T extends boolean = true> {
  */
 export interface BlogsSelect<T extends boolean = true> {
   title?: T;
+  linkedEvent?: T;
   meta?:
     | T
     | {

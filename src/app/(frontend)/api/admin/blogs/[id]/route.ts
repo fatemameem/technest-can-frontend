@@ -76,6 +76,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       id,
       data: {
         ...body,
+        linkedEvent: body.linkedEvent !== undefined ? body.linkedEvent : existing.linkedEvent, // Handle linkedEvent
         meta,
         layout: ensureLayout(body, existing.layout),
         blocks,
@@ -83,8 +84,11 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       overrideAccess: true,
     });
 
-    return Response.json({ ok: true, doc });
+    return Response.json({ doc });
   } catch (error: any) {
+    if (error?.status === 404) {
+      return new Response(JSON.stringify({ error: 'Not found' }), { status: 404 });
+    }
     console.error('[admin/blogs/:id] PATCH error', error);
     return new Response(JSON.stringify({ error: error?.message || 'Failed to update blog' }), { status: 500 });
   }

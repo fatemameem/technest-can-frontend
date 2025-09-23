@@ -24,7 +24,6 @@ const getGoogleDriveEmbedUrl = (url: string) => {
     return match ? `https://drive.google.com/file/d/${match[1]}/preview` : null;
 };
 
-
 const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: boolean; onClick: () => void; }) => {
     const props = block.props;
 
@@ -33,14 +32,14 @@ const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: b
             case BlockType.HERO_MEDIA:
             case BlockType.IMAGE_FIGURE:
                 return (
-                    <figure className="my-8">
+                    <figure className="my-4">
                         <img src={props.mediaRef} alt={props.alt} className="w-full rounded-lg shadow-lg" />
                         {props.caption && <figcaption className="text-center text-sm text-gray-400 mt-2">{props.caption}</figcaption>}
                     </figure>
                 );
             
             case BlockType.LEAD_PARAGRAPH:
-                return <p className="text-xl md:text-2xl text-gray-300 my-8 font-light leading-relaxed">{props.text}</p>;
+                return <p className="text-lg md:text-xl text-gray-300 my-4 font-light leading-relaxed">{props.text}</p>;
 
             case BlockType.RICH_TEXT:
                 const htmlContent = marked.parse(props.content || '');
@@ -48,7 +47,7 @@ const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: b
 
             case BlockType.CODE_BLOCK:
                 return (
-                    <div className="my-8 bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+                    <div className="my-4 bg-gray-800 rounded-lg overflow-hidden shadow-lg">
                         {props.filename && <div className="text-xs text-gray-400 bg-gray-900 px-4 py-2">{props.filename}</div>}
                         <pre className="p-4 overflow-x-auto"><code className={`language-${props.language}`}>{props.code}</code></pre>
                     </div>
@@ -56,22 +55,70 @@ const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: b
 
             case BlockType.QUOTE:
                 return (
-                    <blockquote className="my-8 border-l-4 border-blue-500 pl-6 italic">
-                        <p className="text-xl text-gray-200">{props.quote}</p>
-                        {props.attribution && <footer className="text-base text-gray-400 mt-2">- {props.attribution}</footer>}
+                    <blockquote className="my-4 border-l-4 border-blue-500 pl-6 italic">
+                        <p className="text-xl text-gray-200 leading-relaxed">"{props.text || 'Enter your quote here...'}"</p>
+                        {(props.author || props.source) && (
+                            <footer className="text-base text-gray-400 mt-3">
+                                — {props.author && <span className="font-medium">{props.author}</span>}
+                                {props.author && props.source && <span>, </span>}
+                                {props.source && <cite className="italic">{props.source}</cite>}
+                            </footer>
+                        )}
                     </blockquote>
                 );
             
             case BlockType.CALLOUT:
-                const variantClasses = {
-                    info: 'bg-blue-900/50 border-blue-500',
-                    tip: 'bg-green-900/50 border-green-500',
-                    warning: 'bg-yellow-900/50 border-yellow-500',
+                const calloutVariants = {
+                    info: {
+                        bg: 'bg-blue-900/30',
+                        border: 'border-blue-500',
+                        icon: 'ℹ️',
+                        title: 'Info'
+                    },
+                    warning: {
+                        bg: 'bg-yellow-900/30',
+                        border: 'border-yellow-500',
+                        icon: '⚠️',
+                        title: 'Warning'
+                    },
+                    error: {
+                        bg: 'bg-red-900/30',
+                        border: 'border-red-500',
+                        icon: '❌',
+                        title: 'Error'
+                    },
+                    success: {
+                        bg: 'bg-green-900/30',
+                        border: 'border-green-500',
+                        icon: '✅',
+                        title: 'Success'
+                    },
+                    tip: {
+                        bg: 'bg-purple-900/30',
+                        border: 'border-purple-500',
+                        icon: '💡',
+                        title: 'Tip'
+                    }
                 };
+                
+                const variant = calloutVariants[props.type as keyof typeof calloutVariants] || calloutVariants.info;
+                
                 return (
-                    <div className={`my-8 p-4 border-l-4 rounded-r-lg ${variantClasses[props.variant as 'info' | 'tip' | 'warning']}`}>
-                        {props.title && <h4 className="font-bold text-white mb-2">{props.title}</h4>}
-                        <p className="text-gray-300">{props.content}</p>
+                    <div className={`my-4 p-4 border-l-4 rounded-r-lg ${variant.bg} ${variant.border}`}>
+                        <div className="flex items-start gap-3">
+                            <span className="text-lg flex-shrink-0 mt-0.5">{variant.icon}</span>
+                            <div className="flex-1">
+                                {props.title && (
+                                    <h4 className="font-bold text-white mb-2 text-lg">{props.title}</h4>
+                                )}
+                                {!props.title && props.type && (
+                                    <h4 className="font-bold text-white mb-2 text-lg">{variant.title}</h4>
+                                )}
+                                <div className="text-gray-300 leading-relaxed">
+                                    {props.content || 'Enter your callout message...'}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 );
 
@@ -86,7 +133,7 @@ const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: b
             case BlockType.VIDEO_EMBED:
                 if (!props.url) {
                     return (
-                        <figure className="my-8">
+                        <figure className="my-4">
                             <div className="w-full aspect-video bg-gray-800 flex items-center justify-center rounded-lg">
                                 <p className="text-gray-400">Enter a video URL</p>
                             </div>
@@ -98,7 +145,7 @@ const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: b
                 const embedUrl = youtubeUrl || driveUrl;
 
                 return (
-                    <figure className="my-8">
+                    <figure className="my-4">
                         {embedUrl ? (
                             <div className="aspect-w-16 aspect-h-9">
                                 <iframe 
@@ -159,9 +206,9 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ blogPost, selectedBlockId, 
 
     const mainContent = (
         <article>
-            <header className="mb-12 text-center">
+            <header className="mb-8 text-center">
                 <div className="text-sm uppercase text-blue-400 font-semibold tracking-wider mb-2">
-                    {meta.categories.join(', ')}
+                    {meta.categories.join(' || ')}
                 </div>
                 <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight tracking-tighter">
                     {meta.title}

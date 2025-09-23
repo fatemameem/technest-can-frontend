@@ -101,6 +101,63 @@ export const Blogs: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [
+      async ({ doc, previousDoc, req }) => {
+        if (!doc || !req.payload) return;
+
+        const currentEventId = typeof doc.linkedEvent === 'string' ? doc.linkedEvent : doc.linkedEvent?.id;
+        const previousEventId = typeof previousDoc?.linkedEvent === 'string' ? previousDoc.linkedEvent : previousDoc?.linkedEvent?.id;
+        const isPublished = doc.meta?.status === PostStatus.PUBLISHED;
+        const wasPublished = previousDoc?.meta?.status === PostStatus.PUBLISHED;
+        const recapUrl = `/blogs/blog/${doc.meta?.slug}`;
+
+        try {
+          // Clear recap link from previous event if:
+          // 1. Blog was unpublished
+          // 2. Event was changed to a different event
+          // 3. Event was unlinked
+          if (previousEventId && (
+            (wasPublished && !isPublished) || // Unpublished
+            (currentEventId !== previousEventId) // Event changed or unlinked
+          )) {
+            await req.payload.update({
+              collection: 'events',
+              id: previousEventId,
+              data: {
+                links: {
+                  recapUrl: null,
+                },
+              },
+              overrideAccess: true,
+            });
+          }
+
+          // Set recap link on current event if blog is published and event is linked
+          if (isPublished && currentEventId && currentEventId !== previousEventId) {
+            // Get current event to preserve existing links
+            const currentEvent = await req.payload.findByID({
+              collection: 'events',
+              id: currentEventId,
+              overrideAccess: true,
+            });
+
+            await req.payload.update({
+              collection: 'events',
+              id: currentEventId,
+              data: {
+                links: {
+                  ...currentEvent.links,
+                  recapUrl: recapUrl,
+                },
+              },
+              overrideAccess: true,
+            });
+          }
+        } catch (error) {
+          req.payload?.logger?.error('Error updating event recap link:', error);
+        }
+      },
+    ],
   },
   fields: [
     {
@@ -109,6 +166,16 @@ export const Blogs: CollectionConfig = {
       admin: {
         hidden: true,
         readOnly: true,
+      },
+    },
+    {
+      name: 'linkedEvent',
+      type: 'relationship',
+      relationTo: 'events',
+      label: 'Linked Event',
+      admin: {
+        position: 'sidebar',
+        description: 'Link this blog to an event as a recap post',
       },
     },
     {

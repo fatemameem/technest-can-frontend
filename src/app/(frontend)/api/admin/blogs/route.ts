@@ -13,6 +13,7 @@ type BlogEntry = {
   meta?: any;
   layout?: any;
   blocks?: any[];
+  linkedEvent?: string | null; // Add linkedEvent to the type
   [key: string]: any;
 };
 
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
         collection: BLOG_COLLECTION,
         data: {
           ...entry,
+          linkedEvent: entry.linkedEvent || null, // Include linkedEvent in the data
           meta,
           layout: ensureLayout(entry),
           blocks,
@@ -95,14 +97,8 @@ export async function GET() {
 
   try {
     const payload = await getPayload({ config: configPromise });
-    const result = await (payload as any).find({
-      collection: BLOG_COLLECTION,
-      limit: 100,
-      depth: 1,
-      overrideAccess: true,
-      sort: '-updatedAt',
-    });
-    return Response.json(result);
+    const res = await (payload as any).find({ collection: BLOG_COLLECTION, limit: 200, sort: '-meta.updatedAt', overrideAccess: true });
+    return Response.json(res);
   } catch (error: any) {
     console.error('[admin/blogs] GET error', error);
     return new Response(JSON.stringify({ error: error?.message || 'Failed to load blogs' }), { status: 500 });

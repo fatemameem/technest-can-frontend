@@ -1,22 +1,26 @@
 "use client";
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Mic, Calendar, Users } from 'lucide-react';
+import { Mic, Calendar, Users, FileText } from 'lucide-react';
 
 export default function OverviewSection({
   podcastCount,
   eventCount,
-  subscriberCount,
+  blogCount,
   lastPodcast,
   lastEvent,
   statsLoading,
+  lastBlog,
+  subscriberCount
 }: {
   podcastCount: number | null;
   eventCount: number | null;
-  subscriberCount: number | null;
+  blogCount: number | null;
   lastPodcast: { title: string; when: string } | null;
   lastEvent: { title: string; when: string } | null;
+  lastBlog: { title: string; when: string } | null;
   statsLoading: boolean;
+  subscriberCount: number | null;
 }) {
   return (
     <>
@@ -49,8 +53,8 @@ export default function OverviewSection({
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-slate-400 text-sm">Newsletter Subscribers</p>
-                <p className="text-2xl font-bold text-green-400">{subscriberCount ?? (statsLoading ? '…' : 0)}</p>
+                <p className="text-slate-400 text-sm">Total Blogs</p>
+                <p className="text-2xl font-bold text-green-400">{blogCount ?? (statsLoading ? '…' : 0)}</p>
               </div>
               <Users className="h-8 w-8 text-green-400" />
             </div>
@@ -76,6 +80,14 @@ export default function OverviewSection({
                 <p className="text-slate-400 text-sm">{lastEvent ? lastEvent.title : (statsLoading ? 'Loading…' : 'No events yet')}</p>
               </div>
               <Badge variant="secondary">{lastEvent ? lastEvent.when : (statsLoading ? '…' : '—')}</Badge>
+            </div>
+            <div className="flex items-center space-x-3 p-3 border border-white/10 rounded-lg">
+              <FileText className="h-5 w-5 text-blue-400" />
+              <div className="flex-1">
+                <p className="font-medium">Blog Published</p>
+                <p className="text-slate-400 text-sm">{lastBlog ? lastBlog.title : (statsLoading ? 'Loading…' : 'No blogs yet')}</p>
+              </div>
+              <Badge variant="secondary">{lastBlog ? lastBlog.when : (statsLoading ? '…' : '—')}</Badge>
             </div>
           </div>
         </CardContent>

@@ -80,6 +80,15 @@ export const Events: CollectionConfig = {
           type: 'text',
           label: 'Zoom Link',
         },
+        {
+          name: 'recapUrl',
+          type: 'text',
+          label: 'Recap Blog URL',
+          admin: {
+            readOnly: true,
+            description: 'Auto-generated link to the event recap blog post',
+          },
+        },
       ],
     },
     {

@@ -1,10 +1,17 @@
-﻿import { BlogPost, LayoutPreset, PostStatus, BlockType } from '@/types';
+﻿import { BlogPost, Block, PostStatus, LayoutPreset, BlockType } from '@/types';
 
 // Blog constants
 export const CATEGORIES = [
-  'cybersecurity', 'ai-security', 'ai-ethics-governance',
-  'learning-tech', 'how-to', 'case-studies',
-  'community-careers', 'product-updates'
+  'Cybersecurity',
+  'AI Ethics',
+  'Privacy',
+  'Data Protection',
+  'Incident Response',
+  'Risk Management',
+  'Compliance',
+  'Education',
+  'Research',
+  'Community',
 ];
 
 export const TAGS = ['React', 'TypeScript', 'TailwindCSS', 'AI', 'Security', 'Frontend', 'UX'];
@@ -21,6 +28,7 @@ export const INITIAL_BLOG_POST: BlogPost = createInitialBlogPost();
 export function createInitialBlogPost(): BlogPost {
   return {
     id: 'new',
+    linkedEvent: null, // Add linkedEvent field
     meta: {
       title: 'Untitled Blog Post',
       authorRef: 'Admin User',
@@ -52,20 +60,15 @@ export function createInitialBlogPost(): BlogPost {
         id: crypto.randomUUID(),
         type: BlockType.LEAD_PARAGRAPH,
         props: {
-          text: "This is the lead paragraph. It's designed to grab the reader's attention and provide a concise summary of the article's main points, setting the stage for the detailed content that follows.",
+          text: 'Start writing your blog post here. This lead paragraph will capture your readers\' attention and set the tone for the rest of your content.',
         },
       },
       {
         id: crypto.randomUUID(),
         type: BlockType.RICH_TEXT,
         props: {
-          content: '## A Subheading for Your Section\n\nStart writing your amazing blog content here. You can use markdown to format text, create lists, and embed links. This rich text block is the workhorse of your article, allowing for detailed explanations and storytelling.\n\n*   Bullet points are great for lists.\n*   They help break up long paragraphs.\n*   And make content easier to scan.',
+          content: '## Introduction\n\nWrite your introduction here...\n\n## Main Content\n\nAdd your main content here...',
         },
-      },
-      {
-        id: crypto.randomUUID(),
-        type: BlockType.CODE_BLOCK,
-        props: { language: 'typescript', code: 'console.log("Hello, TechNest!");', filename: 'example.ts' },
       },
     ],
   };

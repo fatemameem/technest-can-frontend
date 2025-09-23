@@ -37,23 +37,24 @@ export interface Event {
 
 export interface EventCardProps {
   event: {
-  id: string;
-  title: string;
-  cover?: string;
-  description: string;
-  date?: string;
-  // time?: string;
-  timeStart?: string;
-  timeEnd?: string;
-  timeZone?: string;
-  location?: string;
-  topic?: string;
-  tags?: string[];
-  links?: {
-    luma?: string;
-    zoom?: string;
-  };
-  sponsors?: string[];
+    id: string;
+    title: string;
+    cover?: string;
+    description: string;
+    date?: string;
+    // time?: string;
+    timeStart?: string;
+    timeEnd?: string;
+    timeZone?: string;
+    location?: string;
+    topic?: string;
+    tags?: string[];
+    links?: {
+      luma?: string;
+      zoom?: string;
+      recapUrl?: string; // Add recapUrl to EventCardProps
+    };
+    sponsors?: string[];
   };
   type: 'upcoming' | 'past';
 }
@@ -73,6 +74,7 @@ export interface UIEvent {
   links?: {
     luma?: string;
     zoom?: string;
+    recapUrl?: string; // Add recapUrl to UIEvent
   };
   sponsors?: string;
 }
@@ -243,7 +245,58 @@ export interface VideoEmbedProps {
 
 export interface BlogPost {
   id: string;
+  linkedEvent?: string | null; // Add this field
   meta: MetaData;
   layout: Layout;
   blocks: Block[];
+}
+
+export interface PodcastForm {
+  title: string;
+  description: string;
+  linkedin: string;
+  instagram: string;
+  drive: string;
+  facebook: string;
+  thumbnail: string;
+}
+
+
+export interface EventForm {
+  title: string;
+  topic: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  lumaLink: string;
+  zoomLink: string;
+  sponsors: string[];
+}
+
+export interface AdminForm {
+  name: string;
+  email: string;
+  role: 'admin' | 'moderator' | '';
+}
+
+export interface Blog {
+  title: string;
+  content: string;
+  coverImage: string;
+  author: string;
+  publishDate: string;
+  status: 'draft' | 'published' | 'archived' | '';
+}
+
+export interface TeamMemberForm {
+  name: string;
+  email: string;
+  designation: string;
+  description: string;
+  linkedin: string;
+  twitter: string;
+  github: string;
+  website: string;
+  imageLink: string;
 }

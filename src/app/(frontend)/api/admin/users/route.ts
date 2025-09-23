@@ -1,6 +1,7 @@
 import { generateStrongPassword } from '@/helpers/generateStrongPassword';
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { requireRole } from '@/lib/auth/requireRole';
 
 export async function POST(req: Request) {
   try {
@@ -12,6 +13,7 @@ export async function POST(req: Request) {
     for (const item of items) {
       const email = String(item.email || '').toLowerCase();
       const role = item.accessLevel || item.role;
+      const name = item.name || email; // Use email as fallback if name is not provided
       if (!email || !role) continue;
 
       const existing = await payload.find({ collection: 'users', where: { email: { equals: email } }, depth: 0, limit: 1, overrideAccess: true });
@@ -25,7 +27,8 @@ export async function POST(req: Request) {
         // Create user with the generated password
         const created = await payload.create({ 
           collection: 'users', 
-          data: { 
+          data: {
+            name, 
             email, 
             role, 
             password  // Include the generated password
@@ -44,5 +47,32 @@ export async function POST(req: Request) {
   } catch (e: any) {
     console.error('[admin/users] error', e);
     return Response.json({ error: e?.message || 'Failed to upsert users' }, { status: 500 });
+  }
+}
+
+// Add this GET function to your existing route.ts file
+export async function GET() {
+  try {
+    // Only admins should be able to list all users
+    const auth = await requireRole(['admin']);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.json), { status: auth.status });
+    }
+    
+    const payload = await getPayload({ config: configPromise });
+    const res = await payload.find({ 
+      collection: 'users', 
+      limit: 100, 
+      sort: 'email',
+      overrideAccess: true 
+    });
+    
+    return Response.json(res);
+  } catch (e: any) {
+    console.error('[admin/users] GET error', e);
+    return Response.json(
+      { error: e?.message || 'Failed to load users' }, 
+      { status: 500 }
+    );
   }
 }

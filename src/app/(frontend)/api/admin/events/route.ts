@@ -1,5 +1,6 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { requireRole } from '@/lib/auth/requireRole'
 
 export async function POST(req: Request) {
   try {
@@ -41,11 +42,22 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
+  const auth = await requireRole(['admin', 'moderator']);
+  if (!auth.ok) {
+    return new Response(JSON.stringify(auth.json), { status: auth.status });
+  }
+
   try {
     const payload = await getPayload({ config: configPromise });
-    const res = await payload.find({ collection: 'events', limit: 200, sort: 'eventDetails.date', overrideAccess: true });
+    const res = await payload.find({ 
+      collection: 'events', 
+      limit: 200, 
+      sort: '-eventDetails.date',
+      overrideAccess: true 
+    });
     return Response.json(res);
-  } catch (e: any) {
-    return Response.json({ error: e?.message || 'Failed to load events' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[admin/events] GET error', error);
+    return new Response(JSON.stringify({ error: error?.message || 'Failed to load events' }), { status: 500 });
   }
 }
