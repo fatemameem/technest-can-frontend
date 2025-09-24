@@ -1,6 +1,8 @@
 ﻿// storage-adapter-import-placeholder
 import { mongooseAdapter } from '@payloadcms/db-mongodb' // database-adapter-import
 // import { payloadCloudPlugin } from '@payloadcms/payload-cloud'
+import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage';
+import { v2 as cloudinary } from 'cloudinary'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
@@ -13,6 +15,7 @@ import { Podcasts } from './collections/Podcasts'
 import { Blogs } from './collections/Blogs'
 import { Events } from './collections/Events'
 import Team from './collections/Team'
+import { cloudinaryAdapter } from '@/lib/cloudinaryAdapter';
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -39,5 +42,16 @@ export default buildConfig({
   plugins: [
     // payloadCloudPlugin(),
     // storage-adapter-placeholder
+    cloudStoragePlugin({
+      collections: {
+        media: {
+          adapter: cloudinaryAdapter,
+          disableLocalStorage: true, // Prevent Payload from saving files to disk
+          generateFileURL: ({ filename }) => {
+            return cloudinary.url(`media/${filename}`, { secure: true })
+          },
+        },
+      },
+    }),
   ],
 })
