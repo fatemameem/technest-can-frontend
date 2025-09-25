@@ -2,7 +2,7 @@
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CustomizedCard } from '@/components/ui/card';
 import { ServiceCard } from '@/components/cards/ServiceCard';
 import { EventCallout } from '@/components/events/EventCallout';
 import Link from 'next/link';
@@ -109,13 +109,13 @@ export default function Home() {
         imageUrl='./images/home.webp'
       >
         <div className="font-poppins flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild className="btn-primary text-white px-8 py-3 text-lg">
+          <Button asChild className="btn-primary text-white px-8 py-3 text-base md:text-lg">
             <Link href="/services">
               Explore Services
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
-          <Button asChild variant="outline" className="btn-secondary text-slate-300 px-8 py-3 text-lg ">
+          <Button asChild variant="outline" className="btn-secondary text-slate-300 px-8 py-3 text-base md:text-lg">
             <Link href="/events">
               Upcoming Events
               <ExternalLink className="ml-2 h-5 w-5" />
@@ -142,12 +142,12 @@ export default function Home() {
       <Section className="pt-8 lg:pt-12">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Our Vision</h2>
-          <p className="text-slate-300 text-lg max-w-4xl mx-auto font-poppins">
+          <p className="text-slate-300 text-base lg:text-lg max-w-4xl mx-auto font-poppins">
             Our mission is straightforward: to make cyber security <span className="">accessible, practical and community-driven</span>. <br/>
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          <Card className="col-span-3 surface overflow-hidden">
+        <div className="grid grid-cols-1 items-center lg:grid-cols-5 gap-6">
+          <CustomizedCard className="col-span-3">
               <CardContent className="p-0">
                 <div className="aspect-video bg-slate-900">
                   <iframe 
@@ -160,8 +160,8 @@ export default function Home() {
                   />
                 </div>
               </CardContent>
-            </Card>
-          <p className="text-slate-300 col-span-2 text-lg max-w-2xl mx-auto font-poppins">
+            </CustomizedCard>
+          <p className="text-slate-300 col-span-2 text-sm md:text-base max-w-2xl mx-auto font-poppins">
             We at TECH-NEST recognize the urgent need for awareness surrounding cyber security and AI ethics, especially given that Canadians are deeply concerned about AI's negative consequences and have lost millions due to cyber fraud.<br/><br/>
 
             We actively address this need by running <span className="font-semibold">workshops</span> in various community hubs and at Concordia University, where we talk with people about important topics like <span className="font-semibold">AI ethics and cyber security</span>. We believe Canadians deserve better support for their cyber safety.<br/><br/>
@@ -175,11 +175,11 @@ export default function Home() {
       <Section className="">
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Recent News & Events</h2>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto font-poppins">
+          <p className="text-slate-300 text-base lg:text-lg max-w-2xl mx-auto font-poppins">
             Stay updated with the latest news and events in the world of cybersecurity and AI ethics.
           </p>
         </div>
-        <div className="flex gap-16 justify-left items-center flex-col md:flex-row">
+        <div className="flex gap-4 md:gap-8 lg:gap-16 justify-left items-center flex-col md:flex-row">
           <div className="lg:col-span-1 space-y-6">
             <Card className=" surface">
               <CardContent className="p-6">
@@ -241,7 +241,7 @@ export default function Home() {
       <Section>
         <div className="text-center mb-12">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Our Services</h2>
-          <p className="text-slate-300 text-lg max-w-2xl mx-auto font-poppins">
+          <p className="text-slate-300 text-base lg:text-lg max-w-2xl mx-auto font-poppins">
             Comprehensive cybersecurity solutions and AI ethics guidance for organizations of all sizes.
           </p>
         </div>
@@ -257,7 +257,7 @@ export default function Home() {
           ))}
         </div>
         <div className="text-center mt-12">
-          <Button asChild className="btn-primary font-poppins">
+          <Button asChild className="btn-primary text-sm md:text-base font-poppins">
             <Link href="/services">View All Services</Link>
           </Button>
         </div>

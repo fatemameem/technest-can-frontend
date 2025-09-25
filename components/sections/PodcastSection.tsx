@@ -71,11 +71,11 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
                                 {badge}
                             </Badge>
                         ) : null}
-                        <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
+                        <h2 className="mt-4 lg:text-3xl text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
                             {title}
                         </h2>
                         {description ? (
-                            <p className="mt-4 max-w-2xl text-lg text-slate-700 dark:text-slate-300 font-poppins">
+                            <p className="mt-4 max-w-2xl text-base lg:text-lg text-slate-700 dark:text-slate-300 font-poppins">
                                 {description}
                             </p>
                         ) : null}
@@ -140,7 +140,7 @@ const PodcastsSection: React.FC<PodcastsSectionProps> = ({ podcasts, title, badg
                 </div>
                 {showAllBtn ? (
                     <div className="text-center mt-8">
-                        <Button asChild className="btn-primary font-poppins">
+                        <Button asChild className="btn-primary text-sm md:text-base font-poppins">
                             <Link href="/podcasts">View All Episodes</Link>
                         </Button>
                     </div>

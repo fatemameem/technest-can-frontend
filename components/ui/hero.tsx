@@ -31,11 +31,11 @@ export function Hero({
         <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
       )}
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 className="leading-tight text-4xl lg:text-6xl lg:leading-tight font-bold mb-6 bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent ">
+        <h1 className="leading-tight text-2xl md:text-4xl lg:text-6xl lg:leading-tight font-bold mb-6 bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent ">
           {title}
         </h1>
         {subtitle && (
-          <p className="font-poppins text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="font-poppins text-base md:text-lg lg:text-xl text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
             {subtitle}
           </p>
         )}
