@@ -16,6 +16,20 @@ const Card = React.forwardRef<
   />
 ));
 Card.displayName = 'Card';
+const CustomizedCard = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      'rounded-lg border-0',
+      className
+    )}
+    {...props}
+  />
+));
+CustomizedCard.displayName = 'CustomizedCard';
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
@@ -78,6 +92,7 @@ CardFooter.displayName = 'CardFooter';
 
 export {
   Card,
+  CustomizedCard,
   CardHeader,
   CardFooter,
   CardTitle,

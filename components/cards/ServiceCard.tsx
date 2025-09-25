@@ -38,9 +38,9 @@ export function ServiceCard({ service }: ServiceCardProps) {
           <div className="p-2 bg-blue-600/10 rounded-lg">
             <IconComponent className="h-6 w-6 text-blue-600" />
           </div>
-          <CardTitle className="text-xl">{service.title}</CardTitle>
+          <CardTitle className="text-lg lg:text-xl">{service.title}</CardTitle>
         </div>
-        <p className="text-slate-300 font-poppins">{service.description}</p>
+        <p className="text-slate-300 text-sm md:text-base font-poppins">{service.description}</p>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         {/* <div className="flex flex-wrap justify-center items-center gap-2 mb-6">
@@ -53,7 +53,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
         <div className="mt-auto">
           {service.available ? (
             // Render button with link when available
-            <Button asChild variant="outline" className="font-poppins btn-secondary w-full">
+            <Button asChild variant="outline" className="font-poppins text-sm md:text-base btn-secondary w-full">
               <Link href={`/contact?service=${service.id}`}>
                 Request Service
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -63,7 +63,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
             // Render just a disabled button when not available
             <Button 
               variant="outline" 
-              className="btn-secondary w-full opacity-50 cursor-not-allowed" 
+              className="btn-secondary text-sm md:text-base w-full opacity-50 cursor-not-allowed" 
               disabled={true}
             >
               Coming Soon
