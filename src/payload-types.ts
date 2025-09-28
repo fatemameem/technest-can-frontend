@@ -153,7 +153,21 @@ export interface User {
  */
 export interface Media {
   id: string;
-  alt: string;
+  alt?: string | null;
+  cloudinary?: {
+    publicId?: string | null;
+    secureUrl?: string | null;
+    width?: number | null;
+    height?: number | null;
+    bytes?: number | null;
+    quality?: number | null;
+    format?: string | null;
+  };
+  drive?: {
+    fileId?: string | null;
+    viewUrl?: string | null;
+    downloadUrl?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -175,13 +189,20 @@ export interface Podcast {
   title: string;
   slug?: string | null;
   description?: string | null;
-  thumbnail?: string | null;
+  thumbnail?: (string | null) | Media;
   socialLinks?: {
     linkedin?: string | null;
     instagram?: string | null;
     facebook?: string | null;
   };
   driveLink?: string | null;
+  learnMoreLinks?:
+    | {
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
   published?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -413,6 +434,24 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  cloudinary?:
+    | T
+    | {
+        publicId?: T;
+        secureUrl?: T;
+        width?: T;
+        height?: T;
+        bytes?: T;
+        quality?: T;
+        format?: T;
+      };
+  drive?:
+    | T
+    | {
+        fileId?: T;
+        viewUrl?: T;
+        downloadUrl?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -442,6 +481,13 @@ export interface PodcastsSelect<T extends boolean = true> {
         facebook?: T;
       };
   driveLink?: T;
+  learnMoreLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
   published?: T;
   updatedAt?: T;
   createdAt?: T;
