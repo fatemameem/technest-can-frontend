@@ -923,6 +923,7 @@ export function useAdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setPodcasts(data.docs || []);
+        // Note: No need to transform the data - keep the full thumbnail object
       } else {
         console.error('Failed to fetch podcasts:', response.status);
         toast.error('Failed to load podcasts');

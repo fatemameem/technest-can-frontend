@@ -1,6 +1,7 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { NextResponse } from 'next/server';
+import { requireRole } from '@/lib/auth/requireRole';
 
 
 export async function POST(req: Request) {
@@ -69,12 +70,35 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    // Authorization check
+    const auth = await requireRole(['admin', 'moderator']);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.json), { status: auth.status });
+    }
+
+    const url = new URL(req.url);
+    const params = Object.fromEntries(url.searchParams);
+    
     const payload = await getPayload({ config: configPromise });
-    const res = await payload.find({ collection: 'podcasts', limit: 100, sort: '-createdAt', overrideAccess: true });
-    return Response.json(res);
+    
+    // Add depth parameter to populate the thumbnail relation
+    const podcasts = await payload.find({
+      collection: 'podcasts',
+      depth: 1, // This is key - it populates relations one level deep
+      sort: '-createdAt',
+      limit: 100,
+      overrideAccess: true,
+      ...params
+    });
+    
+    return Response.json(podcasts);
   } catch (e: any) {
-    return Response.json({ error: e?.message || 'Failed to load podcasts' }, { status: 500 });
+    console.error('[admin/podcasts] GET error:', e);
+    return Response.json(
+      { error: e?.message || 'Failed to fetch podcasts' },
+      { status: 500 }
+    );
   }
 }

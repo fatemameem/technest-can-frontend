@@ -6,6 +6,26 @@ import PodcastFormCard from '@/components/admin/forms/PodcastFormCard';
 import { PodcastForm } from '@/types';
 import Image from 'next/image';
 
+interface PodcastWithThumbnail {
+  id: string;
+  title: string;
+  description: string;
+  linkedin?: string;
+  instagram?: string;
+  drive?: string;
+  facebook?: string;
+  thumbnail?: {
+    id: string;
+    cloudinary: {
+      secureUrl: string;
+      publicId: string;
+      width: number;
+      height: number;
+      // Other cloudinary fields...
+    };
+  } | null;
+}
+
 interface PodcastsTabProps {
 	podcastForms: Array<{
 		title: string;
@@ -23,7 +43,7 @@ interface PodcastsTabProps {
 		[key: string]: boolean | undefined;
 	};
 	isSubmittingPodcasts: boolean;
-	podcasts: any[];
+	podcasts: PodcastWithThumbnail[];
 	loadingPodcasts: boolean;
 	actions: {
 		addPodcastForm: () => void;
@@ -82,7 +102,15 @@ export default function PodcastsTab({
 												<div className="flex items-center space-x-3">
 													<div
 														className="w-12 h-12 bg-cover bg-center rounded-lg"
-														style={{ backgroundImage: `url(${podcast.thumbnail || 'https://placehold.co/100x100/444/fff?text=Podcast'})` }}
+														style={{ 
+															backgroundImage: `url(${
+																// Check if thumbnail is an object with cloudinary data
+																podcast.thumbnail && typeof podcast.thumbnail === 'object' && podcast.thumbnail.cloudinary
+																	? podcast.thumbnail.cloudinary.secureUrl
+																	// Fallback for backward compatibility or missing thumbnails
+																	: 'https://placehold.co/100x100/444/fff?text=Podcast'
+															})`
+														}}
 													></div>
 													<p className="text-white font-medium">{podcast.title}</p>
 												</div>
@@ -92,9 +120,9 @@ export default function PodcastsTab({
 											</td>
 											<td className="p-4">
 												<div className="flex flex-wrap gap-2">
-													{podcast.driveLink && (
+													{podcast.drive && (
 														<a
-															href={podcast.driveLink}
+															href={podcast.drive}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -102,9 +130,9 @@ export default function PodcastsTab({
 															<LinkIcon className="mr-1 h-3 w-3" />
 														</a>
 													)}
-													{podcast.socialLinks.linkedin && (
+													{podcast.linkedin && (
 														<a
-															href={podcast.socialLinks.linkedin}
+															href={podcast.linkedin}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -112,9 +140,9 @@ export default function PodcastsTab({
 															<LinkedinIcon className="mr-1 h-3 w-3" />
 														</a>
 													)}
-													{podcast.socialLinks.instagram && (
+													{podcast.instagram && (
 														<a
-															href={podcast.socialLinks.instagram}
+															href={podcast.instagram}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -122,9 +150,9 @@ export default function PodcastsTab({
 															<InstagramIcon className="mr-1 h-3 w-3" />
 														</a>
 													)}
-													{podcast.socialLinks.facebook && (
+													{podcast.facebook && (
 														<a
-															href={podcast.socialLinks.facebook}
+															href={podcast.facebook}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -147,7 +175,9 @@ export default function PodcastsTab({
 															instagram: podcast.instagram || '',
 															drive: podcast.drive || '',
 															facebook: podcast.facebook || '',
-															thumbnail: podcast.thumbnail || ''
+															thumbnail: podcast.thumbnail && typeof podcast.thumbnail === 'object' && podcast.thumbnail.cloudinary 
+																? podcast.thumbnail.cloudinary.secureUrl 
+																: ''
 														})}
 														disabled={isSubmittingPodcasts || deletingItemId !== null}
 													>
