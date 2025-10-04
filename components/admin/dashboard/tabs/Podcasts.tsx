@@ -1,15 +1,22 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Plus, Save, ChevronLeft, ChevronRight, HardDriveIcon, LinkedinIcon, InstagramIcon, FacebookIcon, LinkIcon, Loader, Loader2 } from 'lucide-react';
 import PodcastFormCard from '@/components/admin/forms/PodcastFormCard';
 import { PodcastForm } from '@/types';
-import { useState, useRef } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 
 interface PodcastsTabProps {
-	podcastForms: PodcastForm[];
+	podcastForms: Array<{
+		title: string;
+		description: string;
+		linkedin: string;
+		instagram: string;
+		drive: string;
+		facebook: string;
+		thumbnail: string;
+		thumbnailFile?: File | null;
+	}>;
 	showPodcastForm: boolean;
 	editMode: {
 		podcasts?: boolean;

@@ -259,6 +259,10 @@ export interface PodcastForm {
   drive: string;
   facebook: string;
   thumbnail: string;
+  // //cloudinary- added file field
+  thumbnailFile?: File | null;
+  thumbnailId?: string;
+  thumbnailUrl?: string;
 }
 
 

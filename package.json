@@ -17,6 +17,8 @@
     "@payloadcms/next": "^3.55.0",
     "@payloadcms/plugin-cloud-storage": "^3.55.0",
     "@payloadcms/richtext-lexical": "^3.55.0",
+    "@payloadcms/translations": "^3.55.0",
+    "@payloadcms/ui": "^3.55.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",

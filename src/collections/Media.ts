@@ -3,6 +3,7 @@ import type { CollectionConfig } from 'payload';
 import { v2 as cloudinary } from 'cloudinary';
 import { google } from 'googleapis';
 import { compressImage } from '@/lib/compressImage';
+import { Readable, PassThrough } from 'stream';
 
 // Configure Cloudinary with environment variables
 cloudinary.config({
@@ -10,16 +11,6 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY!,
   api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
-
-// Configure Google Drive client
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL!,
-    private_key: process.env.GOOGLE_CLIENT_SECRET!.replace(/\\n/g, '\n'),
-  },
-  scopes: ['https://www.googleapis.com/auth/drive'],
-});
-const drive = google.drive({ version: 'v3', auth });
 
 // Helper to convert an incoming file stream to Buffer (for Sharp)
 async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
@@ -30,6 +21,36 @@ async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
     stream.on('error', reject);
   });
 }
+
+// //cloudinary- fix service account storage quota issue
+
+const getAuthenticatedDriveClient = () => {
+  try {
+    // Get the private key from env variables
+    let privateKey = process.env.GOOGLE_SA_KEY || '';
+    privateKey = privateKey.split(String.raw`\n`).join('\n');
+    
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.GOOGLE_SA_EMAIL,
+        private_key: privateKey,
+        project_id: process.env.GOOGLE_PROJECT_ID,
+      },
+      // //cloudinary- update scopes to include shared drives access
+      scopes: [
+        'https://www.googleapis.com/auth/drive',
+        'https://www.googleapis.com/auth/drive.file',
+        'https://www.googleapis.com/auth/drive.appdata'
+      ]
+    });
+    
+    return google.drive({ version: 'v3', auth });
+  } catch (error) {
+    console.error('Google Drive authentication error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to initialize Google Drive client: ${errorMessage}`);
+  }
+};
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -77,59 +98,103 @@ export const Media: CollectionConfig = {
         const filename = uploadedFile.name;
         const mimetype = uploadedFile.mimetype;
 
-        /* A. Upload original to Google Drive */
-        const driveRes = await drive.files.create({
-          requestBody: {
-            name: filename,
-            mimeType: mimetype,
-            parents: [process.env.GDRIVE_FOLDER_ID!],
-          },
-          media: { mimeType: mimetype, body: fileBuffer },
-        });
-        const fileId = driveRes.data.id!;
+        /* A. Upload original to Google Drive */
+        try {
+          // Skip Google Drive upload if disabled
+          if (process.env.SKIP_GDRIVE_UPLOAD === 'true') {
+            console.log('Skipping Google Drive upload (disabled by config)');
+            data.drive = { 
+              fileId: 'skipped',
+              viewUrl: '',
+              downloadUrl: ''
+            };
+          } else {
+            const drive = getAuthenticatedDriveClient();
+            
+            // //cloudinary- use a shared drive instead of service account storage
+            const driveRes = await drive.files.create({
+              // //cloudinary- specify supportsAllDrives for shared drive access
+              supportsAllDrives: true,
+              
+              requestBody: {
+                name: filename,
+                mimeType: mimetype,
+                // //cloudinary- use shared drive ID instead of folder ID
+                ...(process.env.GDRIVE_FOLDER_ID ? { 
+                  parents: [process.env.GDRIVE_FOLDER_ID || 'root'],
+                  driveId: process.env.GDRIVE_FOLDER_ID 
+                } : { 
+                  parents: [process.env.GDRIVE_FOLDER_ID || 'root']
+                })
+              },
+              media: {
+                mimeType: mimetype,
+                body: new PassThrough().end(fileBuffer),
+              },
+            });
+            
+            const fileId = driveRes.data.id!;
 
-        // Make the file publicly readable
-        await drive.permissions.create({
-          fileId,
-          requestBody: { type: 'anyone', role: 'reader' },
-        });
+            // Make the file publicly readable
+            await drive.permissions.create({
+              fileId,
+              // //cloudinary- add support for shared drives
+              supportsAllDrives: true,
+              requestBody: { type: 'anyone', role: 'reader' },
+            });
 
-        data.drive = {
-          fileId,
-          viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
-          downloadUrl: `https://drive.google.com/uc?id=${fileId}`,
-        };
+            data.drive = {
+              fileId,
+              viewUrl: `https://drive.google.com/file/d/${fileId}/view`,
+              downloadUrl: `https://drive.google.com/uc?id=${fileId}`,
+            };
+          }
+        } catch (driveError) {
+          console.error('Error uploading to Google Drive:', driveError);
+          // Don't throw error, just record it and continue with Cloudinary upload
+          data.drive = {
+            fileId: 'error',
+            viewUrl: '',
+            downloadUrl: '',
+            error: driveError instanceof Error ? driveError.message : String(driveError)
+          };
+        }
 
         /* B. Compress for Cloudinary */
-        const { buffer: compressed, usedQuality } = await compressImage(fileBuffer, {
-          targetKB: Number(process.env.IMG_TARGET_KB || 150),
-          maxWidth: Number(process.env.IMG_MAX_W || 1600),
-          maxHeight: Number(process.env.IMG_MAX_H || 1600),
-          format: (process.env.IMG_FORMAT as any) || 'webp',
-        });
+        try {
+          const { buffer: compressed, usedQuality } = await compressImage(fileBuffer, {
+            targetKB: Number(process.env.IMG_TARGET_KB || 150),
+            maxWidth: Number(process.env.IMG_MAX_W || 1600),
+            maxHeight: Number(process.env.IMG_MAX_H || 1600),
+            format: (process.env.IMG_FORMAT as any) || 'webp',
+          });
 
-        /* C. Upload to Cloudinary */
-        const uploadResult: any = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: process.env.CLOUDINARY_FOLDER || 'payload',
-              resource_type: 'image',
-              format: (process.env.IMG_FORMAT as any) || 'webp',
-            },
-            (error, result) => (error ? reject(error) : resolve(result)),
-          );
-          stream.end(compressed);
-        });
+          /* C. Upload to Cloudinary */
+          const uploadResult: any = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+              {
+                folder: process.env.CLOUDINARY_FOLDER || 'payload',
+                resource_type: 'image',
+                format: (process.env.IMG_FORMAT as any) || 'webp',
+              },
+              (error, result) => (error ? reject(error) : resolve(result)),
+            );
+            stream.end(compressed);
+          });
 
-        data.cloudinary = {
-          publicId: uploadResult.public_id,
-          secureUrl: uploadResult.secure_url,
-          width: uploadResult.width,
-          height: uploadResult.height,
-          bytes: compressed.length,
-          quality: usedQuality,
-          format: (process.env.IMG_FORMAT as any) || 'webp',
-        };
+          data.cloudinary = {
+            publicId: uploadResult.public_id,
+            secureUrl: uploadResult.secure_url,
+            width: uploadResult.width,
+            height: uploadResult.height,
+            bytes: compressed.length,
+            quality: usedQuality,
+            format: (process.env.IMG_FORMAT as any) || 'webp',
+          };
+        } catch (cloudinaryError) {
+          console.error('Error processing/uploading to Cloudinary:', cloudinaryError);
+          throw new Error('Failed to upload file to Cloudinary');
+        }
 
         return data;
       },

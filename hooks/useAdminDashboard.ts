@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import { PodcastForm, EventForm, AdminForm, TeamMemberForm, Blog } from '@/types';
@@ -186,16 +186,18 @@ export function useAdminDashboard() {
 
   // Podcast handlers
   const addPodcastForm = useCallback(() => {
-    setPodcastForms([...podcastForms, {
+    setPodcastForms(prev => [...prev, {
       title: '',
       description: '',
       linkedin: '',
       instagram: '',
       drive: '',
       facebook: '',
-      thumbnail: ''
+      thumbnail: '',
+      thumbnailFile: null
     }]);
-  }, [podcastForms]);
+    setShowPodcastForm(true);
+  }, []);
 
   const removePodcastForm = useCallback((index: number) => {
     if (podcastForms.length > 1) {
@@ -243,15 +245,16 @@ export function useAdminDashboard() {
       for (let i = 0; i < podcastForms.length; i++) {
         const f = podcastForms[i];
 
-        if (!isNonEmpty(f.title) || !isNonEmpty(f.description) || !isNonEmpty(f.drive) || !isNonEmpty(f.thumbnail)) {
-          toast.error(`Podcast #${i + 1}: Title, Description, Drive, and Thumbnail are required.`);
+        // //cloudinary- modified validation to check thumbnail exists
+        if (!isNonEmpty(f.title) || !isNonEmpty(f.description) || !isNonEmpty(f.thumbnail)) {
+          toast.error(`Podcast #${i + 1}: Title, Description, and Thumbnail are required.`);
           setIsSubmittingPodcasts(false);
           return;
         }
 
+        // //cloudinary- modified URL checks (removed thumbnail required validation)
         const urlChecks: Array<[string, string, boolean]> = [
-          [f.drive, "Drive", true],
-          [f.thumbnail, "Thumbnail", true],
+          [f.drive, "Drive", false], // //cloudinary- made optional as upload creates a drive link
           [f.linkedin, "LinkedIn", false],
           [f.instagram, "Instagram", false],
           [f.facebook, "Facebook", false],
@@ -272,6 +275,7 @@ export function useAdminDashboard() {
       }
 
       const ts = buildTimestamp();
+      // //cloudinary- create entries without _id field to prevent BSON errors
       const entries: any[] = podcastForms.map((f) => ({
         timestamp: String(ts),
         title: String(sanitize(f.title)),
@@ -281,6 +285,7 @@ export function useAdminDashboard() {
         drive: String(sanitize(f.drive)),
         facebook: String(sanitize(f.facebook)),
         thumbnail: String(sanitize(f.thumbnail)),
+        // Don't include thumbnailFile as it's not needed in the DB
       }));
       
       let apiUrl = '/api/admin/podcasts';
@@ -289,13 +294,17 @@ export function useAdminDashboard() {
       if (editMode.podcasts && currentEditId) {
         apiUrl = `/api/admin/podcasts/${currentEditId}`;
         method = 'PUT';
+        // //cloudinary- remove any potential _id field to avoid BSON errors
+        const entryToUpdate = { ...entries[0] };
+        delete entryToUpdate._id;
         await fetch(apiUrl, { 
           method, 
           headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entries[0]) 
+          body: JSON.stringify(entryToUpdate) 
         });
         toast.success("Podcast updated successfully!");
       } else {
+        console.log('Submitting podcasts:', entries);
         await fetch(apiUrl, { 
           method, 
           headers: { 'Content-Type': 'application/json' }, 
@@ -311,7 +320,9 @@ export function useAdminDashboard() {
         instagram: '',
         drive: '',
         facebook: '',
-        thumbnail: ''
+        thumbnail: '',
+        // //cloudinary- reset the thumbnailFile
+        thumbnailFile: null
       }]);
       setEditMode(prev => ({ ...prev, podcasts: false }));
       setCurrentEditId(null);
