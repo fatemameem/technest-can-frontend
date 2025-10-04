@@ -6,26 +6,6 @@ import PodcastFormCard from '@/components/admin/forms/PodcastFormCard';
 import { PodcastForm } from '@/types';
 import Image from 'next/image';
 
-interface PodcastWithThumbnail {
-  id: string;
-  title: string;
-  description: string;
-  linkedin?: string;
-  instagram?: string;
-  drive?: string;
-  facebook?: string;
-  thumbnail?: {
-    id: string;
-    cloudinary: {
-      secureUrl: string;
-      publicId: string;
-      width: number;
-      height: number;
-      // Other cloudinary fields...
-    };
-  } | null;
-}
-
 interface PodcastsTabProps {
 	podcastForms: Array<{
 		title: string;
@@ -43,7 +23,7 @@ interface PodcastsTabProps {
 		[key: string]: boolean | undefined;
 	};
 	isSubmittingPodcasts: boolean;
-	podcasts: PodcastWithThumbnail[];
+	podcasts: any[];
 	loadingPodcasts: boolean;
 	actions: {
 		addPodcastForm: () => void;
@@ -120,9 +100,9 @@ export default function PodcastsTab({
 											</td>
 											<td className="p-4">
 												<div className="flex flex-wrap gap-2">
-													{podcast.drive && (
+													{podcast.driveLink && (
 														<a
-															href={podcast.drive}
+															href={podcast.driveLink}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -130,9 +110,9 @@ export default function PodcastsTab({
 															<LinkIcon className="mr-1 h-3 w-3" />
 														</a>
 													)}
-													{podcast.linkedin && (
+													{podcast.socialLinks.linkedin && (
 														<a
-															href={podcast.linkedin}
+															href={podcast.socialLinks.linkedin}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -140,9 +120,9 @@ export default function PodcastsTab({
 															<LinkedinIcon className="mr-1 h-3 w-3" />
 														</a>
 													)}
-													{podcast.instagram && (
+													{podcast.socialLinks.instagram && (
 														<a
-															href={podcast.instagram}
+															href={podcast.socialLinks.instagram}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -150,9 +130,9 @@ export default function PodcastsTab({
 															<InstagramIcon className="mr-1 h-3 w-3" />
 														</a>
 													)}
-													{podcast.facebook && (
+													{podcast.socialLinks.facebook && (
 														<a
-															href={podcast.facebook}
+															href={podcast.socialLinks.facebook}
 															target="_blank"
 															rel="noreferrer"
 															className="inline-flex items-center rounded-full  px-2.5 py-0.5 text-xs font-medium text-blue-400"
@@ -175,9 +155,7 @@ export default function PodcastsTab({
 															instagram: podcast.instagram || '',
 															drive: podcast.drive || '',
 															facebook: podcast.facebook || '',
-															thumbnail: podcast.thumbnail && typeof podcast.thumbnail === 'object' && podcast.thumbnail.cloudinary 
-																? podcast.thumbnail.cloudinary.secureUrl 
-																: ''
+															thumbnail: podcast.thumbnail || ''
 														})}
 														disabled={isSubmittingPodcasts || deletingItemId !== null}
 													>
