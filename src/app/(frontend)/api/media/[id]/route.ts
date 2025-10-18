@@ -7,11 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } } // This is the correct signature for App Router
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Access id directly from params (no need to await in this case)
-    const id = params.id;
+    // Await params to get the id
+    const { id } = await context.params;
     console.log('Fetching media with ID:', id);
     
     if (!id || id.length !== 24) {

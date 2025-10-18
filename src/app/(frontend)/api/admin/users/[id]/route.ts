@@ -5,7 +5,7 @@ import { requireRole } from '@/lib/auth/requireRole'
 // DELETE user by ID
 export async function DELETE(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   // Await the params object
   const { id } = await context.params;
@@ -41,7 +41,7 @@ export async function DELETE(
 // UPDATE user by ID
 export async function PUT(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   // Await the params object
   const { id } = await context.params;
@@ -83,7 +83,7 @@ export async function PUT(
 // GET a single user by ID
 export async function GET(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   // Await the params object
   const { id } = await context.params;

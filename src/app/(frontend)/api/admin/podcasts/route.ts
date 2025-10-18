@@ -3,9 +3,14 @@ import { getPayload } from 'payload'
 import { NextResponse } from 'next/server';
 import { requireRole } from '@/lib/auth/requireRole';
 
-
 export async function POST(req: Request) {
   try {
+    // Authorization check
+    const auth = await requireRole(['admin', 'moderator']);
+    if (!auth.ok) {
+      return new Response(JSON.stringify(auth.json), { status: auth.status });
+    }
+
     const payload = await getPayload({ config: configPromise });
     const body = await req.json();
     const input = Array.isArray(body) ? body : (Array.isArray(body?.items) ? body.items : [body]);
@@ -15,8 +20,8 @@ export async function POST(req: Request) {
     const created = [] as any[];
     for (const item of input) {
       try {
-        // Prepare sanitized data
-        const sanitizedData: Record<string, any> = {
+        // Prepare sanitized data with proper typing
+        const sanitizedData = {
           title: String(item.title || ''),
           description: String(item.description || ''),
           driveLink: String(item.driveLink || item.drive || ''),
@@ -25,24 +30,21 @@ export async function POST(req: Request) {
             instagram: String(item.instagram || ''),
             facebook: String(item.facebook || '')
           },
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          thumbnail: String(item.thumbnail || ''),
-          published: true
+          published: true,
+          // Only add thumbnail if it's a valid Media ID
+          ...(item.thumbnail && /^[0-9a-fA-F]{24}$/.test(item.thumbnail) 
+            ? { thumbnail: item.thumbnail } 
+            : {}
+          ),
         };
         
-        // Handle thumbnail - now expecting the ID directly
+        // Log for debugging
         if (item.thumbnail) {
-          // Log for debugging
           console.log('Thumbnail value received:', item.thumbnail);
           
-          // If it's a valid MongoDB ObjectId, use it directly
           if (/^[0-9a-fA-F]{24}$/.test(item.thumbnail)) {
-            sanitizedData.thumbnail = item.thumbnail;
             console.log('Using valid media ID for thumbnail:', item.thumbnail);
-          } 
-          // If it's a URL, log a warning but continue without thumbnail
-          else if (item.thumbnail.startsWith('http')) {
+          } else if (item.thumbnail.startsWith('http')) {
             console.warn('Received URL instead of Media ID:', item.thumbnail);
             console.warn('Thumbnail relation will not be set.');
           }
@@ -54,18 +56,19 @@ export async function POST(req: Request) {
           collection: 'podcasts',
           data: sanitizedData,
           overrideAccess: true,
-          depth: 0
+          depth: 1, // Populate thumbnail relation in response
         });
         
         created.push(doc);
       } catch (itemError) {
         console.error('Error processing podcast item:', itemError);
+        throw itemError; // Re-throw to be caught by outer catch
       }
     }
     
     return NextResponse.json({ ok: true, count: created.length, docs: created });
   } catch (e: any) {
-    console.error('[admin/podcasts] error', e);
+    console.error('[admin/podcasts] POST error:', e);
     return NextResponse.json({ error: e?.message || 'Failed to create podcasts' }, { status: 500 });
   }
 }

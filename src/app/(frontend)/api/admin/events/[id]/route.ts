@@ -5,7 +5,7 @@ import { requireRole } from '@/lib/auth/requireRole'
 // DELETE event by ID
 export async function DELETE(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
   
@@ -49,7 +49,7 @@ export async function DELETE(
 // UPDATE event by ID
 export async function PUT(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
   
@@ -140,7 +140,7 @@ export async function PUT(
 // GET a single event by ID
 export async function GET(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
   
