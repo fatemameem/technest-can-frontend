@@ -33,6 +33,12 @@ export const Events: CollectionConfig = {
       label: 'Description',
     },
     {
+      name: 'thumbnail',
+      type: 'upload',
+      label: 'Thumbnail',
+      relationTo: 'media',
+    },
+    {
       name: 'eventDetails',
       type: 'group',
       label: 'Event Details',

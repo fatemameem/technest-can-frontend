@@ -31,7 +31,11 @@ export function useAdminDashboard() {
     location: '',
     lumaLink: '',
     zoomLink: '',
-    sponsors: ['']
+    sponsors: [''],
+    // Add these fields
+    thumbnail: '',
+    thumbnailUrl: '',
+    thumbnailFile: null,
   }]);
 
   const [adminForms, setAdminForms] = useState<AdminForm[]>([{
@@ -347,7 +351,11 @@ export function useAdminDashboard() {
       location: '',
       lumaLink: '',
       zoomLink: '',
-      sponsors: ['']
+      sponsors: [''],
+      // Add these fields
+      thumbnail: '',
+      thumbnailUrl: '',
+      thumbnailFile: null,
     }]);
   }, [eventForms]);
 
@@ -357,7 +365,7 @@ export function useAdminDashboard() {
     }
   }, [eventForms]);
 
-  const updateEventForm = useCallback((index: number, field: keyof EventForm, value: string | string[]) => {
+  const updateEventForm = useCallback((index: number, field: keyof EventForm, value: string | string[] | File | null) => {
     const updated = [...eventForms];
     updated[index] = { ...updated[index], [field]: value };
     setEventForms(updated);
@@ -406,9 +414,33 @@ export function useAdminDashboard() {
       location: '',
       lumaLink: '',
       zoomLink: '',
-      sponsors: ['']
+      sponsors: [''],
+      // Add these fields
+      thumbnail: '',
+      thumbnailUrl: '',
+      thumbnailFile: null,
     }]);
     setShowEventForm(false);
+  }, []);
+
+    // Fetch events
+  const fetchEvents = useCallback(async () => {
+    try {
+      setLoadingEvents(true);
+      const response = await fetch('/api/admin/events');
+      if (response.ok) {
+        const data = await response.json();
+        setEvents(data.docs || []);
+      } else {
+        console.error('Failed to fetch events:', response.status);
+        toast.error('Failed to load events');
+      }
+    } catch (error) {
+      console.error('Failed to fetch events:', error);
+      toast.error('Failed to load events');
+    } finally {
+      setLoadingEvents(false);
+    }
   }, []);
 
   const handleEventSubmit = useCallback(async () => {
@@ -418,6 +450,7 @@ export function useAdminDashboard() {
       for (let i = 0; i < eventForms.length; i++) {
         const f = eventForms[i];
 
+        // Updated validation - thumbnail is now optional but recommended
         if (
           !isNonEmpty(f.title) ||
           !isNonEmpty(f.topic) ||
@@ -459,6 +492,9 @@ export function useAdminDashboard() {
           .map(sanitize)
           .filter((s) => s.length > 0)
           .join(", "),
+        // Add thumbnail field (Media ID)
+        thumbnail: f.thumbnail ? String(sanitize(f.thumbnail)) : undefined,
+        // Don't include thumbnailFile or thumbnailUrl - they're client-side only
       }));
 
       let apiUrl = '/api/admin/events';
@@ -467,19 +503,37 @@ export function useAdminDashboard() {
       if (editMode.events && currentEditId) {
         apiUrl = `/api/admin/events/${currentEditId}`;
         method = 'PUT';
-        await fetch(apiUrl, { 
+        // Remove any potential _id field to avoid BSON errors
+        const entryToUpdate = { ...entries[0] };
+        delete entryToUpdate._id;
+        
+        const response = await fetch(apiUrl, { 
           method, 
           headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entries[0]) 
+          body: JSON.stringify(entryToUpdate) 
         });
-        toast.success("Event updated successfully!");
+        
+        if (response.ok) {
+          toast.success("Event updated successfully!");
+          fetchEvents(); // Refresh the list
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update event');
+        }
       } else {
-        await fetch(apiUrl, { 
+        const response = await fetch(apiUrl, { 
           method, 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify(entries) 
         });
-        toast.success(`${entries.length} event(s) submitted successfully!`);
+        
+        if (response.ok) {
+          toast.success(`${entries.length} event(s) submitted successfully!`);
+          fetchEvents(); // Refresh the list
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create event(s)');
+        }
       }
       
       setEventForms([{
@@ -491,7 +545,10 @@ export function useAdminDashboard() {
         location: '',
         lumaLink: '',
         zoomLink: '',
-        sponsors: ['']
+        sponsors: [''],
+        thumbnail: '',
+        thumbnailUrl: '',
+        thumbnailFile: null,
       }]);
       setEditMode(prev => ({ ...prev, events: false }));
       setCurrentEditId(null);
@@ -503,7 +560,7 @@ export function useAdminDashboard() {
     } finally {
       setIsSubmittingEvents(false);
     }
-  }, [eventForms, editMode.events, currentEditId]);
+  }, [eventForms, editMode.events, currentEditId, fetchEvents]);
 
   // Admin handlers
   const addAdminForm = useCallback(() => {
@@ -959,26 +1016,6 @@ export function useAdminDashboard() {
       setDeletingItemId(null);
     }
   }, [fetchPodcasts]);
-
-  // Fetch events
-  const fetchEvents = useCallback(async () => {
-    try {
-      setLoadingEvents(true);
-      const response = await fetch('/api/admin/events');
-      if (response.ok) {
-        const data = await response.json();
-        setEvents(data.docs || []);
-      } else {
-        console.error('Failed to fetch events:', response.status);
-        toast.error('Failed to load events');
-      }
-    } catch (error) {
-      console.error('Failed to fetch events:', error);
-      toast.error('Failed to load events');
-    } finally {
-      setLoadingEvents(false);
-    }
-  }, []);
 
   // Delete event
   const deleteEvent = useCallback(async (id: string) => {

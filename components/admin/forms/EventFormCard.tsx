@@ -1,11 +1,14 @@
 "use client";
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, Trash2 } from 'lucide-react';
+import { Calendar, Trash2, UploadCloud, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import Image from 'next/image';
 
 export interface EventForm {
   title: string;
@@ -17,6 +20,9 @@ export interface EventForm {
   lumaLink: string;
   zoomLink: string;
   sponsors: string[];
+  thumbnail: string; // Media ID for database
+  thumbnailUrl?: string; // Cloudinary URL for display
+  thumbnailFile?: File | null; // Temporary file object
 }
 
 export default function EventFormCard({
@@ -33,11 +39,66 @@ export default function EventFormCard({
   form: EventForm;
   canRemove: boolean;
   onRemove: () => void;
-  onChange: (field: keyof EventForm, value: string) => void;
+  onChange: (field: keyof EventForm, value: string | File | null) => void; // Update type
   onAddSponsor: () => void;
   onRemoveSponsor: (sponsorIndex: number) => void;
   onChangeSponsor: (sponsorIndex: number, value: string) => void;
 }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast?.error('Please upload an image file');
+      return;
+    }
+
+    onChange('thumbnailFile', file);
+
+    // Show preview immediately using object URL
+    const objectUrl = URL.createObjectURL(file);
+    onChange('thumbnailUrl', objectUrl); // Store in thumbnailUrl for preview
+    
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.doc) {
+        // Update thumbnailUrl with Cloudinary URL (replaces object URL)
+        onChange('thumbnailUrl', data.doc.cloudinary.secureUrl); // For display
+        onChange('thumbnail', data.doc.id); // For database relation
+
+        toast?.success('Image uploaded successfully');
+
+        console.log('Upload successful - Media ID:', data.doc.id, 'URL:', data.doc.cloudinary.secureUrl);
+      } else {
+        console.error('Upload response issue:', data);
+        toast?.error('Upload completed but returned unexpected format');
+        // Revert preview on error
+        onChange('thumbnailUrl', '');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast?.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Revert preview on error
+      onChange('thumbnailUrl', '');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <Card className="surface">
       <CardHeader>
@@ -62,6 +123,53 @@ export default function EventFormCard({
           <div className="space-y-2">
             <Label htmlFor={`event-topic-${index}`}>Topic *</Label>
             <Input id={`event-topic-${index}`} value={form.topic} onChange={(e) => onChange('topic', e.target.value)} placeholder="e.g., Cybersecurity" className="focus-ring" required />
+          </div>
+        </div>
+
+        {/* Image Upload Section */}
+        <div className="space-y-2">
+          <Label htmlFor={`event-thumbnail-${index}`}>Event Image</Label>
+          <div className="grid grid-cols-1 gap-3">
+            {/* Show preview if thumbnailUrl exists */}
+            {form.thumbnailUrl && (
+              <div className="relative w-full h-48 mb-2">
+                <Image 
+                  src={form.thumbnailUrl} 
+                  alt="Event thumbnail" 
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  className="rounded" 
+                />
+              </div>
+            )}
+            <div className="relative">
+              <Input 
+                id={`event-thumbnail-file-${index}`}
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="focus-ring hidden"
+              />
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full flex items-center justify-center gap-2"
+                onClick={() => document.getElementById(`event-thumbnail-file-${index}`)?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud className="h-4 w-4" />
+                    {form.thumbnailUrl ? 'Change Image' : 'Upload Image'}
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -276,6 +276,10 @@ export interface EventForm {
   lumaLink: string;
   zoomLink: string;
   sponsors: string[];
+    // Add these
+  thumbnail: string;
+  thumbnailUrl?: string;
+  thumbnailFile?: File | null;
 }
 
 export interface AdminForm {

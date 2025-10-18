@@ -21,7 +21,7 @@ interface EventsTabProps {
   actions: {
     addEventForm: () => void;
     removeEventForm: (index: number) => void;
-    updateEventForm: (index: number, field: keyof EventForm, value: string | string[]) => void;
+    updateEventForm: (index: number, field: keyof EventForm, value: string | string[] | File | null) => void;
     handleEditEvent: (eventId: string, eventData: EventForm) => void;
     cancelEventEdit: () => void;
     handleEventSubmit: () => Promise<void>;
@@ -149,17 +149,31 @@ export default function EventsTab({
                   events.map((event) => (
                     <tr key={event.id} className="border-b border-slate-800 hover:bg-slate-800/50">
                       <td className="p-4">
-                        <div className="flex flex-col">
-                          <p className="text-white font-medium">{event.title}</p>
-                          <p className="text-slate-400 text-sm line-clamp-2">{event.description}</p>
-                          {event.topic && (
-                            <Badge 
-                              variant="secondary" 
-                              className="bg-blue-600/20 text-blue-400 border-blue-600/30 mt-2 w-fit"
-                            >
-                              {event.topic}
-                            </Badge>
-                          )}
+                        <div className="flex items-center space-x-3">
+													<div
+														className="w-12 h-12 flex-shrink-0 bg-cover bg-center rounded-lg"
+														style={{ 
+															backgroundImage: `url(${
+																// Check if thumbnail is an object with cloudinary data
+																event.thumbnail && typeof event.thumbnail === 'object' && event.thumbnail.cloudinary
+																	? event.thumbnail.cloudinary.secureUrl
+																	// Fallback for backward compatibility or missing thumbnails
+																	: 'https://placehold.co/100x100/444/fff?text=Event'
+															})`
+														}}
+													></div>
+                          <div className="flex flex-col">
+                            <p className="text-white font-medium">{event.title}</p>
+                            <p className="text-slate-400 text-sm line-clamp-1 text-ellipsis">{event.description}</p>
+                            {event.topic && (
+                              <Badge 
+                                variant="secondary" 
+                                className="bg-blue-600/20 text-blue-400 border-blue-600/30 mt-2 w-fit"
+                              >
+                                {event.topic}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="p-4 text-slate-300">
@@ -221,7 +235,10 @@ export default function EventsTab({
                               zoomLink: event.links?.zoomLink || '',
                               sponsors: event.sponsors ? 
                                 event.sponsors.split(',').map((s: string) => s.trim()) : 
-                                ['']
+                                [''],
+                              thumbnail: event.thumbnail || '',
+                              thumbnailUrl: event.thumbnailUrl,
+                              thumbnailFile: null
                             })}
                             disabled={isSubmittingEvents || deletingItemId !== null}
                           >

@@ -81,7 +81,7 @@ export default function PodcastsTab({
 											<td className="p-4">
 												<div className="flex items-center space-x-3">
 													<div
-														className="w-12 h-12 bg-cover bg-center rounded-lg"
+														className="w-12 h-12 flex-shrink-0 bg-cover bg-center rounded-lg"
 														style={{ 
 															backgroundImage: `url(${
 																// Check if thumbnail is an object with cloudinary data

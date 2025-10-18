@@ -216,6 +216,7 @@ export interface Event {
   title: string;
   topic?: string | null;
   description?: string | null;
+  thumbnail?: (string | null) | Media;
   eventDetails: {
     date: string;
     timeStart?: string | null;
@@ -500,6 +501,7 @@ export interface EventsSelect<T extends boolean = true> {
   title?: T;
   topic?: T;
   description?: T;
+  thumbnail?: T;
   eventDetails?:
     | T
     | {
