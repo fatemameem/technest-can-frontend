@@ -1,3 +1,4 @@
+import 'server-only';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
 import { Linkedin, Facebook, Instagram } from 'lucide-react';

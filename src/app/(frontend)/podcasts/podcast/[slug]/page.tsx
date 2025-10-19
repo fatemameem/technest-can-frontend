@@ -1,9 +1,6 @@
-import { Button } from '@/components/ui/button';
+import 'server-only';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Play, ExternalLink, ArrowLeft, Clock, Calendar, Users } from 'lucide-react';
-import { Linkedin, Facebook, Instagram } from 'lucide-react';
+import { Play} from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPayload } from 'payload';

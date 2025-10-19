@@ -1,3 +1,4 @@
+import 'server-only'
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Button } from '@/components/ui/button';

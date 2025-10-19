@@ -1,3 +1,4 @@
+import 'server-only'
 // collections/Podcasts.ts
 import { generateUniqueSlug } from '@/helpers/generateUniqueSlug';
 import { CollectionConfig } from 'payload'

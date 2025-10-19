@@ -1,4 +1,5 @@
 // collections/Events.ts
+import 'server-only'
 import { CollectionConfig } from 'payload'
 
 export const Events: CollectionConfig = {

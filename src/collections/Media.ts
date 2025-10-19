@@ -1,4 +1,5 @@
 // src/collections/Media.ts
+import 'server-only'
 import type { CollectionConfig } from 'payload';
 import { v2 as cloudinary } from 'cloudinary';
 import { google } from 'googleapis';

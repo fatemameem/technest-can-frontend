@@ -1,4 +1,5 @@
-﻿import type { CollectionConfig } from 'payload';
+﻿import 'server-only'
+import type { CollectionConfig } from 'payload';
 
 import { generateUniqueSlug } from '@/helpers/generateUniqueSlug';
 import { calculateReadingTime } from '@/helpers/calculateReadingTime';

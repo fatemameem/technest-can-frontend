@@ -1,4 +1,5 @@
-﻿import configPromise from '@payload-config';
+﻿import 'server-only';
+import configPromise from '@payload-config';
 import { notFound } from 'next/navigation';
 import { getPayload } from 'payload';
 

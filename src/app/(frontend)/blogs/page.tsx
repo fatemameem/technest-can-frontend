@@ -1,8 +1,4 @@
 import MagicBento, { BentoCardProps } from "@/components/ui/bento";
-import { Hero } from '@/components/ui/hero';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { ArrowRight } from "lucide-react";
 import TextType from "@/components/ui/TextType";
 import ParticleCard from '@/components/ui/particleCard';
 import InfiniteScroll from "@/components/ui/infiniteCarousel";

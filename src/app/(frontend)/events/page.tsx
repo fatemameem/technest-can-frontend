@@ -1,4 +1,5 @@
 // import type { Metadata } from 'next'
+import 'server-only';
 import { Hero } from '@/components/ui/hero';
 import { Section } from '@/components/ui/section';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

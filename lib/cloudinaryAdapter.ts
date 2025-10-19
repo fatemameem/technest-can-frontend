@@ -1,3 +1,4 @@
+import "server-only"
 import { v2 as cloudinary } from 'cloudinary'
 import type { HandleUpload, HandleDelete } from '@payloadcms/plugin-cloud-storage/types'
 import type { UploadApiResponse } from 'cloudinary'
