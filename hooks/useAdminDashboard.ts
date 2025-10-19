@@ -53,7 +53,10 @@ export function useAdminDashboard() {
     twitter: '',
     github: '',
     website: '',
-    imageLink: ''
+    // Remove: imageLink: '',
+    image: '',
+    imageUrl: '',
+    imageFile: null,
   }]);
 
   const [blogForms, setBlogForms] = useState<Blog[]>([{ 
@@ -706,38 +709,43 @@ export function useAdminDashboard() {
     }
   }, [adminForms, canManageAdmins, currentEditId, editMode.admins, fetchUsers]);
 
+  // Fetch team members
+  const fetchTeamMembers = useCallback(async () => {
+    try {
+      setLoadingTeamMembers(true);
+      const response = await fetch('/api/admin/team-members');
+      if (response.ok) {
+        const data = await response.json();
+        setTeamMembers(data.docs || []);
+      } else {
+        console.error('Failed to fetch team members:', response.status);
+        toast.error('Failed to load team members');
+      }
+    } catch (error) {
+      console.error('Failed to fetch team members:', error);
+      toast.error('Failed to load team members');
+    } finally {
+      setLoadingTeamMembers(false);
+    }
+  }, []);
+  
   // Team member handlers
   const addTeamMemberForm = useCallback(() => {
-    if (!showTeamMemberForm) {
-      setTeamMemberForms([{
-        name: '',
-        email: '',
-        designation: '',
-        description: '',
-        linkedin: '',
-        twitter: '',
-        github: '',
-        website: '',
-        imageLink: ''
-      }]);
-    } else {
-      setTeamMemberForms([...teamMemberForms, {
-        name: '',
-        email: '',
-        designation: '',
-        description: '',
-        linkedin: '',
-        twitter: '',
-        github: '',
-        website: '',
-        imageLink: ''
-      }]);
-    }
-    
-    setEditMode(prev => ({ ...prev, teamMembers: false }));
-    setCurrentEditId(null);
-    setShowTeamMemberForm(true);
-  }, [showTeamMemberForm, teamMemberForms]);
+    setTeamMemberForms([...teamMemberForms, {
+      name: '',
+      email: '',
+      designation: '',
+      description: '',
+      linkedin: '',
+      twitter: '',
+      github: '',
+      website: '',
+      // Remove: imageLink: '',
+      image: '',
+      imageUrl: '',
+      imageFile: null,
+    }]);
+  }, [teamMemberForms]);
 
   const removeTeamMemberForm = useCallback((index: number) => {
     if (teamMemberForms.length > 1) {
@@ -745,7 +753,11 @@ export function useAdminDashboard() {
     }
   }, [teamMemberForms]);
 
-  const updateTeamMemberForm = useCallback((index: number, field: keyof TeamMemberForm, value: string) => {
+  const updateTeamMemberForm = useCallback((
+    index: number, 
+    field: keyof TeamMemberForm, 
+    value: string | File | null // Add File | null
+  ) => {
     const updated = [...teamMemberForms];
     updated[index] = { ...updated[index], [field]: value };
     setTeamMemberForms(updated);
@@ -774,7 +786,10 @@ export function useAdminDashboard() {
       twitter: '',
       github: '',
       website: '',
-      imageLink: ''
+      // Remove: imageLink: '',
+      image: '',
+      imageUrl: '',
+      imageFile: null,
     }]);
     setShowTeamMemberForm(false);
   }, []);
@@ -786,11 +801,18 @@ export function useAdminDashboard() {
       for (let i = 0; i < teamMemberForms.length; i++) {
         const f = teamMemberForms[i];
 
-        if (!isNonEmpty(f.name) || !isNonEmpty(f.email) || !isNonEmpty(f.designation) || !isNonEmpty(f.imageLink)) {
-          toast.error(`Team member #${i + 1}: Name, Email, Designation, and Profile Image URL are required.`);
+        // Updated validation - only check for image (Media ID)
+        if (
+          !isNonEmpty(f.name) || 
+          !isNonEmpty(f.email) || 
+          !isNonEmpty(f.designation) || 
+          !isNonEmpty(f.image) // Only require the new image field
+        ) {
+          toast.error(`Team member #${i + 1}: Name, Email, Designation, and Image are required.`);
           setIsSubmittingTeam(false);
           return;
         }
+
         const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim());
         if (!emailOk) {
           toast.error(`Team member #${i + 1}: Email is invalid.`);
@@ -798,21 +820,16 @@ export function useAdminDashboard() {
           return;
         }
 
-        const urlChecks: Array<[string, string, boolean]> = [
-          [f.imageLink, "Profile Image URL", true],
-          [f.linkedin, "LinkedIn", false],
-          [f.twitter, "Twitter", false],
-          [f.github, "GitHub", false],
-          [f.website, "Website", false],
+        // Validate optional URLs
+        const optionalUrls: Array<[string, string]> = [
+          [f.linkedin, "LinkedIn"],
+          [f.twitter, "Twitter"],
+          [f.github, "GitHub"],
+          [f.website, "Website"],
         ];
-        for (const [val, label, requiredValid] of urlChecks) {
-          if (requiredValid && !isValidUrl(val)) {
+        for (const [val, label] of optionalUrls) {
+          if (isNonEmpty(val) && !isValidUrl(val)) {
             toast.error(`Team member #${i + 1}: ${label} must be a valid URL (http/https).`);
-            setIsSubmittingTeam(false);
-            return;
-          }
-          if (!requiredValid && isNonEmpty(val) && !isValidUrl(val)) {
-            toast.error(`Team member #${i + 1}: ${label} URL is invalid.`);
             setIsSubmittingTeam(false);
             return;
           }
@@ -830,7 +847,9 @@ export function useAdminDashboard() {
         twitter: String(sanitize(f.twitter)),
         github: String(sanitize(f.github)),
         website: String(sanitize(f.website)),
-        imageLink: String(sanitize(f.imageLink)),
+        // Only send Media ID
+        image: String(sanitize(f.image)),
+        // Don't include imageFile or imageUrl - they're client-side only
       }));
 
       let apiUrl = '/api/admin/team-members';
@@ -839,19 +858,34 @@ export function useAdminDashboard() {
       if (editMode.teamMembers && currentEditId) {
         apiUrl = `/api/admin/team-members/${currentEditId}`;
         method = 'PUT';
-        await fetch(apiUrl, { 
+        
+        const response = await fetch(apiUrl, { 
           method, 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify(entries[0]) 
         });
-        toast.success("Team member updated successfully!");
+        
+        if (response.ok) {
+          toast.success("Team member updated successfully!");
+          fetchTeamMembers();
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update team member');
+        }
       } else {
-        await fetch(apiUrl, { 
+        const response = await fetch(apiUrl, { 
           method, 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify(entries) 
         });
-        toast.success(`${entries.length} ${entries.length === 1 ? "member" : "members"} added to teamInfo.`);
+        
+        if (response.ok) {
+          toast.success(`${entries.length} ${entries.length === 1 ? "member" : "members"} added successfully!`);
+          fetchTeamMembers();
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to create team member(s)');
+        }
       }
       
       setTeamMemberForms([{
@@ -863,7 +897,10 @@ export function useAdminDashboard() {
         twitter: '',
         github: '',
         website: '',
-        imageLink: ''
+        // Remove: imageLink: '',
+        image: '',
+        imageUrl: '',
+        imageFile: null,
       }]);
       setEditMode(prev => ({ ...prev, teamMembers: false }));
       setCurrentEditId(null);
@@ -875,7 +912,7 @@ export function useAdminDashboard() {
     } finally {
       setIsSubmittingTeam(false);
     }
-  }, [teamMemberForms, editMode.teamMembers, currentEditId]);
+  }, [teamMemberForms, editMode.teamMembers, currentEditId, fetchTeamMembers]);
 
   // Blog handlers
   const addBlogForm = useCallback(() => {
@@ -1084,26 +1121,6 @@ export function useAdminDashboard() {
       setDeletingItemId(null);
     }
   }, [fetchBlogs]);
-
-  // Fetch team members
-  const fetchTeamMembers = useCallback(async () => {
-    try {
-      setLoadingTeamMembers(true);
-      const response = await fetch('/api/admin/team-members');
-      if (response.ok) {
-        const data = await response.json();
-        setTeamMembers(data.docs || []);
-      } else {
-        console.error('Failed to fetch team members:', response.status);
-        toast.error('Failed to load team members');
-      }
-    } catch (error) {
-      console.error('Failed to fetch team members:', error);
-      toast.error('Failed to load team members');
-    } finally {
-      setLoadingTeamMembers(false);
-    }
-  }, []);
 
   // Delete team member
   const deleteTeamMember = useCallback(async (id: string) => {

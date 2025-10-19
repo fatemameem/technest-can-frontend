@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TeamMemberForm } from '@/types';
 import { Users, Edit, Trash2, Plus, Save, Loader2, ChevronLeft, ChevronRight, Github, Twitter, Linkedin, Globe } from 'lucide-react';
@@ -19,7 +19,7 @@ interface TeamTabProps {
   actions: {
     addTeamMemberForm: () => void;
     removeTeamMemberForm: (index: number) => void;
-    updateTeamMemberForm: (index: number, field: keyof TeamMemberForm, value: string) => void;
+    updateTeamMemberForm: (index: number, field: keyof TeamMemberForm, value: string | File | null) => void;
     handleEditTeamMember: (teamMemberId: string, teamMemberData: TeamMemberForm) => void;
     cancelTeamMemberEdit: () => void;
     handleTeamMemberSubmit: () => Promise<void>;
@@ -59,9 +59,9 @@ export default function TeamTab({
                   onChange={(field, value) => actions.updateTeamMemberForm(index, field, value)}
                 />
               ))}
-              
               <div className="flex justify-between mt-4">
-                {!editMode.teamMembers && (
+                <div className="space-x-2">
+                  {!editMode.teamMembers && (
                   <Button
                     type="button"
                     variant="outline"
@@ -71,9 +71,19 @@ export default function TeamTab({
                     <Plus className="h-4 w-4 mr-2" /> Add Another Team Member
                   </Button>
                 )}
-                
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={actions.cancelTeamMemberEdit}
+                  className="text-slate-300 border-slate-600"
+                  disabled={isSubmittingTeam}
+                >
+                  <Trash2 className="h-4 w-4 mr-2 text-red-400 hover:text-red-300" />
+                  Cancel
+                </Button>
+                </div>
                 <div className="space-x-2">
-                  {editMode.teamMembers && (
+                  {/* {editMode.teamMembers && (
                     <Button
                       type="button"
                       variant="outline"
@@ -83,8 +93,7 @@ export default function TeamTab({
                     >
                       Cancel
                     </Button>
-                  )}
-                  
+                  )} */}
                   <Button
                     type="button"
                     onClick={actions.handleTeamMemberSubmit}
@@ -132,12 +141,21 @@ export default function TeamTab({
                     <tr key={member.id} className="border-b border-slate-800 hover:bg-slate-800/50">
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
-                          {member.image && (
-                            <div 
-                              className="w-10 h-10 rounded-full bg-cover bg-center"
-                              style={{ backgroundImage: `url(${member.image})` }}
-                            ></div>
-                          )}
+                          {/* Display image from Media relation or fallback to imageLink */}
+                          <div
+                            className="w-12 h-12 flex-shrink-0 bg-cover bg-center rounded-full"
+                            style={{ 
+                              backgroundImage: `url(${
+                                // Check if image is a Media object with cloudinary data
+                                member.image && typeof member.image === 'object' && member.image.cloudinary
+                                  ? member.image.cloudinary.secureUrl
+                                  // Fallback to direct image string or placeholder
+                                  : member.image && typeof member.image === 'string'
+                                    ? member.image
+                                    : 'https://placehold.co/100x100/444/fff?text=User'
+                              })`
+                            }}
+                          ></div>
                           <div>
                             <p className="text-white font-medium">{member.name}</p>
                             <p className="text-slate-400 text-sm">{member.email}</p>
@@ -204,7 +222,11 @@ export default function TeamTab({
                               twitter: member.socialLinks?.twitter || '',
                               github: member.socialLinks?.github || '',
                               website: member.website || '',
-                              imageLink: member.image || ''
+                              image: typeof member.image === 'object' ? member.image.id : member.image || '',
+                              imageUrl: typeof member.image === 'object' && member.image.cloudinary 
+                                ? member.image.cloudinary.secureUrl 
+                                : (typeof member.image === 'string' ? member.image : ''),
+                              imageFile: null,
                             })}
                             disabled={isSubmittingTeam || deletingItemId !== null}
                           >

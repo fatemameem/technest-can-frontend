@@ -43,7 +43,6 @@ export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
-  // Await the params object
   const { id } = await context.params;
   
   try {
@@ -59,24 +58,45 @@ export async function PUT(
 
     const body = await req.json();
     
+    // Validate image if provided (Media ID)
+    if (body.image && /^[0-9a-fA-F]{24}$/.test(body.image)) {
+      const payload = await getPayload({ config: configPromise });
+      try {
+        await payload.findByID({
+          collection: 'media',
+          id: body.image,
+        });
+      } catch (e) {
+        return Response.json(
+          { error: `Profile image media not found with ID: ${body.image}` },
+          { status: 404 }
+        );
+      }
+    }
+    
     const payload = await getPayload({ config: configPromise });
+    
+    const updateData: any = {
+      name: body.name,
+      email: String(body.email || '').toLowerCase(),
+      designation: body.designation,
+      description: body.description,
+      socialLinks: {
+        linkedin: body.linkedIn || body.linkedin || body.socialLinks?.linkedin || '',
+        twitter: body.twitter || body.socialLinks?.twitter || '',
+        github: body.github || body.socialLinks?.github || '',
+      },
+      website: body.website || '',
+      // Only use the new image field
+      image: body.image || null,
+    };
+
     const updated = await payload.update({
       collection: 'team-members',
       id,
-      data: {
-        name: body.name,
-        email: String(body.email || '').toLowerCase(),
-        designation: body.designation,
-        description: body.description,
-        socialLinks: {
-          linkedin: body.linkedIn || body.linkedin || body.socialLinks?.linkedin || '',
-          twitter: body.twitter || body.socialLinks?.twitter || '',
-          github: body.github || body.socialLinks?.github || '',
-        },
-        website: body.website || '',
-        image: body.imageLink || body.image || '',
-      },
+      data: updateData,
       overrideAccess: true,
+      depth: 1, // Populate image relation in response
     });
 
     return Response.json({ success: true, doc: updated });

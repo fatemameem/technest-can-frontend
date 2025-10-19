@@ -1,38 +1,29 @@
-import { CollectionConfig } from "payload";
+import type { CollectionConfig } from "payload";
 
 const Team: CollectionConfig = {
   slug: "team-members",
-  labels: {
-    singular: "Team Member",
-    plural: "Team Members",
-  },
   admin: {
-    useAsTitle: "name", // shows "name" in list view
+    useAsTitle: "name",
   },
   access: {
-    read: () => true, // allow public read
-    // create: ({ req: { user } }) => Boolean(user),
-    create: () => true, // allow public create
-    update: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    read: () => true,
+    create: ({ req }) => !!req.user,
+    update: ({ req }) => !!req.user,
+    delete: ({ req }) => !!req.user,
   },
   fields: [
     {
       name: "name",
-      label: "Name",
       type: "text",
       required: true,
     },
     {
       name: "email",
-      label: "Email",
       type: "email",
       required: true,
-      unique: true, // ensures no duplicate emails
     },
     {
       name: "designation",
-      label: "Designation",
       type: "text",
       required: true,
     },
@@ -67,12 +58,13 @@ const Team: CollectionConfig = {
     },
     {
       name: "image",
-      label: "Image",
-      type: "text",
-      required: true,
+      type: "upload",
+      label: "Profile Image",
+      relationTo: "media",
+      required: true, // Make the new field required instead
     },
   ],
-  timestamps: true, // creates createdAt & updatedAt automatically
+  timestamps: true,
 };
 
 export default Team;

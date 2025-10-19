@@ -306,5 +306,7 @@ export interface TeamMemberForm {
   twitter: string;
   github: string;
   website: string;
-  imageLink: string;
+  image: string;
+  imageUrl?: string;
+  imageFile?: File | null;
 }
