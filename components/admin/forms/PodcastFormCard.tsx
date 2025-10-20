@@ -70,10 +70,10 @@ export default function PodcastFormCard({
         onChange('thumbnailUrl', data.doc.cloudinary.secureUrl); // For display
         onChange('thumbnail', data.doc.id); // For database relation
         
-        console.log('Upload successful - Media ID:', data.doc.id, 'URL:', data.doc.cloudinary.secureUrl);
+        // console.log('Upload successful - Media ID:', data.doc.id, 'URL:', data.doc.cloudinary.secureUrl);
         
         // For debugging
-        console.log('Current form data after upload:', form);
+        // console.log('Current form data after upload:', form);
       } else {
         console.error('Upload response issue:', data);
         toast?.error('Upload completed but returned unexpected format');

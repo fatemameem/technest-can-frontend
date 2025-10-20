@@ -7,21 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Users, Trash2, UploadCloud, Loader2 } from 'lucide-react';
+import type { TeamMemberForm } from '@/types';
 import { toast } from 'sonner';
-
-export interface TeamMemberForm {
-  name: string;
-  email: string;
-  designation: string;
-  description: string;
-  linkedin: string;
-  twitter: string;
-  github: string;
-  website: string;
-  image: string; // Media ID for database
-  imageUrl?: string; // Cloudinary URL for display
-  imageFile?: File | null; // Temporary file object
-}
+import Image from 'next/image';
 
 export default function TeamMemberFormCard({
   index,
@@ -74,7 +62,6 @@ export default function TeamMemberFormCard({
 
         toast?.success('Image uploaded successfully');
 
-        console.log('Upload successful - Media ID:', data.doc.id, 'URL:', data.doc.cloudinary.secureUrl);
       } else {
         console.error('Upload response issue:', data);
         toast?.error('Upload completed but returned unexpected format');
@@ -164,10 +151,12 @@ export default function TeamMemberFormCard({
             {/* Show preview if imageUrl exists */}
             {form.imageUrl && (
               <div className="relative w-32 h-32 mb-2 mx-auto">
-                <img 
+                <Image 
                   src={form.imageUrl} 
-                  alt="Profile preview" 
-                  className="w-full h-full object-cover rounded-full"
+                  alt="Thumbnail" 
+                  layout="fill" 
+                  objectFit="cover" 
+                  className="rounded" 
                 />
               </div>
             )}
@@ -194,10 +183,20 @@ export default function TeamMemberFormCard({
                 ) : (
                   <>
                     <UploadCloud className="h-4 w-4" />
-                    {form.imageUrl ? 'Change Image' : 'Upload Image'}
+                    {form.image ? 'Change Image' : 'Upload Image'}
                   </>
                 )}
               </Button>
+              {form.imageUrl && (
+                <Input
+                  id={`team-image-${index}`}
+                  type="url"
+                  value={form.imageUrl}
+                  onChange={(e) => onChange('imageUrl', e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="focus-ring mt-2"
+                />
+              )}
             </div>
           </div>
         </div>
