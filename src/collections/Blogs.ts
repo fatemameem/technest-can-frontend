@@ -77,10 +77,9 @@ export const Blogs: CollectionConfig = {
           data.meta.authorRef = user.name || user.email || 'Unknown Author';
         }
 
-        if (originalDoc?.meta?.author) {
-          data.meta.author = originalDoc.meta.author;
-        } else if (!data.meta.author && user.id) {
-          data.meta.author = user.id;
+        // Set author from session if not provided
+        if (!data.meta.author && req.user) {
+          data.meta.author = req.user.id;
         }
 
         data.meta.readingTime = calculateReadingTime(data.blocks);
@@ -164,44 +163,70 @@ export const Blogs: CollectionConfig = {
     {
       name: 'title',
       type: 'text',
-      admin: {
-        hidden: true,
-        readOnly: true,
-      },
+      required: true,
     },
     {
       name: 'linkedEvent',
+      label: 'Linked Event',
       type: 'relationship',
       relationTo: 'events',
-      label: 'Linked Event',
+      hasMany: false,
       admin: {
         position: 'sidebar',
         description: 'Link this blog to an event as a recap post',
+      },
+    },
+    // Add cover image field
+    {
+      name: 'coverImage',
+      type: 'upload',
+      label: 'Cover Image',
+      relationTo: 'media',
+      required: false,
+      admin: {
+        description: 'Optional cover image for the blog post',
       },
     },
     {
       name: 'meta',
       type: 'group',
       fields: [
-        { name: 'title', type: 'text', required: true },
-        { name: 'subtitle', type: 'text' },
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'subtitle',
+          type: 'text',
+        },
         {
           name: 'authorRef',
           type: 'text',
-          admin: { position: 'sidebar' },
+          label: 'Author Reference (deprecated)',
+          admin: {
+            position: 'sidebar',
+            description: 'Legacy field - use author relation instead',
+          },
         },
         {
           name: 'author',
           type: 'relationship',
-          relationTo: 'users',
-          admin: { position: 'sidebar' },
+          relationTo: 'team-members',
+          hasMany: false,
+          admin: {
+            position: 'sidebar',
+          },
         },
         {
           name: 'slug',
           type: 'text',
           unique: true,
           index: true,
-          admin: { position: 'sidebar' },
+          admin: {
+            position: 'sidebar',
+            description: 'Auto-generated from title if left empty',
+          },
         },
         {
           name: 'tags',
@@ -216,7 +241,11 @@ export const Blogs: CollectionConfig = {
         {
           name: 'readingTime',
           type: 'number',
-          admin: { position: 'sidebar', readOnly: true },
+          admin: {
+            position: 'sidebar',
+            readOnly: true,
+            description: 'Auto-calculated from content',
+          },
         },
         {
           name: 'status',
@@ -227,7 +256,10 @@ export const Blogs: CollectionConfig = {
         {
           name: 'publishedAt',
           type: 'date',
-          admin: { position: 'sidebar' },
+          admin: {
+            description: 'Auto-set when first published',
+            position: 'sidebar',
+          },
         },
         {
           name: 'updatedAt',
@@ -240,7 +272,14 @@ export const Blogs: CollectionConfig = {
           fields: [
             { name: 'title', type: 'text' },
             { name: 'description', type: 'textarea' },
-            { name: 'ogImageRef', type: 'text' },
+            // Change ogImageRef to use Media upload
+            {
+              name: 'ogImage',
+              type: 'upload',
+              label: 'OG Image',
+              relationTo: 'media',
+              required: false,
+            },
           ],
         },
       ],
@@ -270,6 +309,9 @@ export const Blogs: CollectionConfig = {
         {
           name: 'props',
           type: 'json',
+          admin: {
+            description: 'Block properties - for images, props.mediaId stores the Media ID',
+          },
         },
       ],
     },

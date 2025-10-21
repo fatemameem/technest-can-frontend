@@ -51,23 +51,24 @@ export function createInitialBlogPost(): BlogPost {
         id: crypto.randomUUID(),
         type: BlockType.HERO_MEDIA,
         props: {
-          mediaRef: `https://picsum.photos/seed/${Math.random()}/1200/600`,
+          // Use placehold.co instead of picsum.photos
+          mediaRef: 'https://placehold.co/1200x600/1e293b/64748b?text=Upload+Your+Hero+Image',
           alt: 'Placeholder hero image',
-          caption: 'Photo by a talented artist',
+          caption: 'Replace this with your own image',
         },
       },
       {
         id: crypto.randomUUID(),
         type: BlockType.LEAD_PARAGRAPH,
         props: {
-          text: 'Start writing your blog post here. This lead paragraph will capture your readers\' attention and set the tone for the rest of your content.',
+          text: 'Start writing your engaging introduction here...',
         },
       },
       {
         id: crypto.randomUUID(),
         type: BlockType.RICH_TEXT,
         props: {
-          content: '## Introduction\n\nWrite your introduction here...\n\n## Main Content\n\nAdd your main content here...',
+          content: '## Your First Section\n\nBegin your story here.',
         },
       },
     ],

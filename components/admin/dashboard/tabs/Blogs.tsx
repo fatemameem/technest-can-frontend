@@ -220,17 +220,24 @@ export default function BlogsTab({
                     <tr key={blog.id} className="border-b border-slate-800 hover:bg-slate-800/50">
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
-                          {blog.meta?.coverImage && (
+                          {/* Use coverImageUrl instead of coverImage */}
+                          {blog.meta?.coverImageUrl && (
                             <div 
                               className="w-12 h-12 bg-cover bg-center rounded-lg" 
-                              style={{ backgroundImage: `url(${blog.meta.coverImage || 'https://placehold.co/100x100/444/fff?text=Blog'})` }}
-                            ></div>
+                              style={{ backgroundImage: `url(${blog.meta.coverImageUrl})` }}
+                            />
+                          )}
+                          {/* Fallback if no cover image */}
+                          {!blog.meta?.coverImageUrl && (
+                            <div 
+                              className="w-12 h-12 bg-slate-700 rounded-lg flex items-center justify-center bg-cover bg-center"
+                              style={{ backgroundImage: `url('https://placehold.co/100x100/444/fff?text=${blog.meta?.title || 'Untitled'})'` }}
+                            >
+                            </div>
                           )}
                           <div>
-                            <p className="text-white font-medium">{blog.meta?.title || blog.title}</p>
-                            <p className="text-slate-400 text-sm line-clamp-1">
-                              {blog.meta?.readingTime ? `${blog.meta.readingTime} min read` : ''}
-                            </p>
+                            <div className="font-medium text-white">{blog.meta?.title || 'Untitled'}</div>
+                            <div className="text-sm text-slate-400">{blog.meta?.slug}</div>
                           </div>
                         </div>
                       </td>

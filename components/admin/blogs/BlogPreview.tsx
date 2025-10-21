@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { marked } from 'marked';
+// REMOVE: import Image from 'next/image';
 import type { BlogPost, Block } from '@/types';
 import { BlockType, LayoutPreset } from '@/types';
 
@@ -31,10 +32,40 @@ const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: b
         switch (block.type) {
             case BlockType.HERO_MEDIA:
             case BlockType.IMAGE_FIGURE:
+                // Prioritize mediaUrl (Cloudinary) over mediaRef (legacy URL)
+                const imageUrl = props.mediaUrl || props.mediaRef;
+                
+                if (!imageUrl) {
+                    return (
+                        <figure className="my-4">
+                            <div className="w-full aspect-video bg-gray-800 flex items-center justify-center rounded-lg">
+                                <p className="text-gray-400">No image uploaded yet</p>
+                            </div>
+                        </figure>
+                    );
+                }
+
                 return (
                     <figure className="my-4">
-                        <img src={props.mediaRef} alt={props.alt} className="w-full rounded-lg shadow-lg" />
-                        {props.caption && <figcaption className="text-center text-sm text-gray-400 mt-2">{props.caption}</figcaption>}
+                        {/* Use regular img tag for admin preview - supports all URLs including blob: */}
+                        <img 
+                            src={imageUrl} 
+                            alt={props.alt || 'Blog image'} 
+                            className="w-full h-auto rounded-lg shadow-lg object-cover"
+                            style={{ maxHeight: '600px' }}
+                        />
+                        {props.caption && (
+                            <figcaption className="text-center text-sm text-gray-400 mt-2">
+                                {props.caption}
+                            </figcaption>
+                        )}
+                        {/* Debug info (development only) */}
+                        {process.env.NODE_ENV === 'development' && props.mediaId && (
+                            <div className="text-xs text-gray-500 mt-1 p-2 bg-gray-800 rounded">
+                                <p>Media ID: {props.mediaId}</p>
+                                <p className="truncate">URL: {imageUrl}</p>
+                            </div>
+                        )}
                     </figure>
                 );
             
@@ -173,7 +204,7 @@ const BlockRenderer = ({ block, selected, onClick }: { block: Block; selected: b
     return (
         <div 
             onClick={onClick}
-            className={`relative p-2 rounded-lg transition-all duration-200 ${selected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-950' : 'hover:ring-1 ring-blue-400/30'}`}
+            className={`relative p-2 rounded-lg transition-all duration-200 cursor-pointer ${selected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-950' : 'hover:ring-1 ring-blue-400/30'}`}
         >
             {blockContent()}
         </div>
@@ -204,8 +235,23 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ blogPost, selectedBlockId, 
         [LayoutPreset.MAGAZINE_RAIL]: 'max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12',
     };
 
+    // Display cover image if available (prioritize mediaUrl over legacy)
+    const coverImageUrl = meta.coverImageUrl || meta.coverImage;
+
     const mainContent = (
         <article>
+            {/* Cover Image (if exists) - Use regular img tag */}
+            {coverImageUrl && (
+                <div className="relative w-full mb-8 -mx-4 sm:-mx-6 lg:-mx-8">
+                    <img 
+                        src={coverImageUrl} 
+                        alt={meta.title || 'Cover image'} 
+                        className="w-full h-auto rounded-lg shadow-2xl object-cover"
+                        style={{ maxHeight: '500px' }}
+                    />
+                </div>
+            )}
+
             <header className="mb-8 text-center">
                 <div className="text-sm uppercase text-blue-400 font-semibold tracking-wider mb-2">
                     {meta.categories.join(' || ')}
@@ -214,29 +260,41 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ blogPost, selectedBlockId, 
                     {meta.title}
                 </h1>
                 {meta.subtitle && <p className="mt-4 text-xl md:text-2xl text-gray-400">{meta.subtitle}</p>}
-                <div className="mt-6 text-sm text-gray-500">
+                <div className="mt-6 text-sm text-gray-500 flex items-center justify-center gap-2 flex-wrap">
                     <span>By {meta.authorRef}</span>
                     <span className="mx-2">&bull;</span>
                     <span>{new Date(meta.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    {meta.readingTime && (
+                        <>
+                            <span className="mx-2">&bull;</span>
+                            <span>{meta.readingTime} min read</span>
+                        </>
+                    )}
                 </div>
             </header>
 
             <div>
-                {blocks.map(block => (
-                    <BlockRenderer 
-                        key={block.id} 
-                        block={block} 
-                        selected={block.id === selectedBlockId}
-                        onClick={() => setSelectedBlockId(block.id)}
-                    />
-                ))}
+                {blocks && blocks.length > 0 ? (
+                    blocks.map(block => (
+                        <BlockRenderer 
+                            key={block.id} 
+                            block={block} 
+                            selected={block.id === selectedBlockId}
+                            onClick={() => setSelectedBlockId(block.id)}
+                        />
+                    ))
+                ) : (
+                    <div className="text-center py-12 text-gray-500">
+                        <p>No content blocks yet. Add blocks from the editor panel.</p>
+                    </div>
+                )}
             </div>
         </article>
     );
 
     const magazineSidebar = (
         <aside className="space-y-8">
-            <div className="p-4 bg-gray-800/50 rounded-lg">
+            <div className="p-4 bg-gray-800/50 rounded-lg sticky top-8">
                 <h3 className="font-bold text-white mb-3 border-b border-gray-700 pb-2">About this post</h3>
                 <dl className="text-sm text-gray-300 space-y-2">
                     <div>
@@ -247,12 +305,26 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ blogPost, selectedBlockId, 
                         <dt className="font-semibold text-gray-400">Published</dt>
                         <dd>{meta.publishedAt ? new Date(meta.publishedAt).toLocaleDateString() : 'Not published'}</dd>
                     </div>
-                     <div>
+                    {meta.readingTime && (
+                        <div>
+                            <dt className="font-semibold text-gray-400">Reading Time</dt>
+                            <dd>{meta.readingTime} minutes</dd>
+                        </div>
+                    )}
+                    <div>
                         <dt className="font-semibold text-gray-400">Categories</dt>
                         <dd className="flex flex-wrap gap-1 mt-1">
                             {meta.categories.map(cat => <span key={cat} className="bg-blue-900 text-blue-300 text-xs px-2 py-0.5 rounded-full">{cat}</span>)}
                         </dd>
                     </div>
+                    {meta.tags && meta.tags.length > 0 && (
+                        <div>
+                            <dt className="font-semibold text-gray-400">Tags</dt>
+                            <dd className="flex flex-wrap gap-1 mt-1">
+                                {meta.tags.map(tag => <span key={tag} className="bg-gray-700 text-gray-300 text-xs px-2 py-0.5 rounded-full">{tag}</span>)}
+                            </dd>
+                        </div>
+                    )}
                 </dl>
             </div>
         </aside>
@@ -288,7 +360,7 @@ const PreviewPanel: React.FC<PreviewPanelProps> = ({ blogPost, selectedBlockId, 
                         {magazineSidebar}
                     </>
                 ) : (
-                     <main>
+                    <main>
                         {mainContent}
                     </main>
                 )}

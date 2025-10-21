@@ -18,6 +18,8 @@ import {
   ChevronUp,
   ChevronDown,
   X,
+  UploadCloud,
+  Loader2,
 } from 'lucide-react';
 
 import type { BlogPost, Block, MetaData, Layout } from '@/types';
@@ -45,6 +47,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import ImageUploadBlock from './ImageUploadBlock';
 
 const DEFAULT_BACK_URL = '/admin';
 
@@ -145,15 +148,54 @@ function normalizeBlogDoc(input: any): BlogPost {
   const layout = input?.layout ?? {};
   const blocks = Array.isArray(input?.blocks) ? input.blocks : [];
 
+  // Handle coverImage - check both root level and meta level
+  let coverImageId: string | null = null;
+  let coverImageUrl: string | null = null;
+
+  // Priority 1: Check root-level coverImage (can be populated object or ID string)
+  if (input?.coverImage) {
+    if (typeof input.coverImage === 'string') {
+      coverImageId = input.coverImage;
+    } else if (typeof input.coverImage === 'object' && input.coverImage.id) {
+      // Populated Media object
+      coverImageId = input.coverImage.id;
+      coverImageUrl = input.coverImage.cloudinary?.secureUrl || input.coverImage.url || null;
+    }
+  }
+
+  // Priority 2: Fall back to meta.coverImage if root level doesn't have it
+  if (!coverImageId && meta.coverImage) {
+    if (typeof meta.coverImage === 'string') {
+      coverImageId = meta.coverImage;
+    } else if (typeof meta.coverImage === 'object' && meta.coverImage.id) {
+      coverImageId = meta.coverImage.id;
+      coverImageUrl = meta.coverImage.cloudinary?.secureUrl || meta.coverImage.url || null;
+    }
+  }
+
+  // Priority 3: Use coverImageUrl from meta if no URL extracted yet
+  if (!coverImageUrl && meta.coverImageUrl) {
+    coverImageUrl = meta.coverImageUrl;
+  }
+
+  // Debug log to verify extraction
+  if (process.env.NODE_ENV === 'development') {
+    console.log('normalizeBlogDoc - Input coverImage:', input?.coverImage);
+    console.log('normalizeBlogDoc - Extracted ID:', coverImageId);
+    console.log('normalizeBlogDoc - Extracted URL:', coverImageUrl);
+  }
+
   const normalized: BlogPost = {
     id: input?.id ?? 'new',
-    linkedEvent: input?.linkedEvent || null, // Normalize linkedEvent
+    linkedEvent: input?.linkedEvent || null,
     meta: {
-      title: meta.title ?? '',
+      title: meta.title ?? input?.title ?? '',
       subtitle: meta.subtitle ?? undefined,
       authorRef: meta.authorRef ?? meta.author ?? '',
       slug: meta.slug ?? slugify(meta.title ?? ''),
-      coverImageRef: meta.coverImageRef ?? undefined,
+      // CRITICAL FIX: Actually assign the extracted values!
+      coverImage: coverImageId || undefined,
+      coverImageUrl: coverImageUrl || undefined,
       tags: Array.isArray(meta.tags) ? meta.tags : [],
       categories: Array.isArray(meta.categories) ? meta.categories : [],
       readingTime: typeof meta.readingTime === 'number' ? meta.readingTime : 0,
@@ -163,7 +205,7 @@ function normalizeBlogDoc(input: any): BlogPost {
       seo: {
         title: meta.seo?.title ?? '',
         description: meta.seo?.description ?? '',
-        ogImageRef: meta.seo?.ogImageRef ?? undefined,
+        ogImage: meta.seo?.ogImage ?? meta.seo?.ogImageRef ?? undefined,
       },
     },
     layout: {
@@ -197,59 +239,59 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
     );
   }
 
+  // CHANGE THIS FUNCTION - Make it merge the new value with existing props
   const updateProp = (key: string, value: any) => {
-    onUpdate({ ...block.props, [key]: value });
+    // Create a new props object with the updated field
+    const updatedProps = { ...block.props, [key]: value };
+    // Call onUpdate with the merged props
+    onUpdate(updatedProps);
   };
 
   const renderProps = () => {
     switch (block.type) {
       case BlockType.HERO_MEDIA:
       case BlockType.IMAGE_FIGURE:
+        // Use ImageUploadBlock for both HERO_MEDIA and IMAGE_FIGURE
         return (
-          <>
-            <div>
-              <Label htmlFor="mediaRef">Image URL</Label>
-              <Input
-                id="mediaRef"
-                value={block.props.mediaRef}
-                onChange={(e) => updateProp('mediaRef', e.target.value)}
-                placeholder="https://example.com/image.png"
-              />
-            </div>
-            <div>
-              <Label htmlFor="alt">Alt Text</Label>
-              <Input
-                id="alt"
-                value={block.props.alt}
-                onChange={(e) => updateProp('alt', e.target.value)}
-                placeholder="Descriptive text for the image"
-              />
-            </div>
-            <div>
-              <Label htmlFor="caption">Caption</Label>
-              <Input
-                id="caption"
-                value={block.props.caption}
-                onChange={(e) => updateProp('caption', e.target.value)}
-                placeholder="Optional image caption"
-              />
-            </div>
-          </>
+          <ImageUploadBlock
+            mediaId={block.props.mediaId}
+            mediaUrl={block.props.mediaUrl}
+            mediaRef={block.props.mediaRef}
+            alt={block.props.alt}
+            caption={block.props.caption}
+            onChange={(props: Record<string, any>) => {
+              // Merge incoming props object from the child with existing block props
+              onUpdate({ ...block.props, ...props });
+            }}
+          />
         );
+
       case BlockType.LEAD_PARAGRAPH:
         return (
           <div>
             <Label htmlFor="text">Paragraph Text</Label>
-            <Textarea id="text" value={block.props.text} onChange={(e) => updateProp('text', e.target.value)} rows={5} />
+            <Textarea 
+              id="text" 
+              value={block.props.text || ''} 
+              onChange={(e) => updateProp('text', e.target.value)} 
+              rows={5} 
+            />
           </div>
         );
+
       case BlockType.RICH_TEXT:
         return (
           <div>
             <Label htmlFor="content">Markdown Content</Label>
-            <Textarea id="content" value={block.props.content} onChange={(e) => updateProp('content', e.target.value)} rows={10} />
+            <Textarea 
+              id="content" 
+              value={block.props.content || ''} 
+              onChange={(e) => updateProp('content', e.target.value)} 
+              rows={10} 
+            />
           </div>
         );
+
       case BlockType.CODE_BLOCK:
         return (
           <>
@@ -257,7 +299,7 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
               <Label htmlFor="language">Language</Label>
               <Input
                 id="language"
-                value={block.props.language}
+                value={block.props.language || ''}
                 onChange={(e) => updateProp('language', e.target.value)}
                 placeholder="e.g., typescript, python"
               />
@@ -266,17 +308,23 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
               <Label htmlFor="filename">Filename (optional)</Label>
               <Input
                 id="filename"
-                value={block.props.filename}
+                value={block.props.filename || ''}
                 onChange={(e) => updateProp('filename', e.target.value)}
                 placeholder="e.g., example.ts"
               />
             </div>
             <div>
               <Label htmlFor="code">Code</Label>
-              <Textarea id="code" value={block.props.code} onChange={(e) => updateProp('code', e.target.value)} rows={10} />
+              <Textarea 
+                id="code" 
+                value={block.props.code || ''} 
+                onChange={(e) => updateProp('code', e.target.value)} 
+                rows={10} 
+              />
             </div>
           </>
         );
+
       case BlockType.VIDEO_EMBED:
         return (
           <>
@@ -284,7 +332,7 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
               <Label htmlFor="url">Video URL</Label>
               <Input
                 id="url"
-                value={block.props.url}
+                value={block.props.url || ''}
                 onChange={(e) => updateProp('url', e.target.value)}
                 placeholder="YouTube or Google Drive link"
               />
@@ -293,13 +341,14 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
               <Label htmlFor="caption">Caption (optional)</Label>
               <Input
                 id="caption"
-                value={block.props.caption}
+                value={block.props.caption || ''}
                 onChange={(e) => updateProp('caption', e.target.value)}
                 placeholder="Optional video caption"
               />
             </div>
           </>
         );
+
       case BlockType.CALLOUT:
         return (
           <>
@@ -342,6 +391,7 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
             </div>
           </>
         );
+
       case BlockType.QUOTE:
         return (
           <>
@@ -374,6 +424,57 @@ const BlockEditor = ({ block, onUpdate }: { block: Block; onUpdate: (props: Reco
               />
             </div>
           </>
+        );
+
+      case BlockType.HEADING:
+        return (
+          <>
+            <div>
+              <Label htmlFor="text">Heading Text</Label>
+              <Input
+                id="text"
+                value={block.props.text || ''}
+                onChange={(e) => updateProp('text', e.target.value)}
+                placeholder="Enter heading text"
+              />
+            </div>
+            <div>
+              <Label htmlFor="level">Heading Level</Label>
+              <Select
+                value={String(block.props.level || 2)}
+                onValueChange={(val) => updateProp('level', parseInt(val))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">H1</SelectItem>
+                  <SelectItem value="2">H2</SelectItem>
+                  <SelectItem value="3">H3</SelectItem>
+                  <SelectItem value="4">H4</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        );
+      case BlockType.DIVIDER:
+        return (
+          <div>
+            <Label htmlFor="style">Divider Style</Label>
+            <Select
+              value={block.props.style || 'solid'}
+              onValueChange={(value) => updateProp('style', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select divider style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="solid">Solid</SelectItem>
+                <SelectItem value="dashed">Dashed</SelectItem>
+                <SelectItem value="dotted">Dotted</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         );
       default:
         return <p className="text-slate-400">This block type has no editable properties.</p>;
@@ -414,6 +515,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
   const [pastEvents, setPastEvents] = useState<any[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [selectedEventDetails, setSelectedEventDetails] = useState<any>(null);
+
+  // Add state for cover image upload
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   const baseDraftKey = useMemo(() => `blog-editor:${initialPost?.id ?? 'new'}`, [initialPost?.id]);
   const draftKey = useMemo(() => {
@@ -460,7 +564,24 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
   const buildPayload = useCallback(
     (patch?: BlogPostPatch) => {
       const merged = mergeBlogPost(blogPost, patch);
-      return derivePost(merged);
+      const derived = derivePost(merged);
+      
+      // Ensure meta.title is not empty
+      const finalTitle = derived.meta.title || 'Untitled Blog Post';
+      
+      // ENSURE TITLE AND COVER IMAGE ARE PROPERLY SET
+      return {
+        ...derived,
+        title: finalTitle, // Set root title for Payload CMS
+        meta: {
+          ...derived.meta,
+          title: finalTitle, // Explicitly set meta.title
+          coverImage: derived.meta.coverImage || null, // Keep in meta
+          coverImageUrl: derived.meta.coverImageUrl || null, // Keep in meta
+        },
+        linkedEvent: derived.linkedEvent || null,
+        coverImage: derived.meta.coverImage || null, // Set root-level for Payload CMS relationship
+      };
     },
     [blogPost]
   );
@@ -470,6 +591,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
       setIsSaving(true);
       try {
         const payload = buildPayload(patch);
+        
+        // DEBUG: Log what we're sending
+        console.log('=== SAVING BLOG ===');
+        console.log('Cover Image (root):', payload.coverImage);
+        console.log('Cover Image (meta.coverImage):', payload.meta.coverImage);
+        console.log('Cover Image URL (meta.coverImageUrl):', payload.meta.coverImageUrl);
+        console.log('Full Payload:', JSON.stringify(payload, null, 2));
+        
         const isCreate = !blogPost.id || blogPost.id === 'new';
         const endpoint = isCreate ? '/api/admin/blogs' : `/api/admin/blogs/${blogPost.id}`;
         const method = isCreate ? 'POST' : 'PATCH';
@@ -487,6 +616,15 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
 
         const data = await response.json();
         const doc = normalizeBlogDoc(data.doc ?? data);
+        
+        // DEBUG: Log what we got back
+        console.log('=== BLOG SAVED, RESPONSE ===');
+        console.log('Returned coverImage:', doc.meta.coverImage);
+        console.log('Returned meta.coverImage:', doc.meta?.coverImage);
+        console.log('Returned meta.coverImageUrl:', doc.meta?.coverImageUrl);
+        console.log('Full Doc:', doc);
+        console.log('========================');
+        
         setPostFromServer(doc);
         clearDraft();
         return doc;
@@ -869,6 +1007,304 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
     }
   }, [blogPost.linkedEvent, pastEvents]);
 
+  // Add cover image upload handler
+  const handleCoverImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast?.error('Please upload an image file');
+      return;
+    }
+
+    // Show preview immediately
+    const objectUrl = URL.createObjectURL(file);
+    updateMeta('coverImageUrl', objectUrl);
+    
+    setUploadingCover(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.doc) {
+        // Update BOTH fields in meta
+        updateMeta('coverImageUrl', data.doc.cloudinary.secureUrl);
+        updateMeta('coverImage', data.doc.id);
+
+        toast?.success('Cover image uploaded successfully');
+        console.log('Cover upload successful - Media ID:', data.doc.id, 'URL:', data.doc.cloudinary.secureUrl);
+      } else {
+        console.error('Upload response issue:', data);
+        toast?.error('Upload completed but returned unexpected format');
+        updateMeta('coverImageUrl', '');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast?.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      updateMeta('coverImageUrl', '');
+    } finally {
+      setUploadingCover(false);
+    }
+  }, [updateMeta]);
+
+  // In the JSX, add this section after subtitle:
+  // Around line 950-1000 in the metadata form
+
+  const metadataForm = (
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="title">Title</Label>
+        <Input 
+          id="title" 
+          value={blogPost.meta.title} 
+          onChange={(e) => handleTitleChange(e.target.value)} 
+        />
+      </div>
+      <div>
+        <Label htmlFor="subtitle">Subtitle</Label>
+        <Input 
+          id="subtitle" 
+          value={blogPost.meta.subtitle || ''} 
+          onChange={(e) => updateMeta('subtitle', e.target.value)} 
+        />
+      </div>
+      <div>
+        <Label htmlFor="author">Author</Label>
+        <Input 
+          id="author" 
+          value={blogPost.meta.authorRef} 
+          onChange={(e) => updateMeta('authorRef', e.target.value)} 
+        />
+      </div>
+      <div>
+        <Label htmlFor="slug">Slug</Label>
+        <Input 
+          id="slug" 
+          value={blogPost.meta.slug} 
+          onChange={(e) => handleSlugChange(e.target.value)} 
+        />
+      </div>
+
+      {/* Linked Event Section */}
+      <div>
+        <Label>Linked Event</Label>
+        <p className="text-xs text-slate-400 mb-2">
+          Link this blog to an event as a recap post
+        </p>
+        
+        {selectedEventDetails && (
+          <div className="mb-3 p-3 bg-slate-800 rounded-md border border-slate-600">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h4 className="font-medium text-white text-sm">
+                  {selectedEventDetails.title}
+                </h4>
+                <p className="text-xs text-slate-400 mt-1">
+                  {selectedEventDetails.eventDetails?.date && 
+                    new Date(selectedEventDetails.eventDetails.date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })
+                  }
+                </p>
+                {selectedEventDetails.eventDetails?.location && (
+                  <p className="text-xs text-slate-400">
+                    {selectedEventDetails.eventDetails.location}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => updateLinkedEvent(null)}
+                className="text-slate-400 hover:text-white p-1"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <Select
+          value={blogPost.linkedEvent || ''}
+          onValueChange={(value) => updateLinkedEvent(value || null)}
+          disabled={loadingEvents}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder={
+              loadingEvents 
+                ? "Loading events..." 
+                : selectedEventDetails 
+                  ? "Change linked event..." 
+                  : "Select a past event..."
+            } />
+          </SelectTrigger>
+          <SelectContent>
+            {pastEvents.length === 0 && !loadingEvents && (
+              <div className="px-2 py-1.5 text-sm text-slate-400">
+                No past events available
+              </div>
+            )}
+            {pastEvents.map((event) => (
+              <SelectItem key={event.id} value={event.id}>
+                <div className="flex flex-col">
+                  <span className="font-medium">{event.title}</span>
+                  <span className="text-xs text-slate-400">
+                    {event.eventDetails?.date && 
+                      new Date(event.eventDetails.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                      })
+                    }
+                  </span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
+        <Label>Categories</Label>
+        <div className="p-2 border border-slate-600 rounded-md bg-slate-900 min-h-[40px]">
+          <div className="flex flex-wrap gap-2">
+            {blogPost.meta.categories.map((category) => (
+              <span
+                key={category}
+                className="flex items-center gap-1 bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full"
+              >
+                {category}
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateMeta(
+                      'categories',
+                      blogPost.meta.categories.filter((item) => item !== category)
+                    )
+                  }
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+        <div className="mt-2">
+          <Select
+            value=""
+            onValueChange={(value) => {
+              if (value && !blogPost.meta.categories.includes(value)) {
+                updateMeta('categories', [...blogPost.meta.categories, value]);
+              }
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Add a category..." />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.filter((category) => !blogPost.meta.categories.includes(category)).map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div>
+        <Label>Layout Preset</Label>
+        <Select
+          value={blogPost.layout.preset}
+          onValueChange={(value) => updateLayout('preset', value as LayoutPreset)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select layout preset" />
+          </SelectTrigger>
+          <SelectContent>
+            {LAYOUT_PRESETS.map((preset) => (
+              <SelectItem key={preset.value} value={preset.value}>
+                {preset.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Cover Image Section */}
+      <div>
+        <Label htmlFor="meta-coverImage">Cover Image</Label>
+        <div className="space-y-3">
+          {/* Preview if cover image exists */}
+          {(blogPost.meta.coverImageUrl || blogPost.meta.coverImage) && (
+            <div className="relative w-full max-w-md mx-auto">
+              <img 
+                src={blogPost.meta.coverImageUrl || blogPost.meta.coverImage} 
+                alt="Cover preview" 
+                className="w-full h-auto rounded-lg border border-slate-700"
+              />
+            </div>
+          )}
+          
+          {/* Upload Button */}
+          <div>
+            <input
+              id="cover-image-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleCoverImageUpload}
+              className="hidden"
+            />
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => document.getElementById('cover-image-upload')?.click()}
+              disabled={uploadingCover}
+            >
+              {uploadingCover ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="h-4 w-4" />
+                  {blogPost.meta.coverImageUrl ? 'Change Cover Image' : 'Upload Cover Image'}
+                </>
+              )}
+            </Button>
+          </div>
+          
+          {/* Legacy URL input for backward compatibility */}
+          {!blogPost.meta.coverImage && (
+            <div>
+              <Label htmlFor="meta-coverImageUrl" className="text-sm text-slate-400">
+                Or paste image URL (legacy)
+              </Label>
+              <Input
+                id="meta-coverImageUrl"
+                value={blogPost.meta.coverImageUrl || ''}
+                onChange={(e) => updateMeta('coverImageUrl', e.target.value)}
+                placeholder="https://example.com/cover.jpg"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col">
@@ -942,188 +1378,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ initialPost, mode }) => {
                       <h3 className="text-lg font-semibold text-white">Basic Info</h3>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="title">Title</Label>
-                          <Input 
-                            id="title" 
-                            value={blogPost.meta.title} 
-                            onChange={(e) => handleTitleChange(e.target.value)} 
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="subtitle">Subtitle</Label>
-                          <Input 
-                            id="subtitle" 
-                            value={blogPost.meta.subtitle || ''} 
-                            onChange={(e) => updateMeta('subtitle', e.target.value)} 
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="author">Author</Label>
-                          <Input 
-                            id="author" 
-                            value={blogPost.meta.authorRef} 
-                            onChange={(e) => updateMeta('authorRef', e.target.value)} 
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="slug">Slug</Label>
-                          <Input 
-                            id="slug" 
-                            value={blogPost.meta.slug} 
-                            onChange={(e) => handleSlugChange(e.target.value)} 
-                          />
-                        </div>
-
-                        {/* Linked Event Section */}
-                        <div>
-                          <Label>Linked Event</Label>
-                          <p className="text-xs text-slate-400 mb-2">
-                            Link this blog to an event as a recap post
-                          </p>
-                          
-                          {selectedEventDetails && (
-                            <div className="mb-3 p-3 bg-slate-800 rounded-md border border-slate-600">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <h4 className="font-medium text-white text-sm">
-                                    {selectedEventDetails.title}
-                                  </h4>
-                                  <p className="text-xs text-slate-400 mt-1">
-                                    {selectedEventDetails.eventDetails?.date && 
-                                      new Date(selectedEventDetails.eventDetails.date).toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                      })
-                                    }
-                                  </p>
-                                  {selectedEventDetails.eventDetails?.location && (
-                                    <p className="text-xs text-slate-400">
-                                      {selectedEventDetails.eventDetails.location}
-                                    </p>
-                                  )}
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => updateLinkedEvent(null)}
-                                  className="text-slate-400 hover:text-white p-1"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          )}
-
-                          <Select
-                            value={blogPost.linkedEvent || ''}
-                            onValueChange={(value) => updateLinkedEvent(value || null)}
-                            disabled={loadingEvents}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder={
-                                loadingEvents 
-                                  ? "Loading events..." 
-                                  : selectedEventDetails 
-                                    ? "Change linked event..." 
-                                    : "Select a past event..."
-                              } />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {pastEvents.length === 0 && !loadingEvents && (
-                                <div className="px-2 py-1.5 text-sm text-slate-400">
-                                  No past events available
-                                </div>
-                              )}
-                              {pastEvents.map((event) => (
-                                <SelectItem key={event.id} value={event.id}>
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">{event.title}</span>
-                                    <span className="text-xs text-slate-400">
-                                      {event.eventDetails?.date && 
-                                        new Date(event.eventDetails.date).toLocaleDateString('en-US', {
-                                          year: 'numeric',
-                                          month: 'short',
-                                          day: 'numeric'
-                                        })
-                                      }
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label>Categories</Label>
-                          <div className="p-2 border border-slate-600 rounded-md bg-slate-900 min-h-[40px]">
-                            <div className="flex flex-wrap gap-2">
-                              {blogPost.meta.categories.map((category) => (
-                                <span
-                                  key={category}
-                                  className="flex items-center gap-1 bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded-full"
-                                >
-                                  {category}
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      updateMeta(
-                                        'categories',
-                                        blogPost.meta.categories.filter((item) => item !== category)
-                                      )
-                                    }
-                                  >
-                                    &times;
-                                  </button>
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="mt-2">
-                            <Select
-                              value=""
-                              onValueChange={(value) => {
-                                if (value && !blogPost.meta.categories.includes(value)) {
-                                  updateMeta('categories', [...blogPost.meta.categories, value]);
-                                }
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Add a category..." />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {CATEGORIES.filter((category) => !blogPost.meta.categories.includes(category)).map((category) => (
-                                  <SelectItem key={category} value={category}>
-                                    {category}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Layout Preset</Label>
-                          <Select
-                            value={blogPost.layout.preset}
-                            onValueChange={(value) => updateLayout('preset', value as LayoutPreset)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select layout preset" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {LAYOUT_PRESETS.map((preset) => (
-                                <SelectItem key={preset.value} value={preset.value}>
-                                  {preset.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
+                      {metadataForm}
                     </CardContent>
                   </Card>
                 </div>

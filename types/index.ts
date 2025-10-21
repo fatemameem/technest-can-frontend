@@ -124,8 +124,28 @@ export interface BlogLayout {
 
 export interface BlogBlock {
   id: string;
-  type: string;
-  props: Record<string, any>;
+  type: BlockType;
+  props: {
+    // Common props
+    text?: string;
+    level?: number;
+    
+    // Image block props - UPDATED
+    mediaRef?: string; // Legacy: Direct URL
+    mediaId?: string; // NEW: Media collection ID
+    mediaUrl?: string; // NEW: Cloudinary URL for display
+    alt?: string;
+    caption?: string;
+    
+    // Code block props
+    language?: string;
+    code?: string;
+    
+    // Quote block props
+    author?: string;
+    
+    [key: string]: any;
+  };
 }
 
 export interface BlogData {
@@ -163,6 +183,7 @@ export enum BlockType {
   CALLOUT = 'Callout',
   DIVIDER = 'Divider',
   VIDEO_EMBED = 'VideoEmbed',
+  HEADING = 'Heading',
 }
 
 export interface SEO {
@@ -174,16 +195,22 @@ export interface SEO {
 export interface MetaData {
   title: string;
   subtitle?: string;
-  authorRef: string;
-  slug: string;
-  coverImageRef?: string;
+  authorRef?: string;
+  author?: string | { id: string; name: string }; // Can be ID or populated object
+  slug?: string;
   tags: string[];
   categories: string[];
-  readingTime: number;
+  readingTime?: number;
   status: PostStatus;
   publishedAt?: string;
   updatedAt: string;
-  seo: SEO;
+  coverImage?: string; // Media ID
+  coverImageUrl?: string; // Cloudinary URL for display
+  seo?: {
+    title?: string;
+    description?: string;
+    ogImage?: string; // Media ID
+  };
 }
 
 export interface Layout {
