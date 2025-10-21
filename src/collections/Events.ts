@@ -16,6 +16,54 @@ export const Events: CollectionConfig = {
     update: ({ req: { user } }) => Boolean(user),
     delete: ({ req: { user } }) => Boolean(user),
   },
+  hooks: {
+    afterDelete: [
+      async ({ doc, req }) => {
+        // Clean up thumbnail when event is deleted
+        if (doc.thumbnail) {
+          const thumbnailId = typeof doc.thumbnail === 'string' ? doc.thumbnail : doc.thumbnail.id;
+          if (thumbnailId) {
+            try {
+              await req.payload.delete({
+                collection: 'media',
+                id: thumbnailId,
+                overrideAccess: true,
+              });
+              console.log(`✅ Deleted thumbnail ${thumbnailId} from event deletion`);
+            } catch (error) {
+              console.error(`❌ Error deleting thumbnail ${thumbnailId}:`, error);
+            }
+          }
+        }
+      },
+    ],
+    beforeChange: [
+      async ({ data, req, originalDoc }) => {
+        if (!data || !originalDoc) return data;
+
+        // Check if thumbnail was replaced
+        if (originalDoc.thumbnail && data.thumbnail) {
+          const oldThumbId = typeof originalDoc.thumbnail === 'string' ? originalDoc.thumbnail : originalDoc.thumbnail.id;
+          const newThumbId = typeof data.thumbnail === 'string' ? data.thumbnail : data.thumbnail?.id;
+          
+          if (oldThumbId && newThumbId && oldThumbId !== newThumbId) {
+            try {
+              await req.payload.delete({
+                collection: 'media',
+                id: oldThumbId,
+                overrideAccess: true,
+              });
+              console.log(`✅ Deleted replaced thumbnail ${oldThumbId}`);
+            } catch (error) {
+              console.error(`❌ Error deleting replaced thumbnail ${oldThumbId}:`, error);
+            }
+          }
+        }
+
+        return data;
+      },
+    ],
+  },
   fields: [
     {
       name: 'title',

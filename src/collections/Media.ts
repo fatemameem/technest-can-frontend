@@ -85,6 +85,33 @@ export const Media: CollectionConfig = {
     },
   ],
   hooks: {
+    afterDelete: [
+      async ({ doc }) => {
+        // Clean up Cloudinary file
+        if (doc.cloudinary?.publicId) {
+          try {
+            await cloudinary.uploader.destroy(doc.cloudinary.publicId);
+            console.log(`✅ Deleted Cloudinary file: ${doc.cloudinary.publicId}`);
+          } catch (error) {
+            console.error(`❌ Error deleting Cloudinary file ${doc.cloudinary.publicId}:`, error);
+          }
+        }
+
+        // Clean up Google Drive file
+        if (doc.drive?.fileId && doc.drive.fileId !== 'skipped' && doc.drive.fileId !== 'error') {
+          try {
+            const drive = getAuthenticatedDriveClient();
+            await drive.files.delete({
+              fileId: doc.drive.fileId,
+              supportsAllDrives: true,
+            });
+            console.log(`✅ Deleted Google Drive file: ${doc.drive.fileId}`);
+          } catch (error) {
+            console.error(`❌ Error deleting Google Drive file ${doc.drive.fileId}:`, error);
+          }
+        }
+      },
+    ],
     beforeChange: [
       async ({ req, data }) => {
         // Check if an upload is present

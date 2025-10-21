@@ -21,6 +21,47 @@ export const Blogs: CollectionConfig = {
     delete: ({ req }) => Boolean(req.user),
   },
   hooks: {
+    afterDelete: [
+      async ({ doc, req }) => {
+        // Clean up associated media when blog is deleted
+        const mediaIdsToDelete: string[] = [];
+
+        // Add cover image
+        if (doc.coverImage) {
+          const coverId = typeof doc.coverImage === 'string' ? doc.coverImage : doc.coverImage.id;
+          if (coverId) mediaIdsToDelete.push(coverId);
+        }
+
+        // Add OG image
+        if (doc.meta?.seo?.ogImage) {
+          const ogId = typeof doc.meta.seo.ogImage === 'string' ? doc.meta.seo.ogImage : doc.meta.seo.ogImage.id;
+          if (ogId) mediaIdsToDelete.push(ogId);
+        }
+
+        // Add images from blocks
+        if (Array.isArray(doc.blocks)) {
+          doc.blocks.forEach((block: any) => {
+            if (block.type === 'Image' && block.props?.mediaId) {
+              mediaIdsToDelete.push(block.props.mediaId);
+            }
+          });
+        }
+
+        // Delete all collected media
+        for (const mediaId of mediaIdsToDelete) {
+          try {
+            await req.payload.delete({
+              collection: 'media',
+              id: mediaId,
+              overrideAccess: true,
+            });
+            console.log(`✅ Deleted media ${mediaId} from blog deletion`);
+          } catch (error) {
+            console.error(`❌ Error deleting media ${mediaId}:`, error);
+          }
+        }
+      },
+    ],
     beforeValidate: [
       async ({ data, req, originalDoc }) => {
         if (!data) return data;
@@ -66,6 +107,45 @@ export const Blogs: CollectionConfig = {
     beforeChange: [
       async ({ data, req, originalDoc }) => {
         if (!data) return data;
+
+        // Clean up replaced media files
+        if (originalDoc) {
+          const mediaToDelete: string[] = [];
+
+          // Check if cover image was replaced
+          if (originalDoc.coverImage && data.coverImage) {
+            const oldCoverId = typeof originalDoc.coverImage === 'string' ? originalDoc.coverImage : originalDoc.coverImage.id;
+            const newCoverId = typeof data.coverImage === 'string' ? data.coverImage : data.coverImage?.id;
+            
+            if (oldCoverId && newCoverId && oldCoverId !== newCoverId) {
+              mediaToDelete.push(oldCoverId);
+            }
+          }
+
+          // Check if OG image was replaced
+          if (originalDoc.meta?.seo?.ogImage && data.meta?.seo?.ogImage) {
+            const oldOgId = typeof originalDoc.meta.seo.ogImage === 'string' ? originalDoc.meta.seo.ogImage : originalDoc.meta.seo.ogImage.id;
+            const newOgId = typeof data.meta.seo.ogImage === 'string' ? data.meta.seo.ogImage : data.meta.seo.ogImage?.id;
+            
+            if (oldOgId && newOgId && oldOgId !== newOgId) {
+              mediaToDelete.push(oldOgId);
+            }
+          }
+
+          // Delete replaced media
+          for (const mediaId of mediaToDelete) {
+            try {
+              await req.payload.delete({
+                collection: 'media',
+                id: mediaId,
+                overrideAccess: true,
+              });
+              console.log(`✅ Deleted replaced media ${mediaId}`);
+            } catch (error) {
+              console.error(`❌ Error deleting replaced media ${mediaId}:`, error);
+            }
+          }
+        }
 
         const user = (req as any)?.user ?? {};
         data.meta = data.meta ?? {};
