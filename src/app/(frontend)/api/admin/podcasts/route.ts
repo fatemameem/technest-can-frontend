@@ -31,6 +31,23 @@ export async function POST(req: Request) {
             facebook: String(item.facebook || '')
           },
           published: true,
+          // Add these arrays
+          learnMoreLinks: Array.isArray(item.learnMoreLinks)
+            ? item.learnMoreLinks
+                .filter((link: any) => link.label?.trim() && link.url?.trim())
+                .map((link: any) => ({
+                  label: String(link.label).trim(),
+                  url: String(link.url).trim(),
+                }))
+            : [],
+          resourcesLinks: Array.isArray(item.resourcesLinks)
+            ? item.resourcesLinks
+                .filter((link: any) => link.label?.trim() && link.url?.trim())
+                .map((link: any) => ({
+                  label: String(link.label).trim(),
+                  url: String(link.url).trim(),
+                }))
+            : [],
           // Only add thumbnail if it's a valid Media ID
           ...(item.thumbnail && /^[0-9a-fA-F]{24}$/.test(item.thumbnail) 
             ? { thumbnail: item.thumbnail } 

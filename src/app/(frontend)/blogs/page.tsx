@@ -9,36 +9,42 @@ export default function BlogPage() {
       color: '#060010',
       title: 'Analytics',
       description: 'Track user behavior',
-      label: 'Insights'
+      label: 'Insights',
+      coverImageUrl: '/images/events.jpg'
     },
     {
       color: '#060010',
       title: 'Dashboard',
       description: 'Centralized data view',
+      coverImageUrl: '/images/events.jpg',
       label: 'Overview'
     },
     {
       color: '#060010',
       title: 'Collaboration',
       description: 'Work together seamlessly',
-      label: 'Teamwork'
+      label: 'Teamwork',
+      coverImageUrl: '/images/events.jpg'
     },
     {
       color: '#060010',
       title: 'Automation',
       description: 'Streamline workflows',
-      label: 'Efficiency'
+      label: 'Efficiency',
+      coverImageUrl: '/images/events.jpg'
     },
     {
       color: '#060010',
       title: 'Integration',
       description: 'Connect favorite tools',
-      label: 'Connectivity'
+      label: 'Connectivity',
+      coverImageUrl: '/images/events.jpg'
     },
     {
       color: '#060010',
       title: 'Security',
       description: 'Enterprise-grade protection',
+      coverImageUrl: '/images/events.jpg',
       label: 'Protection'
     }
   ];

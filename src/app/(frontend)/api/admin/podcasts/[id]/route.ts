@@ -96,6 +96,23 @@ export async function PUT(
         instagram: body.instagram || body.socialLinks?.instagram,
         facebook: body.facebook || body.socialLinks?.facebook,
       },
+      // Add these arrays
+      learnMoreLinks: Array.isArray(body.learnMoreLinks)
+        ? body.learnMoreLinks
+            .filter((link: any) => link.label?.trim() && link.url?.trim())
+            .map((link: any) => ({
+              label: String(link.label).trim(),
+              url: String(link.url).trim(),
+            }))
+        : [],
+      resourcesLinks: Array.isArray(body.resourcesLinks)
+        ? body.resourcesLinks
+            .filter((link: any) => link.label?.trim() && link.url?.trim())
+            .map((link: any) => ({
+              label: String(link.label).trim(),
+              url: String(link.url).trim(),
+            }))
+        : [],
       published: Boolean(body.published ?? true),
     };
 

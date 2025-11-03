@@ -7,16 +7,7 @@ import { PodcastForm } from '@/types';
 import Image from 'next/image';
 
 interface PodcastsTabProps {
-	podcastForms: Array<{
-		title: string;
-		description: string;
-		linkedin: string;
-		instagram: string;
-		drive: string;
-		facebook: string;
-		thumbnail: string;
-		thumbnailFile?: File | null;
-	}>;
+	podcastForms: PodcastForm[];
 	showPodcastForm: boolean;
 	editMode: {
 		podcasts?: boolean;
@@ -33,6 +24,13 @@ interface PodcastsTabProps {
 		cancelPodcastEdit: () => void;
 		handlePodcastSubmit: () => Promise<void>;
 		deletePodcast: (id: string) => Promise<void>;
+		// Link management helpers for PodcastForm.learnMoreLinks and PodcastForm.resourcesLinks
+		addLearnMoreLink: (podcastIndex: number) => void;
+		removeLearnMoreLink: (podcastIndex: number, linkIndex: number) => void;
+		updateLearnMoreLink: (podcastIndex: number, linkIndex: number, field: string, value: string) => void;
+		addResourceLink: (podcastIndex: number) => void;
+		removeResourceLink: (podcastIndex: number, linkIndex: number) => void;
+		updateResourceLink: (podcastIndex: number, linkIndex: number, field: string, value: string) => void;
 	};
 	deletingItemId: string | null;
 }
@@ -155,7 +153,10 @@ export default function PodcastsTab({
 															instagram: podcast.instagram || '',
 															drive: podcast.drive || '',
 															facebook: podcast.facebook || '',
-															thumbnail: podcast.thumbnail || ''
+															thumbnail: podcast.thumbnail || '',
+															thumbnailFile: null,
+															learnMoreLinks: podcast.learnMoreLinks || [],
+															resourcesLinks: podcast.resourcesLinks || []
 														})}
 														disabled={isSubmittingPodcasts || deletingItemId !== null}
 													>
@@ -235,6 +236,17 @@ export default function PodcastsTab({
 				canRemove={podcastForms.length > 1 && !editMode.podcasts}
 				onRemove={() => actions.removePodcastForm(index)}
 				onChange={(field, value) => actions.updatePodcastForm(index, field, value)}
+				// Add new props
+				onAddLearnMoreLink={() => actions.addLearnMoreLink(index)}
+				onRemoveLearnMoreLink={(linkIndex) => actions.removeLearnMoreLink(index, linkIndex)}
+				onUpdateLearnMoreLink={(linkIndex, field, value) => 
+      actions.updateLearnMoreLink(index, linkIndex, field, value)
+    }
+				onAddResourceLink={() => actions.addResourceLink(index)}
+				onRemoveResourceLink={(linkIndex) => actions.removeResourceLink(index, linkIndex)}
+				onUpdateResourceLink={(linkIndex, field, value) => 
+      actions.updateResourceLink(index, linkIndex, field, value)
+    }
 				/>
 			))}
 			</div>

@@ -19,7 +19,10 @@ export function useAdminDashboard() {
     instagram: '',
     drive: '',
     facebook: '',
-    thumbnail: ''
+    thumbnail: '',
+    // Add these
+    learnMoreLinks: [{ label: '', url: '' }],
+    resourcesLinks: [{ label: '', url: '' }],
   }]);
 
   const [eventForms, setEventForms] = useState<EventForm[]>([{
@@ -201,7 +204,9 @@ export function useAdminDashboard() {
       drive: '',
       facebook: '',
       thumbnail: '',
-      thumbnailFile: null
+      thumbnailFile: null,
+      learnMoreLinks: [{ label: '', url: '' }],
+      resourcesLinks: [{ label: '', url: '' }]
     }]);
     setShowPodcastForm(true);
   }, []);
@@ -218,10 +223,39 @@ export function useAdminDashboard() {
     setPodcastForms(updated);
   }, [podcastForms]);
 
-  const handleEditPodcast = useCallback((podcastId: string, podcastData: PodcastForm) => {
+  const handleEditPodcast = useCallback((podcastId: string, podcastData: any) => {
     setEditMode(prev => ({ ...prev, podcasts: true }));
     setCurrentEditId(podcastId);
-    setPodcastForms([podcastData]);
+    
+    // Extract thumbnail data correctly
+    const thumbnailId = typeof podcastData.thumbnail === 'object' && podcastData.thumbnail?.id
+      ? podcastData.thumbnail.id
+      : typeof podcastData.thumbnail === 'string'
+      ? podcastData.thumbnail
+      : '';
+      
+    const thumbnailUrl = typeof podcastData.thumbnail === 'object' && podcastData.thumbnail?.cloudinary?.secureUrl
+      ? podcastData.thumbnail.cloudinary.secureUrl
+      : '';
+  
+    setPodcastForms([{
+      title: podcastData.title || '',
+      description: podcastData.description || '',
+      linkedin: podcastData.socialLinks?.linkedin || '',
+      instagram: podcastData.socialLinks?.instagram || '',
+      drive: podcastData.driveLink || '',
+      facebook: podcastData.socialLinks?.facebook || '',
+      thumbnail: thumbnailId, // Media ID for database
+      thumbnailUrl: thumbnailUrl, // URL for preview
+      thumbnailFile: null,
+      learnMoreLinks: podcastData.learnMoreLinks?.length 
+        ? podcastData.learnMoreLinks 
+        : [{ label: '', url: '' }],
+      resourcesLinks: podcastData.resourcesLinks?.length 
+        ? podcastData.resourcesLinks 
+        : [{ label: '', url: '' }],
+    }]);
+    
     setShowPodcastForm(true);
     
     setTimeout(() => {
@@ -239,87 +273,171 @@ export function useAdminDashboard() {
       instagram: '',
       drive: '',
       facebook: '',
-      thumbnail: ''
+      thumbnail: '',
+      learnMoreLinks: [{ label: '', url: '' }],
+      resourcesLinks: [{ label: '', url: '' }],
+      thumbnailFile: null
     }]);
     setShowPodcastForm(false);
   }, []);
 
-  const handlePodcastSubmit = useCallback(async () => {
+    // Fetch podcasts
+  const fetchPodcasts = useCallback(async () => {
     try {
-      setIsSubmittingPodcasts(true);
-
-      // Validation
-      for (let i = 0; i < podcastForms.length; i++) {
-        const f = podcastForms[i];
-
-        // //cloudinary- modified validation to check thumbnail exists
-        if (!isNonEmpty(f.title) || !isNonEmpty(f.description) || !isNonEmpty(f.thumbnail)) {
-          toast.error(`Podcast #${i + 1}: Title, Description, and Thumbnail are required.`);
-          setIsSubmittingPodcasts(false);
-          return;
-        }
-
-        // //cloudinary- modified URL checks (removed thumbnail required validation)
-        const urlChecks: Array<[string, string, boolean]> = [
-          [f.drive, "Drive", false], // //cloudinary- made optional as upload creates a drive link
-          [f.linkedin, "LinkedIn", false],
-          [f.instagram, "Instagram", false],
-          [f.facebook, "Facebook", false],
-        ];
-
-        for (const [val, label, requiredValid] of urlChecks) {
-          if (requiredValid && !isValidUrl(val)) {
-            toast.error(`Podcast #${i + 1}: ${label} must be a valid URL (http/https).`);
-            setIsSubmittingPodcasts(false);
-            return;
-          }
-          if (!requiredValid && isNonEmpty(val) && !isValidUrl(val)) {
-            toast.error(`Podcast #${i + 1}: ${label} URL is invalid.`);
-            setIsSubmittingPodcasts(false);
-            return;
-          }
-        }
-      }
-
-      const ts = buildTimestamp();
-      // //cloudinary- create entries without _id field to prevent BSON errors
-      const entries: any[] = podcastForms.map((f) => ({
-        timestamp: String(ts),
-        title: String(sanitize(f.title)),
-        description: String(sanitize(f.description)),
-        linkedin: String(sanitize(f.linkedin)),
-        instagram: String(sanitize(f.instagram)),
-        drive: String(sanitize(f.drive)),
-        facebook: String(sanitize(f.facebook)),
-        thumbnail: String(sanitize(f.thumbnail)),
-        // Don't include thumbnailFile as it's not needed in the DB
-      }));
-      
-      let apiUrl = '/api/admin/podcasts';
-      let method = 'POST';
-      
-      if (editMode.podcasts && currentEditId) {
-        apiUrl = `/api/admin/podcasts/${currentEditId}`;
-        method = 'PUT';
-        // //cloudinary- remove any potential _id field to avoid BSON errors
-        const entryToUpdate = { ...entries[0] };
-        delete entryToUpdate._id;
-        await fetch(apiUrl, { 
-          method, 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entryToUpdate) 
-        });
-        toast.success("Podcast updated successfully!");
+      setLoadingPodcasts(true);
+      const response = await fetch('/api/admin/podcasts');
+      if (response.ok) {
+        const data = await response.json();
+        setPodcasts(data.docs || []);
+        // Note: No need to transform the data - keep the full thumbnail object
       } else {
-        console.log('Submitting podcasts:', entries);
-        await fetch(apiUrl, { 
-          method, 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entries) 
-        });
-        toast.success(`${entries.length} podcast(s) submitted successfully!`);
+        console.error('Failed to fetch podcasts:', response.status);
+        toast.error('Failed to load podcasts');
+      }
+    } catch (error) {
+      console.error('Failed to fetch podcasts:', error);
+      toast.error('Failed to load podcasts');
+    } finally {
+      setLoadingPodcasts(false);
+    }
+  }, []);
+
+  const handlePodcastSubmit = useCallback(async () => {
+    // Basic field validation
+    for (let i = 0; i < podcastForms.length; i++) {
+      const form = podcastForms[i];
+      
+      if (!isNonEmpty(form.title)) {
+        toast?.error(`Podcast ${i + 1}: Title is required`);
+        return;
       }
       
+      if (!isNonEmpty(form.description)) {
+        toast?.error(`Podcast ${i + 1}: Description is required`);
+        return;
+      }
+      
+      // Validate social links (optional but must be valid URLs if provided)
+      if (form.linkedin && !isValidUrl(form.linkedin)) {
+        toast?.error(`Podcast ${i + 1}: Invalid LinkedIn URL`);
+        return;
+      }
+      if (form.instagram && !isValidUrl(form.instagram)) {
+        toast?.error(`Podcast ${i + 1}: Invalid Instagram URL`);
+        return;
+      }
+      if (form.facebook && !isValidUrl(form.facebook)) {
+        toast?.error(`Podcast ${i + 1}: Invalid Facebook URL`);
+        return;
+      }
+      if (form.drive && !isValidUrl(form.drive)) {
+        toast?.error(`Podcast ${i + 1}: Invalid Drive URL`);
+        return;
+      }
+
+      // Validate learnMoreLinks array
+      for (let j = 0; j < form.learnMoreLinks.length; j++) {
+        const link = form.learnMoreLinks[j];
+        
+        // Only validate if at least one field is filled (partial entry = error)
+        const hasLabel = link.label?.trim();
+        const hasUrl = link.url?.trim();
+        
+        if (hasLabel || hasUrl) {
+          if (!hasLabel) {
+            toast?.error(`Podcast ${i + 1}, Learn More Link ${j + 1}: Label is required`);
+            return;
+          }
+          if (!hasUrl) {
+            toast?.error(`Podcast ${i + 1}, Learn More Link ${j + 1}: URL is required`);
+            return;
+          }
+          if (!isValidUrl(link.url)) {
+            toast?.error(`Podcast ${i + 1}, Learn More Link ${j + 1}: Invalid URL`);
+            return;
+          }
+        }
+      }
+
+      // Validate resourcesLinks array
+      for (let j = 0; j < form.resourcesLinks.length; j++) {
+        const link = form.resourcesLinks[j];
+        
+        const hasLabel = link.label?.trim();
+        const hasUrl = link.url?.trim();
+        
+        if (hasLabel || hasUrl) {
+          if (!hasLabel) {
+            toast?.error(`Podcast ${i + 1}, Resource Link ${j + 1}: Label is required`);
+            return;
+          }
+          if (!hasUrl) {
+            toast?.error(`Podcast ${i + 1}, Resource Link ${j + 1}: URL is required`);
+            return;
+          }
+          if (!isValidUrl(link.url)) {
+            toast?.error(`Podcast ${i + 1}, Resource Link ${j + 1}: Invalid URL`);
+            return;
+          }
+        }
+      }
+    }
+
+    setIsSubmittingPodcasts(true);
+
+    try {
+      const podcastsData = podcastForms.map((form) => ({
+        title: sanitize(form.title),
+        description: sanitize(form.description),
+        thumbnail: form.thumbnail, // Media ID
+        linkedin: sanitize(form.linkedin),
+        instagram: sanitize(form.instagram),
+        facebook: sanitize(form.facebook),
+        drive: sanitize(form.drive),
+        // Filter out empty links and sanitize
+        learnMoreLinks: form.learnMoreLinks
+          .filter(link => link.label?.trim() && link.url?.trim())
+          .map(link => ({
+            label: sanitize(link.label),
+            url: sanitize(link.url),
+          })),
+        resourcesLinks: form.resourcesLinks
+          .filter(link => link.label?.trim() && link.url?.trim())
+          .map(link => ({
+            label: sanitize(link.label),
+            url: sanitize(link.url),
+          })),
+      }));
+
+      let response;
+      if (editMode.podcasts && currentEditId) {
+        // Update existing podcast
+        response = await fetch(`/api/admin/podcasts/${currentEditId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(podcastsData[0]),
+        });
+      } else {
+        // Create new podcasts (bulk)
+        response = await fetch('/api/admin/podcasts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ podcasts: podcastsData }),
+        });
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit podcasts');
+      }
+
+      toast?.success(
+        editMode.podcasts
+          ? 'Podcast updated successfully!'
+          : `${podcastsData.length} podcast(s) created successfully!`
+      );
+
+      // Reset form
       setPodcastForms([{
         title: '',
         description: '',
@@ -328,20 +446,22 @@ export function useAdminDashboard() {
         drive: '',
         facebook: '',
         thumbnail: '',
-        // //cloudinary- reset the thumbnailFile
-        thumbnailFile: null
+        learnMoreLinks: [{ label: '', url: '' }],
+        resourcesLinks: [{ label: '', url: '' }],
       }]);
-      setEditMode(prev => ({ ...prev, podcasts: false }));
-      setCurrentEditId(null);
       setShowPodcastForm(false);
+      setEditMode({ ...editMode, podcasts: false });
+      setCurrentEditId(null);
       
-    } catch (err: any) {
-      console.error(err);
-      toast.error(`Failed to submit podcasts. ${err?.message ?? ""}`.trim());
+      // Refresh podcast list
+      await fetchPodcasts();
+    } catch (error) {
+      console.error('Error submitting podcasts:', error);
+      toast?.error(error instanceof Error ? error.message : 'Failed to submit podcasts');
     } finally {
       setIsSubmittingPodcasts(false);
     }
-  }, [podcastForms, editMode.podcasts, currentEditId]);
+  }, [podcastForms, editMode, currentEditId, toast, fetchPodcasts]);
 
   // Event handlers
   const addEventForm = useCallback(() => {
@@ -495,8 +615,11 @@ export function useAdminDashboard() {
           .map(sanitize)
           .filter((s) => s.length > 0)
           .join(", "),
-        // Add thumbnail field (Media ID)
-        thumbnail: f.thumbnail ? String(sanitize(f.thumbnail)) : undefined,
+        // ✅ Fix: Only include thumbnail if it's a string (Media ID)
+        // Don't try to sanitize if it's a File object
+        ...(typeof f.thumbnail === 'string' && f.thumbnail 
+          ? { thumbnail: String(sanitize(f.thumbnail)) } 
+          : {}),
         // Don't include thumbnailFile or thumbnailUrl - they're client-side only
       }));
 
@@ -527,7 +650,7 @@ export function useAdminDashboard() {
         const response = await fetch(apiUrl, { 
           method, 
           headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entries) 
+          body: JSON.stringify({ events: entries }) 
         });
         
         if (response.ok) {
@@ -1009,27 +1132,6 @@ export function useAdminDashboard() {
     setShowBlogForm(false);
   }, []);
 
-  // Fetch podcasts
-  const fetchPodcasts = useCallback(async () => {
-    try {
-      setLoadingPodcasts(true);
-      const response = await fetch('/api/admin/podcasts');
-      if (response.ok) {
-        const data = await response.json();
-        setPodcasts(data.docs || []);
-        // Note: No need to transform the data - keep the full thumbnail object
-      } else {
-        console.error('Failed to fetch podcasts:', response.status);
-        toast.error('Failed to load podcasts');
-      }
-    } catch (error) {
-      console.error('Failed to fetch podcasts:', error);
-      toast.error('Failed to load podcasts');
-    } finally {
-      setLoadingPodcasts(false);
-    }
-  }, []);
-
   // Delete podcast
   const deletePodcast = useCallback(async (id: string) => {
     if (!confirm('Are you sure you want to delete this podcast?')) return;
@@ -1199,6 +1301,60 @@ export function useAdminDashboard() {
     return item ? `Manage ${item.label}` : 'Admin Dashboard';
   }, [activeTab]);
 
+  // Add link to learnMoreLinks array
+  const addLearnMoreLink = (podcastIndex: number) => {
+    const updated = [...podcastForms];
+    updated[podcastIndex].learnMoreLinks.push({ label: '', url: '' });
+    setPodcastForms(updated);
+  };
+
+  // Remove link from learnMoreLinks array
+  const removeLearnMoreLink = (podcastIndex: number, linkIndex: number) => {
+    const updated = [...podcastForms];
+    if (updated[podcastIndex].learnMoreLinks.length > 1) {
+      updated[podcastIndex].learnMoreLinks.splice(linkIndex, 1);
+      setPodcastForms(updated);
+    }
+  };
+
+  // Update link in learnMoreLinks array
+  const updateLearnMoreLink = (
+    podcastIndex: number, 
+    linkIndex: number, 
+    field: 'label' | 'url', 
+    value: string
+  ) => {
+    const updated = [...podcastForms];
+    updated[podcastIndex].learnMoreLinks[linkIndex][field] = value;
+    setPodcastForms(updated);
+  };
+
+  // Same for resourcesLinks
+  const addResourceLink = (podcastIndex: number) => {
+    const updated = [...podcastForms];
+    updated[podcastIndex].resourcesLinks.push({ label: '', url: '' });
+    setPodcastForms(updated);
+  };
+
+  const removeResourceLink = (podcastIndex: number, linkIndex: number) => {
+    const updated = [...podcastForms];
+    if (updated[podcastIndex].resourcesLinks.length > 1) {
+      updated[podcastIndex].resourcesLinks.splice(linkIndex, 1);
+      setPodcastForms(updated);
+    }
+  };
+
+  const updateResourceLink = (
+    podcastIndex: number, 
+    linkIndex: number, 
+    field: 'label' | 'url', 
+    value: string
+  ) => {
+    const updated = [...podcastForms];
+    updated[podcastIndex].resourcesLinks[linkIndex][field] = value;
+    setPodcastForms(updated);
+  };
+
   return {
     state: {
       session,
@@ -1301,7 +1457,14 @@ export function useAdminDashboard() {
       deleteTeamMember,
       fetchUsers,
       deleteUser,
-      getPageTitle
+      getPageTitle,
+      // Link handlers
+      addLearnMoreLink,
+      removeLearnMoreLink,
+      updateLearnMoreLink,
+      addResourceLink,
+      removeResourceLink,
+      updateResourceLink,
     }
   };
 }

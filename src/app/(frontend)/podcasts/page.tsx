@@ -39,7 +39,7 @@ export default async function Podcasts() {
     linkedin: r.socialLinks?.linkedin ?? '',
     instagram: r.socialLinks?.instagram ?? '',
     facebook: r.socialLinks?.facebook ?? '',
-    thumbnailUrl: r.thumbnailUrl ?? "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
+    thumbnailUrl: r.thumbnail.url ?? "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
   }));
 
   const latestEpisode = mappedPodcasts[mappedPodcasts.length - 1] || {

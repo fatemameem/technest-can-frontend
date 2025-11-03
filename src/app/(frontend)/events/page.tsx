@@ -34,7 +34,7 @@ export default async function Events() {
   });
 
   const rawEvents = eventsRes?.docs ?? [];
-
+  // console.log("Events fetched:", rawEvents);
   // Map Payload events to UIEvent structure
   const mappedEvents: UIEvent[] = rawEvents.map((event: any) => ({
     id: event.id,
@@ -59,6 +59,7 @@ export default async function Events() {
       recapUrl: event.links?.recapUrl, // Map the recapUrl from Payload
     },
     sponsors: event.sponsors,
+    thumbnailUrl: event.thumbnail?.url,
   }));
 
   // Separate upcoming and past events

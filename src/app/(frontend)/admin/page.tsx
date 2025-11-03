@@ -117,6 +117,12 @@ export default function AdminDashboard() {
             cancelPodcastEdit: actions.cancelPodcastEdit,
             handlePodcastSubmit: actions.handlePodcastSubmit,
             deletePodcast: actions.deletePodcast,
+            addLearnMoreLink: actions.addLearnMoreLink,
+            removeLearnMoreLink: actions.removeLearnMoreLink,
+            updateLearnMoreLink: actions.updateLearnMoreLink as (podcastIndex: number, linkIndex: number, field: string, value: string) => void,
+            addResourceLink: actions.addResourceLink,
+            removeResourceLink: actions.removeResourceLink,
+            updateResourceLink: actions.updateResourceLink as (podcastIndex: number, linkIndex: number, field: string, value: string) => void,
           }}
         />
       )}

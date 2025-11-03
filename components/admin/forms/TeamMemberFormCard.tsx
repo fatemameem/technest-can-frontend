@@ -1,85 +1,40 @@
 "use client";
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Users, Trash2, UploadCloud, Loader2 } from 'lucide-react';
-import type { TeamMemberForm } from '@/types';
+import { Trash2, UploadCloud, Loader2, Users } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import Image from 'next/image';
+import type { TeamMemberForm } from '@/types';
 
 export default function TeamMemberFormCard({
   index,
   form,
-  canRemove,
-  onRemove,
   onChange,
+  onRemove,
+  canRemove,
 }: {
   index: number;
   form: TeamMemberForm;
-  canRemove: boolean;
-  onRemove: () => void;
   onChange: (field: keyof TeamMemberForm, value: string | File | null) => void;
+  onRemove: () => void;
+  canRemove: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
-
+  
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast?.error('Please upload an image file');
-      return;
-    }
-
-    onChange('imageFile', file);
-
-    // Show preview immediately using object URL
-    const objectUrl = URL.createObjectURL(file);
-    onChange('imageUrl', objectUrl); // Store in imageUrl for preview
     
-    setUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/media', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.doc) {
-        // Update imageUrl with Cloudinary URL (replaces object URL)
-        onChange('imageUrl', data.doc.cloudinary.secureUrl); // For display
-        onChange('image', data.doc.id); // For database relation
-
-        toast?.success('Image uploaded successfully');
-
-      } else {
-        console.error('Upload response issue:', data);
-        toast?.error('Upload completed but returned unexpected format');
-        // Revert preview on error
-        onChange('imageUrl', '');
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast?.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      // Revert preview on error
-      onChange('imageUrl', '');
-    } finally {
-      setUploading(false);
-    }
+    onChange('imageFile', file);
   };
 
   return (
-    <Card className="surface">
+    <Card className="bg-slate-800 border-slate-700">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center space-x-2">
@@ -93,6 +48,7 @@ export default function TeamMemberFormCard({
           )}
         </div>
       </CardHeader>
+      
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -144,60 +100,55 @@ export default function TeamMemberFormCard({
           />
         </div>
 
-        {/* Image Upload Section - Match EventFormCard exactly */}
+        {/* Image Upload Section */}
         <div className="space-y-2">
           <Label htmlFor={`team-image-${index}`}>Profile Image *</Label>
           <div className="grid grid-cols-1 gap-3">
-            {/* Show preview if imageUrl exists */}
             {form.imageUrl && (
               <div className="relative w-32 h-32 mb-2 mx-auto">
-                <Image 
+                {/* Replace Next.js Image with regular img */}
+                <img 
                   src={form.imageUrl} 
-                  alt="Thumbnail" 
-                  layout="fill" 
-                  objectFit="cover" 
-                  className="rounded" 
+                  alt="Profile" 
+                  className="w-full h-full object-cover rounded-full border-2 border-slate-600"
                 />
               </div>
             )}
-            <div className="relative">
-              <Input 
-                id={`team-image-file-${index}`}
+            
+            <div className="flex items-center gap-2">
+              <Input
+                id={`team-image-${index}`}
                 type="file"
                 accept="image/*"
                 onChange={handleFileUpload}
-                className="focus-ring hidden"
+                className="hidden"
+                disabled={uploading}
               />
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full flex items-center justify-center gap-2"
-                onClick={() => document.getElementById(`team-image-file-${index}`)?.click()}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-slate-600 hover:bg-slate-700"
+                onClick={() => document.getElementById(`team-image-${index}`)?.click()}
                 disabled={uploading}
               >
                 {uploading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Uploading...
                   </>
                 ) : (
                   <>
-                    <UploadCloud className="h-4 w-4" />
-                    {form.image ? 'Change Image' : 'Upload Image'}
+                    <UploadCloud className="mr-2 h-4 w-4" />
+                    {form.imageUrl ? 'Replace Image' : 'Upload Image'}
                   </>
                 )}
               </Button>
-              {form.imageUrl && (
-                <Input
-                  id={`team-image-${index}`}
-                  type="url"
-                  value={form.imageUrl}
-                  onChange={(e) => onChange('imageUrl', e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="focus-ring mt-2"
-                />
-              )}
             </div>
+            {form.imageFile && (
+              <p className="text-xs text-slate-400">
+                Selected: {form.imageFile.name}
+              </p>
+            )}
           </div>
         </div>
 

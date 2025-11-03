@@ -151,6 +151,25 @@ export const Podcasts: CollectionConfig = {
         ]
       },
       {
+        name: 'resourcesLinks',
+        type: 'array',
+        label: 'Resources Links',
+        fields: [
+          {
+            name: 'label',
+            type: 'text',
+            label: 'Link Label',
+            required: true,
+          },
+          {
+            name: 'url',
+            type: 'text',
+            label: 'URL',
+            required: true,
+          }
+        ]
+      },
+      {
         name: 'published',
         type: 'checkbox',
         label: 'Published',

@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Play, ExternalLink, ArrowLeft, Clock, Calendar, Users } from 'lucide-react';
+import { Play, ExternalLink, ArrowLeft, Clock, Calendar, Users, Watch } from 'lucide-react';
 import { Linkedin, Facebook, Instagram } from 'lucide-react';
 import Link from 'next/link';
+import WatchNextCard from '@/components/cards/WatchNextCard';
+
 
 interface PodcastDetailPageProps {
   podcast: any; // Replace with proper type
@@ -100,6 +102,7 @@ export default function PodcastDetailPage({ podcast }: PodcastDetailPageProps) {
           </Card>
         </div>
       </div>
+      {/* <WatchNextCard episode={podcast} compact={true} /> */}
     </div>
   );
 }

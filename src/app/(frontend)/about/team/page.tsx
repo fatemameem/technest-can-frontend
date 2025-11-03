@@ -66,7 +66,7 @@ export default async function Team() {
       name: raw.name,
       designation: raw.designation,
       description: raw.description,
-      imageLink: raw.image,
+      imageLink: raw.image.url,
       linkedin: raw.socialLinks?.linkedin,
       twitter: raw.socialLinks?.twitter,
       github: raw.socialLinks?.github,

@@ -1,15 +1,13 @@
 "use client";
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Mic, Trash2 } from 'lucide-react';
-import { UploadCloud, Loader2 } from 'lucide-react'; // //cloudinary- added icons
-import {toast} from 'sonner'; 
-import Image from 'next/image';
+import { Trash2, Plus, UploadCloud, Loader2, Mic } from 'lucide-react';
+import { toast } from 'sonner';
 
 export interface PodcastForm {
   title: string;
@@ -23,6 +21,8 @@ export interface PodcastForm {
   // //cloudinary- added file field
   thumbnailFile?: File | null;
   thumbnailId?: string;
+  learnMoreLinks: { label: string; url: string }[];
+  resourcesLinks: { label: string; url: string }[];
 }
 
 export default function PodcastFormCard({
@@ -31,12 +31,26 @@ export default function PodcastFormCard({
   onChange,
   onRemove,
   canRemove,
+  // Add these new props
+  onAddLearnMoreLink,
+  onRemoveLearnMoreLink,
+  onUpdateLearnMoreLink,
+  onAddResourceLink,
+  onRemoveResourceLink,
+  onUpdateResourceLink,
 }: {
   index: number;
   form: PodcastForm;
   canRemove: boolean;
   onChange: (field: keyof PodcastForm, value: any) => void;
   onRemove: () => void;
+  // New prop types
+  onAddLearnMoreLink: () => void;
+  onRemoveLearnMoreLink: (linkIndex: number) => void;
+  onUpdateLearnMoreLink: (linkIndex: number, field: 'label' | 'url', value: string) => void;
+  onAddResourceLink: () => void;
+  onRemoveResourceLink: (linkIndex: number) => void;
+  onUpdateResourceLink: (linkIndex: number, field: 'label' | 'url', value: string) => void;
 }) {
   // //cloudinary- added loading state
   const [uploading, setUploading] = useState(false);
@@ -123,12 +137,11 @@ export default function PodcastFormCard({
             <div className="grid grid-cols-1 gap-3">
               {form.thumbnailUrl && (
                 <div className="relative w-24 h-24 mb-2">
-                  <Image 
+                  {/* Use regular img instead of Next.js Image */}
+                  <img 
                     src={form.thumbnailUrl} 
                     alt="Thumbnail" 
-                    layout="fill" 
-                    objectFit="cover" 
-                    className="rounded" 
+                    className="w-full h-full object-cover rounded" 
                   />
                 </div>
               )}
@@ -201,6 +214,132 @@ export default function PodcastFormCard({
             <Label htmlFor={`podcast-facebook-${index}`}>Facebook URL</Label>
             <Input id={`podcast-facebook-${index}`} type="url" value={form.facebook} onChange={(e) => onChange('facebook', e.target.value)} placeholder="https://facebook.com/..." className="focus-ring" />
           </div>
+        </div>
+
+        {/* Learn More Links Section */}
+        <Separator className="bg-white/10 my-4" />
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="text-base">Learn More Links</Label>
+            <Button
+              type="button"
+              onClick={onAddLearnMoreLink}
+              variant="ghost"
+              size="sm"
+              className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/10"
+            >
+              <Plus className="mr-1 h-3 w-3" />
+              Add Link
+            </Button>
+          </div>
+
+          {form.learnMoreLinks.map((link, linkIndex) => (
+            <div key={linkIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <div className="space-y-2">
+                <Label htmlFor={`podcast-${index}-learn-label-${linkIndex}`}>
+                  Label
+                </Label>
+                <Input
+                  id={`podcast-${index}-learn-label-${linkIndex}`}
+                  value={link.label}
+                  onChange={(e) => onUpdateLearnMoreLink(linkIndex, 'label', e.target.value)}
+                  placeholder="e.g., Read the full article"
+                  className="focus-ring"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor={`podcast-${index}-learn-url-${linkIndex}`}>
+                  URL
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id={`podcast-${index}-learn-url-${linkIndex}`}
+                    type="url"
+                    value={link.url}
+                    onChange={(e) => onUpdateLearnMoreLink(linkIndex, 'url', e.target.value)}
+                    placeholder="https://example.com"
+                    className="focus-ring flex-1"
+                  />
+                  {form.learnMoreLinks.length > 1 && (
+                    <Button
+                      type="button"
+                      onClick={() => onRemoveLearnMoreLink(linkIndex)}
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Resources Links Section */}
+        <Separator className="bg-white/10 my-4" />
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="text-base">Resources Links</Label>
+            <Button
+              type="button"
+              onClick={onAddResourceLink}
+              variant="ghost"
+              size="sm"
+              className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/10"
+            >
+              <Plus className="mr-1 h-3 w-3" />
+              Add Resource
+            </Button>
+          </div>
+
+          {form.resourcesLinks.map((link, linkIndex) => (
+            <div key={linkIndex} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <div className="space-y-2">
+                <Label htmlFor={`podcast-${index}-resource-label-${linkIndex}`}>
+                  Label
+                </Label>
+                <Input
+                  id={`podcast-${index}-resource-label-${linkIndex}`}
+                  value={link.label}
+                  onChange={(e) => onUpdateResourceLink(linkIndex, 'label', e.target.value)}
+                  placeholder="e.g., Download slides"
+                  className="focus-ring"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor={`podcast-${index}-resource-url-${linkIndex}`}>
+                  URL
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id={`podcast-${index}-resource-url-${linkIndex}`}
+                    type="url"
+                    value={link.url}
+                    onChange={(e) => onUpdateResourceLink(linkIndex, 'url', e.target.value)}
+                    placeholder="https://example.com"
+                    className="focus-ring flex-1"
+                  />
+                  {form.resourcesLinks.length > 1 && (
+                    <Button
+                      type="button"
+                      onClick={() => onRemoveResourceLink(linkIndex)}
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
