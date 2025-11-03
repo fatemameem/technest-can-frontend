@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Hero } from "@/components/ui/hero";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import configPromise from '@payload-config';
 import { getPayload } from "payload";
@@ -136,7 +136,7 @@ export default async function BlogsPage() {
                         </div>
                         {blog.tags && blog.tags.length > 0 && (
                           <div className="flex flex-wrap gap-2">
-                            {blog.tags.slice(0, 3).map((tag) => (
+                            {blog.tags.slice(0, 3).map((tag: string) => (
                               <Badge key={`${blog.id}-${tag}`} variant="secondary" className="text-xs">
                                 {tag}
                               </Badge>
