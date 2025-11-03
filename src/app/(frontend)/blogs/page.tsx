@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Hero } from "@/components/ui/hero";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import configPromise from '@payload-config';
 import { getPayload } from "payload";
