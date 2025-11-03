@@ -10,27 +10,50 @@ import { getPayload } from "payload";
 export default async function BlogsPage() {
   const payload = await getPayload({ config: configPromise });
   
-  // ✅ Fix: Query using meta.status instead of published
+  // ✅ Query using meta.status instead of published
   const res = await payload.find({
     collection: 'blogs',
     where: { 
       'meta.status': { equals: 'Published' } 
     },
-    sort: '-meta.publishedAt', // Sort by publish date, newest first
+    sort: '-meta.publishedAt',
     limit: 100,
-    depth: 2, // Populate coverImage and author relationships
+    depth: 2,
     overrideAccess: true,
   });
   
   const rawBlogs = res.docs || [];
-  // console.log("Fetched blogs:", rawBlogs);
   
   // Map into the shape BlogCard expects
   const mappedBlogs = (rawBlogs || []).map((r: any) => {
-    // Extract cover image URL from populated Media relationship
-    const coverImageUrl = typeof r.coverImage === 'object' && r.coverImage?.url
-      ? r.coverImage.cloudinary.secureUrl
-      : "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080";
+    // ✅ Fix: Handle Cloudinary URL extraction safely
+    let coverImageUrl = "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080";
+    
+    if (r.coverImage) {
+      // If coverImage is populated (depth: 2)
+      if (typeof r.coverImage === 'object') {
+        // Try cloudinary.secureUrl first
+        if (r.coverImage.cloudinary?.secureUrl) {
+          coverImageUrl = r.coverImage.cloudinary.secureUrl;
+        } 
+        // Fallback to url field
+        else if (r.coverImage.url) {
+          coverImageUrl = r.coverImage.url;
+        }
+      }
+      // If it's just an ID string, skip (can't generate URL at build time)
+    }
+    
+    // Handle meta.coverImage similarly if it exists
+    if (!coverImageUrl && r.meta?.coverImage) {
+      if (typeof r.meta.coverImage === 'object') {
+        if (r.meta.coverImage.cloudinary?.secureUrl) {
+          coverImageUrl = r.meta.coverImage.cloudinary.secureUrl;
+        } else if (r.meta.coverImage.url) {
+          coverImageUrl = r.meta.coverImage.url;
+        }
+      }
+    }
     
     return {
       id: r.id,
@@ -39,31 +62,34 @@ export default async function BlogsPage() {
       date: r.meta?.publishedAt || r.createdAt || '',
       path: r.meta?.slug ? `/blogs/blog/${r.meta.slug}` : '/blogs',
       thumbnailUrl: coverImageUrl,
-      author: typeof r.meta?.authorRef === 'string' 
+      author: typeof r.meta?.authorRef === 'object' && r.meta.authorRef?.name
+        ? r.meta.authorRef.name
+        : typeof r.meta?.authorRef === 'string' 
         ? r.meta.authorRef 
         : r.meta?.author || 'TECH-NEST Team',
       readingTime: r.meta?.readingTime || 5,
-      tags: r.meta?.tags || [],
+      tags: Array.isArray(r.meta?.tags) ? r.meta.tags : [],
     };
   });
 
-  const latestBlog = mappedBlogs[0] || { // First item after sorting by newest
+  const latestBlog = mappedBlogs[0] || {
     id: "placeholder",
     title: "No published blogs yet",
     description: "Check back soon for our latest insights!",
     date: "",
-    url: "",
     path: "#",
+    thumbnailUrl: "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080",
+    author: "TECH-NEST Team",
+    readingTime: 5,
+    tags: [],
   };
-
-  // console.log(latestBlog);
 
   return (
     <div>
       <Hero
         title={latestBlog.title}
         subtitle={latestBlog.description}
-        imageUrl={`${latestBlog.thumbnailUrl}`}
+        imageUrl={latestBlog.thumbnailUrl}
       >
         <div className="font-poppins flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild className="btn-primary text-white px-8 py-3 text-base md:text-lg">
@@ -72,12 +98,6 @@ export default async function BlogsPage() {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
-          {/* <Button asChild variant="outline" className="btn-secondary text-slate-300 px-8 py-3 text-base md:text-lg">
-            <Link href="/events">
-              Upcoming Events
-              <ExternalLink className="ml-2 h-5 w-5" />
-            </Link>
-          </Button> */}
         </div>
       </Hero>
 
