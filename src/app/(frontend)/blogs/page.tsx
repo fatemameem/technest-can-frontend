@@ -1,127 +1,168 @@
-import MagicBento, { BentoCardProps } from "@/components/ui/bento";
-import TextType from "@/components/ui/TextType";
-import ParticleCard from '@/components/ui/particleCard';
-import InfiniteScroll from "@/components/ui/infiniteCarousel";
+import { Button } from "@/components/ui/button";
+import { Hero } from "@/components/ui/hero";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import configPromise from '@payload-config';
+import { getPayload } from "payload";
 
-export default function BlogPage() {
-  const cardData: BentoCardProps[] = [
-    {
-      color: '#060010',
-      title: 'Analytics',
-      description: 'Track user behavior',
-      label: 'Insights',
-      coverImageUrl: '/images/events.jpg'
+export default async function BlogsPage() {
+  const payload = await getPayload({ config: configPromise });
+  
+  // ✅ Fix: Query using meta.status instead of published
+  const res = await payload.find({
+    collection: 'blogs',
+    where: { 
+      'meta.status': { equals: 'Published' } 
     },
-    {
-      color: '#060010',
-      title: 'Dashboard',
-      description: 'Centralized data view',
-      coverImageUrl: '/images/events.jpg',
-      label: 'Overview'
-    },
-    {
-      color: '#060010',
-      title: 'Collaboration',
-      description: 'Work together seamlessly',
-      label: 'Teamwork',
-      coverImageUrl: '/images/events.jpg'
-    },
-    {
-      color: '#060010',
-      title: 'Automation',
-      description: 'Streamline workflows',
-      label: 'Efficiency',
-      coverImageUrl: '/images/events.jpg'
-    },
-    {
-      color: '#060010',
-      title: 'Integration',
-      description: 'Connect favorite tools',
-      label: 'Connectivity',
-      coverImageUrl: '/images/events.jpg'
-    },
-    {
-      color: '#060010',
-      title: 'Security',
-      description: 'Enterprise-grade protection',
-      coverImageUrl: '/images/events.jpg',
-      label: 'Protection'
-    }
-  ];
-  const horizontalItems = [
-  { content: "Text Item 1" },
-  { content: <p>Paragraph Item 2</p> },
-  { content: "Text Item 3" },
-  { content: <p>Paragraph Item 4</p> },
-  { content: "Text Item 5" },
-  { content: <p>Paragraph Item 6</p> },
-  { content: "Text Item 7" },
-  { content: <p>Paragraph Item 8</p> },
-  { content: "Text Item 9" },
-  { content: <p>Paragraph Item 10</p> },
-  { content: "Text Item 11" },
-  { content: <p>Paragraph Item 12</p> },
-  { content: "Text Item 13" },
-  { content: <p>Paragraph Item 14</p> },
-];
+    sort: '-meta.publishedAt', // Sort by publish date, newest first
+    limit: 100,
+    depth: 2, // Populate coverImage and author relationships
+    overrideAccess: true,
+  });
+  
+  const rawBlogs = res.docs || [];
+  // console.log("Fetched blogs:", rawBlogs);
+  
+  // Map into the shape BlogCard expects
+  const mappedBlogs = (rawBlogs || []).map((r: any) => {
+    // Extract cover image URL from populated Media relationship
+    const coverImageUrl = typeof r.coverImage === 'object' && r.coverImage?.url
+      ? r.coverImage.cloudinary.secureUrl
+      : "https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080";
+    
+    return {
+      id: r.id,
+      title: r.meta?.title || r.title || 'Untitled Blog',
+      description: r.meta?.subtitle || '',
+      date: r.meta?.publishedAt || r.createdAt || '',
+      path: r.meta?.slug ? `/blogs/blog/${r.meta.slug}` : '/blogs',
+      thumbnailUrl: coverImageUrl,
+      author: typeof r.meta?.authorRef === 'string' 
+        ? r.meta.authorRef 
+        : r.meta?.author || 'TECH-NEST Team',
+      readingTime: r.meta?.readingTime || 5,
+      tags: r.meta?.tags || [],
+    };
+  });
+
+  const latestBlog = mappedBlogs[0] || { // First item after sorting by newest
+    id: "placeholder",
+    title: "No published blogs yet",
+    description: "Check back soon for our latest insights!",
+    date: "",
+    url: "",
+    path: "#",
+  };
+
+  // console.log(latestBlog);
+
   return (
-    <>
-    {/* Hero/Title Section with Type Text animation */}
-      <h1 className="leading-tight text-4xl lg:text-6xl lg:leading-tight font-bold my-20 bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-slate-300 text-center ">
-        <TextType 
-        text={["TECH-NEST Blogs", "Cybersecurity Unleashed", "AI Revolution", "Tech Insights", "Digital Frontiers", "Code. Create. Innovate."]}
-        typingSpeed={75}
-        pauseDuration={1500}
-        showCursor={true}
-        cursorCharacter="_"
-        />
-      </h1>
-      {/* Grid Section for the latest blog posts */}
-      <MagicBento 
-        textAutoHide={true}
-        enableStars={true}
-        enableSpotlight={true}
-        enableBorderGlow={true}
-        enableTilt={false}
-        enableMagnetism={true}
-        clickEffect={true}
-        spotlightRadius={300}
-        particleCount={12}
-        glowColor="87, 238, 255"
-      />
-      <h2 className="col-span-full text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r text-accent my-20 bg-clip-text text-center">
-        Dive into the Digital Frontier
-        <span className="block text-lg md:text-xl mt-2 font-normal text-slate-300">
-          Fresh insights & cutting-edge perspectives
-        </span>
-      </h2>
-      {/* We should put the genres here which will be a infinite scroll and users can filter by genres like AI, cybersecurity, How-to */}
-      <div className="container mx-auto my-20">
-        <InfiniteScroll
-        direction="horizontal"
-        height="auto"
-        fullScreenWidth={false}
-        autoplayOnView={false}
-        items={horizontalItems}
-        />
-      </div>
-      {/* Card Section for blog posts: so here if the user selects a genre, we are going to show the filtered posts, otherwise all blog posts will be shown. We need to add pagination here once blog numbers grow to 25. each page will show a maximum of 12 posts. */}
-      <div className="flex-wrap gap-4 justify-center card-responsive mx-auto container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 my-20">
-      {cardData.map((card, index) => (
-        <ParticleCard 
-          className="min-h-[200px] aspect-[4/3] border border-solid rounded-[20px] p-4 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(0,0,0,0.15)]"
-          enableBorderGlow={true}
-          enableTilt={false}
-          clickEffect={true}
-          enableMagnetism={true}
-          particleCount={12}
-          glowColor="87, 238, 255"
-        >
-          <h3 className="text-white font-normal text-base mb-1">My Card Title</h3>
-          <p className="text-white text-xs leading-5 opacity-90">Card content goes here</p>
-        </ParticleCard>
-      ))}
-      </div>
-    </>
-  )
+    <div>
+      <Hero
+        title={latestBlog.title}
+        subtitle={latestBlog.description}
+        imageUrl={`${latestBlog.thumbnailUrl}`}
+      >
+        <div className="font-poppins flex flex-col sm:flex-row gap-4 justify-center">
+          <Button asChild className="btn-primary text-white px-8 py-3 text-base md:text-lg">
+            <Link href={latestBlog.path}>
+              Read More
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+          </Button>
+          {/* <Button asChild variant="outline" className="btn-secondary text-slate-300 px-8 py-3 text-base md:text-lg">
+            <Link href="/events">
+              Upcoming Events
+              <ExternalLink className="ml-2 h-5 w-5" />
+            </Link>
+          </Button> */}
+        </div>
+      </Hero>
+
+      <section className="py-16 bg-slate-950">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-4 mb-8">
+            <div>
+              <h2 className="text-3xl lg:text-4xl font-bold">Latest Insights</h2>
+              <p className="text-slate-300 text-base lg:text-lg">
+                Explore stories, research, and field notes from the TECH-NEST team.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="hidden md:inline-flex btn-secondary">
+              <Link href="/blogs">View All</Link>
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+            {mappedBlogs.length > 0 ? (
+              mappedBlogs.map((blog) => {
+                const parsedDate = blog.date ? new Date(blog.date) : null;
+                const hasValidDate = parsedDate && !Number.isNaN(parsedDate.getTime());
+                const dateLabel = hasValidDate
+                  ? parsedDate.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  : 'Coming soon';
+                const readingTimeLabel =
+                  typeof blog.readingTime === 'number' && blog.readingTime > 0
+                    ? `${blog.readingTime} min read`
+                    : 'Quick read';
+
+                return (
+                  <Link key={blog.id} href={blog.path} className="group block h-full">
+                    <Card className="surface hover-lift h-full overflow-hidden transition-transform duration-300">
+                      <div className="relative aspect-[16/9] overflow-hidden bg-slate-900">
+                        <img
+                          src={blog.thumbnailUrl}
+                          alt={blog.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      </div>
+                      <CardContent className="p-6 flex flex-col gap-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-400">
+                          <span>{dateLabel}</span>
+                          <span>{readingTimeLabel}</span>
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-semibold text-white transition-colors duration-300 group-hover:text-cyan-400">
+                            {blog.title}
+                          </h3>
+                          <p className="text-sm text-slate-300 line-clamp-3">{blog.description}</p>
+                        </div>
+                        {blog.tags && blog.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {blog.tags.slice(0, 3).map((tag) => (
+                              <Badge key={`${blog.id}-${tag}`} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        <div className="mt-auto flex items-center justify-between text-sm text-slate-400">
+                          <span>{blog.author}</span>
+                          <span className="inline-flex items-center gap-2 text-cyan-400 transition-transform duration-300 group-hover:translate-x-1">
+                            Read more
+                            <ArrowRight className="h-4 w-4" />
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })
+            ) : (
+              <p className="col-span-full text-center text-slate-300">
+                No published blogs yet. Check back soon!
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
