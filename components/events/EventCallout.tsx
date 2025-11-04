@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, ExternalLink, MapPin } from 'lucide-react';
+import { calloutFromLocalISO, monthAbbrFromLocalISO, toLocalISO } from '@/helpers/dateConverter';
 
 interface EventCalloutProps {
   event: {
@@ -20,8 +21,17 @@ interface EventCalloutProps {
 }
 
 export function EventCallout({ event }: EventCalloutProps) {
-  const eventDate = new Date(`${event.date}T${event.time}`);
+  // console.log(toLocalISO(event.date, event.time));
+  const eventDate = toLocalISO(event.date, event.time);
+  // console.log('Event Date:', event.date, 'Event Time:', event.time, 'Combined:', eventDate);
+  // const eventDateNew = new Date(event.date);
+  // const eventTimeNew = event.time;
+  const month = monthAbbrFromLocalISO(eventDate);
+  // console.log('Event Date Local ISO:', calloutFromLocalISO(eventDate));
   
+  // console.log('Event Month:', month);
+  const day = calloutFromLocalISO(eventDate).day;
+  // console.log('Event Date New:', eventDateNew, eventTimeNew);
   return (
     <Card className="surface glow-cyan max-w-4xl mx-auto">
       <CardHeader>
@@ -32,10 +42,10 @@ export function EventCallout({ event }: EventCalloutProps) {
           </div>
           <div className="text-right">
             <div className="text-3xl font-bold text-cyan-400">
-              {eventDate.getDate()}
+              {day}
             </div>
             <div className="text-sm text-slate-400">
-              {eventDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              {month}
             </div>
           </div>
         </div>
@@ -46,18 +56,11 @@ export function EventCallout({ event }: EventCalloutProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="flex items-center text-slate-300">
             <Calendar className="mr-2 h-4 w-4 text-cyan-400" />
-            {eventDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
+            {event.date}
           </div>
           <div className="flex items-center text-slate-300">
             <Clock className="mr-2 h-4 w-4 text-cyan-400" />
-            {eventDate.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
+            {event.time}
           </div>
           <div className="flex items-center text-slate-300">
             <MapPin className="mr-2 h-4 w-4 text-cyan-400" />

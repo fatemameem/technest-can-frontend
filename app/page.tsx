@@ -179,8 +179,65 @@ export default function Home() {
             Stay updated with the latest news and events in the world of cybersecurity and AI ethics.
           </p>
         </div>
+        <div className="flex flex-col gap-8">
         <div className="flex gap-4 md:gap-8 lg:gap-16 justify-left items-center flex-col md:flex-row">
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 w-full">
+            <Card className=" surface">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                    <Link
+                      href="/events/findac-x-technest"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group hover-lift"
+                    >
+                      <div className="flex items-center gap-7">
+                        <div 
+                          className="w-24 h-16 bg-cover bg-center rounded-lg flex-shrink-0"
+                          style={{ backgroundImage: `url(/images/technest-findac-2025-10-31.jpeg)` }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm md:text-base line-clamp-2 group-hover:text-cyan-400 transition-colors">
+                            <span>TECH-NEST at FINDAC (Concordia) - Online Safety and AI Awareness</span>
+                            <ExternalLink className="inline-block ml-1 mb-1 h-4 w-4" />
+                          </h3>
+                        </div>
+                      </div>
+                    </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div> 
+          <div className="lg:col-span-1 space-y-6 w-full">
+            <Card className=" surface">
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                    <Link
+                      href="/events/technest-at-forces-avenir"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block group hover-lift"
+                    >
+                      <div className="flex items-center gap-7">
+                        <div 
+                          className="w-24 h-16 bg-cover bg-center rounded-lg flex-shrink-0"
+                          style={{ backgroundImage: `url(/images/forces-avenir-1.jpeg)` }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm md:text-base line-clamp-2 group-hover:text-cyan-400 transition-colors">
+                            <span>Proud to Be Part of Forces AVENIR 2025: Celebrating Student Leadership and Community Impact</span>
+                            <ExternalLink className="inline-block ml-1 mb-1 h-4 w-4" />
+                          </h3>
+                        </div>
+                      </div>
+                    </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div> 
+        </div>
+        <div className="flex gap-4 md:gap-8 lg:gap-16 justify-left items-center flex-col md:flex-row">
+          <div className="lg:col-span-1 space-y-6 w-full">
             <Card className=" surface">
               <CardContent className="p-6">
                 <div className="space-y-4">
@@ -207,7 +264,7 @@ export default function Home() {
               </CardContent>
             </Card>
           </div> 
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 w-full">
             <Card className=" surface">
               <CardContent className="p-6">
                 <div className="space-y-4">
@@ -235,7 +292,21 @@ export default function Home() {
             </Card>
           </div> 
         </div>
+        </div>
       </Section>
+
+      {/* Upcoming Event Callout */}
+      {upcomingEvents.length !== 0 ? (
+        <Section>
+          <div className="max-w-5xl mx-auto">
+            <div className="space-y-6">
+              {upcomingEvents.map((evt) => (
+                <EventCallout key={evt.id} event={evt} />
+              ))}
+            </div>
+          </div>
+        </Section>
+      ) : null}
 
       {/* Featured Services */}
       <Section>
@@ -274,18 +345,7 @@ export default function Home() {
         />
       </Section>
 
-      {/* Upcoming Event Callout */}
-      {upcomingEvents.length !== 0 ? (
-        <Section>
-          <div className="max-w-5xl mx-auto">
-            <div className="space-y-6">
-              {upcomingEvents.map((evt) => (
-                <EventCallout key={evt.id} event={evt} />
-              ))}
-            </div>
-          </div>
-        </Section>
-      ) : null}
+
     </>
   );
 }

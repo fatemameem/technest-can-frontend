@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { RegisterDialog } from '@/components/events/RegisterDialog';
 
 interface EventCardProps {
   event: {
@@ -70,10 +69,11 @@ export function EventCard({ event, type }: EventCardProps) {
           {event.time && (
             <div className="flex items-center">
             <Clock className="mr-2 h-4 w-4 text-cyan-400" />
-            {eventDate.toLocaleTimeString('en-US', { 
+            {/* {eventDate.toLocaleTimeString('en-US', { 
               hour: '2-digit', 
               minute: '2-digit' 
-            })}
+            })} */}
+            {event.time}
           </div>
           )}
           <div className="flex items-center">

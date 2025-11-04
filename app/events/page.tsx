@@ -22,6 +22,34 @@ const MOCK_PAST_EVENT: UIEvent = {
   sponsors: 'Tech-Nest',
   thumbnailUrl:'/images/outreach.png'
 };
+const MOCK_PAST_EVENT_2: UIEvent = {
+  id: 'mock-past-2',
+  title: 'TECH-NEST at FINDAC (Concordia) - Online Safety and AI Awareness',
+  description: 'A session on online safety, AI literacy, and digital ethics with FINDAC - The Financial Data Science Club at Concordia (SGW Campus).',
+  date: 'October, 2025',
+  location: 'Concordia University, SGW Campus',
+  topic: 'Cybersecurity & AI Ethics',
+  tags: ['#CyberSafety','#AIAwareness','#TechForGood','#DigitalEthics','#Montreal','#CommunityEngagement'],
+  links: {
+    url: 'findac-x-technest' // Link to the detailed recap page
+  },
+  sponsors: 'Tech-Nest',
+  thumbnailUrl:'/images/technest-findac-2025-10-31.jpeg'
+};
+const MOCK_PAST_EVENT_3: UIEvent = {
+  id: 'mock-past-3',
+  title: 'Proud to Be Part of Forces AVENIR 2025: Celebrating Student Leadership and Community Impact',
+  description: "TECH-NEST's Journey in Student Leadership",
+  date: 'October, 2025',
+  location: 'Quebec City, QC',
+  topic: 'Tech-Nest and Student Leadership',
+  tags: ['#ForcesAVENIR','#StudentLeadership','#ConcordiaUniversity','#Innovation','#Networking','#TechNest','#Growth','#Gratitude'],
+  links: {
+    url: 'technest-at-forces-avenir' // Link to the detailed recap page
+  },
+  sponsors: 'Tech-Nest',
+  thumbnailUrl:'/images/forces-avenir-1.jpeg'
+};
 
 interface SheetEvent {
   id: string;
@@ -116,7 +144,9 @@ export default function Events() {
           });
 
         const pastEvents = [
-          MOCK_PAST_EVENT, // Add mock event to past events
+          MOCK_PAST_EVENT,
+          MOCK_PAST_EVENT_2,
+          MOCK_PAST_EVENT_3,
           ...mapped
             .filter((e) => {
               const d = toDateObj(e.date, e.time);
