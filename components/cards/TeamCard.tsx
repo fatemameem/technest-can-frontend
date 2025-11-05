@@ -28,7 +28,7 @@ export function TeamCard({ member }: TeamCardProps) {
   return (
     <Card className="surface hover-lift">
       <CardContent className="p-6 text-center">
-        <Avatar className="w-24 h-24 mx-auto mb-4">
+        <Avatar className="w-48 h-48 mx-auto mb-4">
           <AvatarImage src={member.imageUrl} alt={member.name} />
           <AvatarFallback className="text-lg font-semibold bg-blue-600">
             {getInitials(member.name)}
@@ -36,8 +36,8 @@ export function TeamCard({ member }: TeamCardProps) {
         </Avatar>
         
         <h3 className="text-xl font-semibold mb-2">{member.name}</h3>
-        <p className="text-cyan-400 font-medium mb-3">{member.role}</p>
-        <p className="text-slate-300 text-sm mb-6 leading-relaxed">{member.bio}</p>
+        {/* <p className="text-cyan-400 font-medium mb-3">{member.role}</p> */}
+        <p className="text-slate-300 text-sm mb-6 leading-relaxed overflow-auto line-clamp-6">{member.bio}</p>
         
         <div className="flex justify-center gap-2">
           {member.linkedin && (
