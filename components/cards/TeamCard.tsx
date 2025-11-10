@@ -37,7 +37,7 @@ export function TeamCard({ member }: TeamCardProps) {
         
         <h3 className="text-xl font-semibold mb-2">{member.name}</h3>
         {/* <p className="text-cyan-400 font-medium mb-3">{member.role}</p> */}
-        <p className="text-slate-300 text-sm mb-6 leading-relaxed overflow-auto line-clamp-6">{member.bio}</p>
+        <p className="text-slate-300 text-sm mb-6 leading-relaxed line-clamp-6 scroll-area overflow-y-auto overflow-x-hidden">{member.bio}</p>
         
         <div className="flex justify-center gap-2">
           {member.linkedin && (

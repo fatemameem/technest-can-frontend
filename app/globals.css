@@ -96,3 +96,36 @@
     }
   }
 }
+
+/* app/globals.css (or any imported global stylesheet) */
+.scroll-area {
+  overflow: 0 auto;
+  background: transparent;
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, .6) transparent;
+  /* thumb | track */
+}
+
+/* WebKit (Chrome, Edge, Safari) */
+.scroll-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-area::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, .6);
+  /* slate-400 */
+  border-radius: 9999px;
+  /* this keeps a bit of gap around the thumb */
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.scroll-area::-webkit-scrollbar-corner {
+  background: transparent;
+  /* removes white square at bottom-right */
+}
