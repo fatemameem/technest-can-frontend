@@ -62,26 +62,26 @@ export function useAdminDashboard() {
     imageFile: null,
   }]);
 
-  const [blogForms, setBlogForms] = useState<Blog[]>([{ 
-    title: '', 
-    content: '', 
-    coverImage: '', 
-    author: '', 
-    publishDate: '', 
-    status: 'draft' 
+  const [blogForms, setBlogForms] = useState<Blog[]>([{
+    title: '',
+    content: '',
+    coverImage: '',
+    author: '',
+    publishDate: '',
+    status: 'draft'
   }]);
 
   // UI state
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Form visibility state
   const [showPodcastForm, setShowPodcastForm] = useState(false);
   const [showEventForm, setShowEventForm] = useState(false);
   const [showTeamMemberForm, setShowTeamMemberForm] = useState(false);
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [showBlogForm, setShowBlogForm] = useState(false);
-  
+
   // Edit mode state 
   const [editMode, setEditMode] = useState({
     podcasts: false,
@@ -90,17 +90,17 @@ export function useAdminDashboard() {
     admins: false,
     blogs: false
   });
-  
+
   // Current item being edited
   const [currentEditId, setCurrentEditId] = useState<string | null>(null);
-  
+
   // Loading states
   const [isSubmittingPodcasts, setIsSubmittingPodcasts] = useState(false);
   const [isSubmittingEvents, setIsSubmittingEvents] = useState(false);
   const [isSubmittingAdmins, setIsSubmittingAdmins] = useState(false);
   const [isSubmittingTeam, setIsSubmittingTeam] = useState(false);
   const [isSubmittingBlogs, setIsSubmittingBlogs] = useState(false);
-  
+
   // Stats state
   const [podcastCount, setPodcastCount] = useState<number | null>(null);
   const [eventCount, setEventCount] = useState<number | null>(null);
@@ -150,6 +150,17 @@ export function useAdminDashboard() {
   // Deleting state
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
+  // Delete confirmation state
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    isOpen: boolean;
+    itemId: string | null;
+    itemType: 'podcast' | 'event' | 'blog' | 'team-member' | 'user' | null;
+  }>({
+    isOpen: false,
+    itemId: null,
+    itemType: null,
+  });
+
   // Derived state
   const canManageAdmins = role === "admin";
   const canManageContent = role === "admin" || role === "moderator";
@@ -170,17 +181,17 @@ export function useAdminDashboard() {
         setEventCount(stats.eventCount ?? 0);
         setBlogCount(stats.blogCount ?? 0);
         setSubscriberCount(stats.subscriberCount ?? 0);
-        setLastPodcast(stats.lastPodcast ? { 
-          title: stats.lastPodcast.title, 
-          when: formatRelative(Date.parse(stats.lastPodcast.when)) 
+        setLastPodcast(stats.lastPodcast ? {
+          title: stats.lastPodcast.title,
+          when: formatRelative(Date.parse(stats.lastPodcast.when))
         } : null);
-        setLastEvent(stats.lastEvent ? { 
-          title: stats.lastEvent.title, 
-          when: formatRelative(Date.parse(stats.lastEvent.when)) 
+        setLastEvent(stats.lastEvent ? {
+          title: stats.lastEvent.title,
+          when: formatRelative(Date.parse(stats.lastEvent.when))
         } : null);
-        setLastBlog(stats.lastBlog ? { 
-          title: stats.lastBlog.title, 
-          when: formatRelative(Date.parse(stats.lastBlog.when)) 
+        setLastBlog(stats.lastBlog ? {
+          title: stats.lastBlog.title,
+          when: formatRelative(Date.parse(stats.lastBlog.when))
         } : null);
       } catch (e) {
         console.error(e);
@@ -226,18 +237,18 @@ export function useAdminDashboard() {
   const handleEditPodcast = useCallback((podcastId: string, podcastData: any) => {
     setEditMode(prev => ({ ...prev, podcasts: true }));
     setCurrentEditId(podcastId);
-    
+
     // Extract thumbnail data correctly
     const thumbnailId = typeof podcastData.thumbnail === 'object' && podcastData.thumbnail?.id
       ? podcastData.thumbnail.id
       : typeof podcastData.thumbnail === 'string'
-      ? podcastData.thumbnail
-      : '';
-      
+        ? podcastData.thumbnail
+        : '';
+
     const thumbnailUrl = typeof podcastData.thumbnail === 'object' && podcastData.thumbnail?.cloudinary?.secureUrl
       ? podcastData.thumbnail.cloudinary.secureUrl
       : '';
-  
+
     setPodcastForms([{
       title: podcastData.title || '',
       description: podcastData.description || '',
@@ -248,16 +259,16 @@ export function useAdminDashboard() {
       thumbnail: thumbnailId, // Media ID for database
       thumbnailUrl: thumbnailUrl, // URL for preview
       thumbnailFile: null,
-      learnMoreLinks: podcastData.learnMoreLinks?.length 
-        ? podcastData.learnMoreLinks 
+      learnMoreLinks: podcastData.learnMoreLinks?.length
+        ? podcastData.learnMoreLinks
         : [{ label: '', url: '' }],
-      resourcesLinks: podcastData.resourcesLinks?.length 
-        ? podcastData.resourcesLinks 
+      resourcesLinks: podcastData.resourcesLinks?.length
+        ? podcastData.resourcesLinks
         : [{ label: '', url: '' }],
     }]);
-    
+
     setShowPodcastForm(true);
-    
+
     setTimeout(() => {
       document.querySelector('#podcast-form-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -281,7 +292,7 @@ export function useAdminDashboard() {
     setShowPodcastForm(false);
   }, []);
 
-    // Fetch podcasts
+  // Fetch podcasts
   const fetchPodcasts = useCallback(async () => {
     try {
       setLoadingPodcasts(true);
@@ -306,17 +317,17 @@ export function useAdminDashboard() {
     // Basic field validation
     for (let i = 0; i < podcastForms.length; i++) {
       const form = podcastForms[i];
-      
+
       if (!isNonEmpty(form.title)) {
         toast?.error(`Podcast ${i + 1}: Title is required`);
         return;
       }
-      
+
       if (!isNonEmpty(form.description)) {
         toast?.error(`Podcast ${i + 1}: Description is required`);
         return;
       }
-      
+
       // Validate social links (optional but must be valid URLs if provided)
       if (form.linkedin && !isValidUrl(form.linkedin)) {
         toast?.error(`Podcast ${i + 1}: Invalid LinkedIn URL`);
@@ -338,11 +349,11 @@ export function useAdminDashboard() {
       // Validate learnMoreLinks array
       for (let j = 0; j < form.learnMoreLinks.length; j++) {
         const link = form.learnMoreLinks[j];
-        
+
         // Only validate if at least one field is filled (partial entry = error)
         const hasLabel = link.label?.trim();
         const hasUrl = link.url?.trim();
-        
+
         if (hasLabel || hasUrl) {
           if (!hasLabel) {
             toast?.error(`Podcast ${i + 1}, Learn More Link ${j + 1}: Label is required`);
@@ -362,10 +373,10 @@ export function useAdminDashboard() {
       // Validate resourcesLinks array
       for (let j = 0; j < form.resourcesLinks.length; j++) {
         const link = form.resourcesLinks[j];
-        
+
         const hasLabel = link.label?.trim();
         const hasUrl = link.url?.trim();
-        
+
         if (hasLabel || hasUrl) {
           if (!hasLabel) {
             toast?.error(`Podcast ${i + 1}, Resource Link ${j + 1}: Label is required`);
@@ -452,7 +463,7 @@ export function useAdminDashboard() {
       setShowPodcastForm(false);
       setEditMode({ ...editMode, podcasts: false });
       setCurrentEditId(null);
-      
+
       // Refresh podcast list
       await fetchPodcasts();
     } catch (error) {
@@ -519,7 +530,7 @@ export function useAdminDashboard() {
     setCurrentEditId(eventId);
     setEventForms([eventData]);
     setShowEventForm(true);
-    
+
     setTimeout(() => {
       document.querySelector('#event-form-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -546,7 +557,7 @@ export function useAdminDashboard() {
     setShowEventForm(false);
   }, []);
 
-    // Fetch events
+  // Fetch events
   const fetchEvents = useCallback(async () => {
     try {
       setLoadingEvents(true);
@@ -572,7 +583,6 @@ export function useAdminDashboard() {
 
       for (let i = 0; i < eventForms.length; i++) {
         const f = eventForms[i];
-
         // Updated validation - thumbnail is now optional but recommended
         if (
           !isNonEmpty(f.title) ||
@@ -601,12 +611,13 @@ export function useAdminDashboard() {
       }
 
       const ts = buildTimestamp();
+      console.log("Submitting events with timestamp:", ts);
       const entries: any[] = eventForms.map((f) => ({
         timestamp: String(ts),
         title: String(sanitize(f.title)),
         topic: String(sanitize(f.topic)),
         description: String(sanitize(f.description)),
-        date: String(sanitize(f.date)),
+        date: f.date,
         time: String(sanitize(f.time)),
         location: String(sanitize(f.location)),
         lumaLink: String(sanitize(f.lumaLink)),
@@ -617,28 +628,29 @@ export function useAdminDashboard() {
           .join(", "),
         // ✅ Fix: Only include thumbnail if it's a string (Media ID)
         // Don't try to sanitize if it's a File object
-        ...(typeof f.thumbnail === 'string' && f.thumbnail 
-          ? { thumbnail: String(sanitize(f.thumbnail)) } 
+        ...(typeof f.thumbnail === 'string' && f.thumbnail
+          ? { thumbnail: String(sanitize(f.thumbnail)) }
           : {}),
         // Don't include thumbnailFile or thumbnailUrl - they're client-side only
       }));
+      console.log("Prepared event entries:", entries);
 
       let apiUrl = '/api/admin/events';
       let method = 'POST';
-      
+
       if (editMode.events && currentEditId) {
         apiUrl = `/api/admin/events/${currentEditId}`;
         method = 'PUT';
         // Remove any potential _id field to avoid BSON errors
         const entryToUpdate = { ...entries[0] };
         delete entryToUpdate._id;
-        
-        const response = await fetch(apiUrl, { 
-          method, 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entryToUpdate) 
+
+        const response = await fetch(apiUrl, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entryToUpdate)
         });
-        
+
         if (response.ok) {
           toast.success("Event updated successfully!");
           fetchEvents(); // Refresh the list
@@ -647,12 +659,12 @@ export function useAdminDashboard() {
           throw new Error(errorData.error || 'Failed to update event');
         }
       } else {
-        const response = await fetch(apiUrl, { 
-          method, 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify({ events: entries }) 
+        const response = await fetch(apiUrl, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: entries })
         });
-        
+
         if (response.ok) {
           toast.success(`${entries.length} event(s) submitted successfully!`);
           fetchEvents(); // Refresh the list
@@ -661,7 +673,7 @@ export function useAdminDashboard() {
           throw new Error(errorData.error || 'Failed to create event(s)');
         }
       }
-      
+
       setEventForms([{
         title: '',
         topic: '',
@@ -679,7 +691,7 @@ export function useAdminDashboard() {
       setEditMode(prev => ({ ...prev, events: false }));
       setCurrentEditId(null);
       setShowEventForm(false);
-      
+
     } catch (err: any) {
       console.error(err);
       toast.error(`Failed to submit events. ${err?.message ?? ""}`.trim());
@@ -703,7 +715,7 @@ export function useAdminDashboard() {
         role: ''
       }]);
     }
-    
+
     setEditMode(prev => ({ ...prev, admins: false }));
     setCurrentEditId(null);
     setShowAdminForm(true);
@@ -726,7 +738,7 @@ export function useAdminDashboard() {
     setCurrentEditId(adminId);
     setAdminForms([adminData]); // Set the form data to the admin being edited
     setShowAdminForm(true); // Show the form
-    
+
     setTimeout(() => {
       document.querySelector('#admin-form-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -765,9 +777,9 @@ export function useAdminDashboard() {
         toast.error("Only admins can add admins or moderators.");
         return;
       }
-      
+
       setIsSubmittingAdmins(true);
-      
+
       // Validate form fields
       for (let i = 0; i < adminForms.length; i++) {
         const f = adminForms[i];
@@ -776,7 +788,7 @@ export function useAdminDashboard() {
           setIsSubmittingAdmins(false);
           return;
         }
-        
+
         // Basic email format check
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.trim())) {
           toast.error(`Admin #${i + 1}: Email is invalid.`);
@@ -784,7 +796,7 @@ export function useAdminDashboard() {
           return;
         }
       }
-      
+
       if (editMode.admins && currentEditId) {
         // Update existing admin
         const response = await fetch(`/api/admin/users/${currentEditId}`, {
@@ -794,7 +806,7 @@ export function useAdminDashboard() {
           },
           body: JSON.stringify(adminForms[0]),
         });
-        
+
         if (response.ok) {
           toast.success('Admin updated successfully');
           fetchUsers(); // Refresh the list
@@ -814,7 +826,7 @@ export function useAdminDashboard() {
           },
           body: JSON.stringify(adminForms),
         });
-        
+
         if (response.ok) {
           toast.success(`${adminForms.length} admin(s) added successfully`);
           fetchUsers(); // Refresh the list
@@ -851,7 +863,7 @@ export function useAdminDashboard() {
       setLoadingTeamMembers(false);
     }
   }, []);
-  
+
   // Team member handlers
   const addTeamMemberForm = useCallback(() => {
     setTeamMemberForms([...teamMemberForms, {
@@ -877,8 +889,8 @@ export function useAdminDashboard() {
   }, [teamMemberForms]);
 
   const updateTeamMemberForm = useCallback((
-    index: number, 
-    field: keyof TeamMemberForm, 
+    index: number,
+    field: keyof TeamMemberForm,
     value: string | File | null // Add File | null
   ) => {
     const updated = [...teamMemberForms];
@@ -891,7 +903,7 @@ export function useAdminDashboard() {
     setCurrentEditId(teamMemberId);
     setTeamMemberForms([teamMemberData]);
     setShowTeamMemberForm(true);
-    
+
     setTimeout(() => {
       document.querySelector('#team-member-form-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -926,9 +938,9 @@ export function useAdminDashboard() {
 
         // Updated validation - only check for image (Media ID)
         if (
-          !isNonEmpty(f.name) || 
-          !isNonEmpty(f.email) || 
-          !isNonEmpty(f.designation) || 
+          !isNonEmpty(f.name) ||
+          !isNonEmpty(f.email) ||
+          !isNonEmpty(f.designation) ||
           !isNonEmpty(f.image) // Only require the new image field
         ) {
           toast.error(`Team member #${i + 1}: Name, Email, Designation, and Image are required.`);
@@ -977,17 +989,17 @@ export function useAdminDashboard() {
 
       let apiUrl = '/api/admin/team-members';
       let method = 'POST';
-      
+
       if (editMode.teamMembers && currentEditId) {
         apiUrl = `/api/admin/team-members/${currentEditId}`;
         method = 'PUT';
-        
-        const response = await fetch(apiUrl, { 
-          method, 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entries[0]) 
+
+        const response = await fetch(apiUrl, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entries[0])
         });
-        
+
         if (response.ok) {
           toast.success("Team member updated successfully!");
           fetchTeamMembers();
@@ -996,12 +1008,12 @@ export function useAdminDashboard() {
           throw new Error(errorData.error || 'Failed to update team member');
         }
       } else {
-        const response = await fetch(apiUrl, { 
-          method, 
-          headers: { 'Content-Type': 'application/json' }, 
-          body: JSON.stringify(entries) 
+        const response = await fetch(apiUrl, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entries)
         });
-        
+
         if (response.ok) {
           toast.success(`${entries.length} ${entries.length === 1 ? "member" : "members"} added successfully!`);
           fetchTeamMembers();
@@ -1010,7 +1022,7 @@ export function useAdminDashboard() {
           throw new Error(errorData.error || 'Failed to create team member(s)');
         }
       }
-      
+
       setTeamMemberForms([{
         name: '',
         email: '',
@@ -1028,7 +1040,7 @@ export function useAdminDashboard() {
       setEditMode(prev => ({ ...prev, teamMembers: false }));
       setCurrentEditId(null);
       setShowTeamMemberForm(false);
-      
+
     } catch (err: any) {
       console.error(err);
       toast.error(`Failed to submit team members. ${err?.message ?? ""}`.trim());
@@ -1092,10 +1104,10 @@ export function useAdminDashboard() {
         status: String(sanitize(f.status)),
       }));
 
-      await fetch('/api/admin/blogs', { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json' }, 
-        body: JSON.stringify(entries) 
+      await fetch('/api/admin/blogs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entries)
       });
 
       toast.success(`${entries.length} blog(s) submitted successfully!`);
@@ -1112,7 +1124,7 @@ export function useAdminDashboard() {
     setCurrentEditId(blogId);
     setBlogForms([blogData]);
     setShowBlogForm(true);
-    
+
     setTimeout(() => {
       document.querySelector('#blog-form-section')?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
@@ -1133,52 +1145,22 @@ export function useAdminDashboard() {
   }, []);
 
   // Delete podcast
-  const deletePodcast = useCallback(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this podcast?')) return;
-    
-    try {
-      setDeletingItemId(id);
-      const response = await fetch(`/api/admin/podcasts/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        toast.success('Podcast deleted successfully');
-        fetchPodcasts(); // Refresh the list
-      } else {
-        toast.error('Failed to delete podcast');
-      }
-    } catch (error) {
-      console.error('Failed to delete podcast:', error);
-      toast.error('Failed to delete podcast');
-    } finally {
-      setDeletingItemId(null);
-    }
-  }, [fetchPodcasts]);
+  const deletePodcast = useCallback((id: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId: id,
+      itemType: 'podcast',
+    });
+  }, []);
 
   // Delete event
-  const deleteEvent = useCallback(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-    
-    try {
-      setDeletingItemId(id);
-      const response = await fetch(`/api/admin/events/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        toast.success('Event deleted successfully');
-        fetchEvents(); // Refresh the list
-      } else {
-        toast.error('Failed to delete event');
-      }
-    } catch (error) {
-      console.error('Failed to delete event:', error);
-      toast.error('Failed to delete event');
-    } finally {
-      setDeletingItemId(null);
-    }
-  }, [fetchEvents]);
+  const deleteEvent = useCallback((id: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId: id,
+      itemType: 'event',
+    });
+  }, []);
 
   // Fetch blogs
   const fetchBlogs = useCallback(async () => {
@@ -1201,76 +1183,100 @@ export function useAdminDashboard() {
   }, []);
 
   // Delete blog
-  const deleteBlog = useCallback(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this blog?')) return;
-    
-    try {
-      setDeletingItemId(id);
-      const response = await fetch(`/api/admin/blogs/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        toast.success('Blog deleted successfully');
-        fetchBlogs(); // Refresh the list
-      } else {
-        toast.error('Failed to delete blog');
-      }
-    } catch (error) {
-      console.error('Failed to delete blog:', error);
-      toast.error('Failed to delete blog');
-    } finally {
-      setDeletingItemId(null);
-    }
-  }, [fetchBlogs]);
+  const deleteBlog = useCallback((id: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId: id,
+      itemType: 'blog',
+    });
+  }, []);
 
   // Delete team member
-  const deleteTeamMember = useCallback(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this team member?')) return;
-    
-    try {
-      setDeletingItemId(id);
-      const response = await fetch(`/api/admin/team-members/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        toast.success('Team member deleted successfully');
-        fetchTeamMembers(); // Refresh the list
-      } else {
-        toast.error('Failed to delete team member');
-      }
-    } catch (error) {
-      console.error('Failed to delete team member:', error);
-      toast.error('Failed to delete team member');
-    } finally {
-      setDeletingItemId(null);
-    }
-  }, [fetchTeamMembers]);
+  const deleteTeamMember = useCallback((id: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId: id,
+      itemType: 'team-member',
+    });
+  }, []);
 
   // Delete user
-  const deleteUser = useCallback(async (id: string) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    
+  const deleteUser = useCallback((id: string) => {
+    setDeleteConfirmation({
+      isOpen: true,
+      itemId: id,
+      itemType: 'user',
+    });
+  }, []);
+
+  // Confirm delete
+  const confirmDelete = useCallback(async () => {
+    const { itemId, itemType } = deleteConfirmation;
+    if (!itemId || !itemType) return;
+
+    setDeletingItemId(itemId);
+
     try {
-      setDeletingItemId(id);
-      const response = await fetch(`/api/admin/users/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        toast.success('User deleted successfully');
-        fetchUsers(); // Refresh the list
-      } else {
-        toast.error('Failed to delete user');
+      let url = '';
+      let successMsg = '';
+      let errorMsg = '';
+      let refreshFn: () => void = () => { };
+
+      switch (itemType) {
+        case 'podcast':
+          url = `/api/admin/podcasts/${itemId}`;
+          successMsg = 'Podcast deleted successfully';
+          errorMsg = 'Failed to delete podcast';
+          refreshFn = fetchPodcasts;
+          break;
+        case 'event':
+          url = `/api/admin/events/${itemId}`;
+          successMsg = 'Event deleted successfully';
+          errorMsg = 'Failed to delete event';
+          refreshFn = fetchEvents;
+          break;
+        case 'blog':
+          url = `/api/admin/blogs/${itemId}`;
+          successMsg = 'Blog deleted successfully';
+          errorMsg = 'Failed to delete blog';
+          refreshFn = fetchBlogs;
+          break;
+        case 'team-member':
+          url = `/api/admin/team-members/${itemId}`;
+          successMsg = 'Team member deleted successfully';
+          errorMsg = 'Failed to delete team member';
+          refreshFn = fetchTeamMembers;
+          break;
+        case 'user':
+          url = `/api/admin/users/${itemId}`;
+          successMsg = 'User deleted successfully';
+          errorMsg = 'Failed to delete user';
+          refreshFn = fetchUsers;
+          break;
+      }
+
+      if (url) {
+        const response = await fetch(url, { method: 'DELETE' });
+
+        if (response.ok) {
+          toast.success(successMsg);
+          refreshFn();
+        } else {
+          toast.error(errorMsg);
+        }
       }
     } catch (error) {
-      console.error('Failed to delete user:', error);
-      toast.error('Failed to delete user');
+      console.error('Delete error:', error);
+      toast.error('An error occurred while deleting');
     } finally {
       setDeletingItemId(null);
+      setDeleteConfirmation({ isOpen: false, itemId: null, itemType: null });
     }
-  }, [fetchUsers]);
+  }, [deleteConfirmation, fetchPodcasts, fetchEvents, fetchBlogs, fetchTeamMembers, fetchUsers]);
+
+  const cancelDelete = useCallback(() => {
+    setDeleteConfirmation({ isOpen: false, itemId: null, itemType: null });
+  }, []);
 
   // Effects
   useEffect(() => {
@@ -1319,9 +1325,9 @@ export function useAdminDashboard() {
 
   // Update link in learnMoreLinks array
   const updateLearnMoreLink = (
-    podcastIndex: number, 
-    linkIndex: number, 
-    field: 'label' | 'url', 
+    podcastIndex: number,
+    linkIndex: number,
+    field: 'label' | 'url',
     value: string
   ) => {
     const updated = [...podcastForms];
@@ -1345,9 +1351,9 @@ export function useAdminDashboard() {
   };
 
   const updateResourceLink = (
-    podcastIndex: number, 
-    linkIndex: number, 
-    field: 'label' | 'url', 
+    podcastIndex: number,
+    linkIndex: number,
+    field: 'label' | 'url',
     value: string
   ) => {
     const updated = [...podcastForms];
@@ -1404,6 +1410,7 @@ export function useAdminDashboard() {
       users,
       loadingUsers,
       deletingItemId,
+      deleteConfirmation,
     },
     actions: {
       setActiveTab,
@@ -1465,6 +1472,8 @@ export function useAdminDashboard() {
       addResourceLink,
       removeResourceLink,
       updateResourceLink,
+      confirmDelete,
+      cancelDelete,
     }
   };
 }

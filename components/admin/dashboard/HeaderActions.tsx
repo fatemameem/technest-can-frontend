@@ -15,11 +15,11 @@ export default function HeaderActions({
   sidebarItems
 }: HeaderActionsProps) {
   if (!handlers) return null;
-  
+
   return (
     <>
       {activeTab === 'podcasts' && (
-        <Button 
+        <Button
           className="bg-blue-600 hover:bg-blue-500 text-white"
           onClick={() => {
             handlers.cancelPodcastEdit();
@@ -31,7 +31,7 @@ export default function HeaderActions({
         </Button>
       )}
       {activeTab === 'events' && (
-        <Button 
+        <Button
           className="bg-blue-600 hover:bg-blue-500 text-white"
           onClick={() => {
             handlers.cancelEventEdit();
@@ -43,7 +43,7 @@ export default function HeaderActions({
         </Button>
       )}
       {activeTab === 'team-members' && (
-        <Button 
+        <Button
           className="bg-blue-600 hover:bg-blue-500 text-white"
           onClick={() => {
             handlers.cancelTeamMemberEdit();
@@ -56,23 +56,36 @@ export default function HeaderActions({
       )}
       {activeTab === 'blogs' && (
         <Link href="/admin/blogs/new">
-        <Button 
-          className="bg-blue-600 hover:bg-blue-500 text-white"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add a new blog post
-        </Button>
+          <Button
+            className="bg-blue-600 hover:bg-blue-500 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add a new blog post
+          </Button>
         </Link>
       )}
-      {(activeTab !== 'overview' && activeTab !== 'settings' && 
-        activeTab !== 'podcasts' && activeTab !== 'events' && 
-        activeTab !== 'team-members' && activeTab !== 'blogs' &&
-        activeTab !== 'newsletter') && (
-        <Button className="bg-blue-600 hover:bg-blue-500 text-white">
+      {activeTab === 'admins' && (
+        <Button
+          className="bg-blue-600 hover:bg-blue-500 text-white"
+          onClick={() => {
+            handlers.cancelAdminEdit();
+            handlers.setShowAdminForm(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
-          Add a new {sidebarItems.find(item => item.id === activeTab)?.label.toLowerCase().slice(0, -1)}
+          Add a new admin
         </Button>
       )}
+      {(activeTab !== 'overview' && activeTab !== 'settings' &&
+        activeTab !== 'podcasts' && activeTab !== 'events' &&
+        activeTab !== 'team-members' && activeTab !== 'blogs' &&
+        activeTab !== 'admins' &&
+        activeTab !== 'newsletter') && (
+          <Button className="bg-blue-600 hover:bg-blue-500 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Add a new {sidebarItems.find(item => item.id === activeTab)?.label.toLowerCase().slice(0, -1)}
+          </Button>
+        )}
     </>
   );
 }

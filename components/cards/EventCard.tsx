@@ -1,8 +1,10 @@
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { toLocalISO } from '@/helpers/dateConverter';
 
 interface EventCardProps {
   event: {
@@ -26,7 +28,15 @@ interface EventCardProps {
 }
 
 export function EventCard({ event, type }: EventCardProps) {
-  const eventDate = new Date(`${event.date}`);
+  // Create a proper Date object that respects the event's timezone
+  const eventDateTime = React.useMemo(() => {
+    if (!event.date || !event.time) return null;
+    
+    // toLocalISO creates "2025-12-12T14:30:00" (no Z suffix)
+    // Browser interprets this in the USER'S local timezone
+    const localIso = toLocalISO(event.date, event.time);
+    return new Date(localIso);
+  }, [event.date, event.time]);
 
   return (
     <Card className="surface hover-lift overflow-hidden">
@@ -52,20 +62,28 @@ export function EventCard({ event, type }: EventCardProps) {
       
       <CardContent>
         <div className="space-y-2 mb-4 text-sm text-slate-400">
-          {event.date && (
-            <div className="flex items-center">
-              <Calendar className="mr-2 h-4 w-4 text-cyan-400" />
-              {event.date}
-            </div>
-          )}
-          {event.time && (
-            <div className="flex items-center">
-              <Clock className="mr-2 h-4 w-4 text-cyan-400" />
-              {eventDate.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}
-            </div>
+          {eventDateTime && (
+            <>
+              <div className="flex items-center">
+                <Calendar className="mr-2 h-4 w-4 text-cyan-400" />
+                {/* This shows in user's timezone */}
+                {eventDateTime.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  month: 'long', 
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </div>
+              <div className="flex items-center">
+                <Clock className="mr-2 h-4 w-4 text-cyan-400" />
+                {/* This shows in user's timezone */}
+                {eventDateTime.toLocaleTimeString('en-US', { 
+                  hour: '2-digit', 
+                  minute: '2-digit',
+                  timeZoneName: 'short' // Shows "EST" or user's TZ
+                })}
+              </div>
+            </>
           )}
           {event.location && (
             <div className="flex items-center">

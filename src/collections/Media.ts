@@ -91,7 +91,7 @@ export const Media: CollectionConfig = {
         if (doc.cloudinary?.publicId) {
           try {
             await cloudinary.uploader.destroy(doc.cloudinary.publicId);
-            console.log(`✅ Deleted Cloudinary file: ${doc.cloudinary.publicId}`);
+            // console.log(`✅ Deleted Cloudinary file: ${doc.cloudinary.publicId}`);
           } catch (error) {
             console.error(`❌ Error deleting Cloudinary file ${doc.cloudinary.publicId}:`, error);
           }

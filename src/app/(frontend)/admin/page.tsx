@@ -13,6 +13,16 @@ import EventsTab from '@/components/admin/dashboard/tabs/Events';
 import BlogsTab from '@/components/admin/dashboard/tabs/Blogs';
 import TeamTab from '@/components/admin/dashboard/tabs/Team';
 import AdminsTab from '@/components/admin/dashboard/tabs/Admins';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminDashboard() {
   const { state, actions } = useAdminDashboard();
@@ -28,7 +38,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-slate-400">Please sign in with Google to access the admin dashboard.</p>
-            <Button 
+            <Button
               onClick={() => signIn("google", { callbackUrl: "/admin" })}
               className="w-full bg-blue-600 hover:bg-blue-500 text-white"
             >
@@ -52,7 +62,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-slate-400">Your account isn't on the admin allowlist.</p>
-            <Button 
+            <Button
               onClick={() => signOut({ callbackUrl: '/' })}
               className="w-full bg-slate-800 hover:bg-slate-700 text-white"
             >
@@ -214,6 +224,32 @@ export default function AdminDashboard() {
           }}
         />
       )}
+
+      <AlertDialog open={state.deleteConfirmation.isOpen} onOpenChange={actions.cancelDelete}>
+        <AlertDialogContent className="bg-slate-900 border-slate-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-400">
+              This action cannot be undone. This will permanently delete the
+              {state.deleteConfirmation.itemType === 'team-member' ? ' team member' : ` ${state.deleteConfirmation.itemType}`} and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={actions.cancelDelete}
+              className="bg-slate-800 text-white border-slate-700 hover:bg-slate-700 hover:text-white"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={actions.confirmDelete}
+              className="bg-red-600 text-white hover:bg-red-700 border-none"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }

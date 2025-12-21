@@ -25,12 +25,46 @@ export default function TeamMemberFormCard({
   canRemove: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
-  
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     onChange('imageFile', file);
+
+    // Show preview immediately
+    const objectUrl = URL.createObjectURL(file);
+    onChange('imageUrl', objectUrl);
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.doc) {
+        // Store both the URL and ID
+        onChange('imageUrl', data.doc.cloudinary.secureUrl); // For display
+        onChange('image', data.doc.id); // For database relation
+
+        toast.success('Image uploaded successfully');
+      } else {
+        console.error('Upload response issue:', data);
+        toast.error('Upload completed but returned unexpected format');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -48,55 +82,55 @@ export default function TeamMemberFormCard({
           )}
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor={`team-name-${index}`}>Name *</Label>
-            <Input 
-              id={`team-name-${index}`} 
-              value={form.name} 
-              onChange={(e) => onChange('name', e.target.value)} 
-              placeholder="Enter name" 
-              className="focus-ring" 
-              required 
+            <Input
+              id={`team-name-${index}`}
+              value={form.name}
+              onChange={(e) => onChange('name', e.target.value)}
+              placeholder="Enter name"
+              className="focus-ring"
+              required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`team-email-${index}`}>Email *</Label>
-            <Input 
-              id={`team-email-${index}`} 
-              type="email" 
-              value={form.email} 
-              onChange={(e) => onChange('email', e.target.value)} 
-              placeholder="email@example.com" 
-              className="focus-ring" 
-              required 
+            <Input
+              id={`team-email-${index}`}
+              type="email"
+              value={form.email}
+              onChange={(e) => onChange('email', e.target.value)}
+              placeholder="email@example.com"
+              className="focus-ring"
+              required
             />
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor={`team-designation-${index}`}>Designation *</Label>
-          <Input 
-            id={`team-designation-${index}`} 
-            value={form.designation} 
-            onChange={(e) => onChange('designation', e.target.value)} 
-            placeholder="e.g., Lead Developer" 
-            className="focus-ring" 
-            required 
+          <Input
+            id={`team-designation-${index}`}
+            value={form.designation}
+            onChange={(e) => onChange('designation', e.target.value)}
+            placeholder="e.g., Lead Developer"
+            className="focus-ring"
+            required
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor={`team-description-${index}`}>Description</Label>
-          <Textarea 
-            id={`team-description-${index}`} 
-            value={form.description} 
-            onChange={(e) => onChange('description', e.target.value)} 
-            placeholder="Brief bio and expertise..." 
-            rows={3} 
-            className="focus-ring resize-none" 
+          <Textarea
+            id={`team-description-${index}`}
+            value={form.description}
+            onChange={(e) => onChange('description', e.target.value)}
+            placeholder="Brief bio and expertise..."
+            rows={3}
+            className="focus-ring resize-none"
           />
         </div>
 
@@ -107,14 +141,14 @@ export default function TeamMemberFormCard({
             {form.imageUrl && (
               <div className="relative w-32 h-32 mb-2 mx-auto">
                 {/* Replace Next.js Image with regular img */}
-                <img 
-                  src={form.imageUrl} 
-                  alt="Profile" 
+                <img
+                  src={form.imageUrl}
+                  alt="Profile"
                   className="w-full h-full object-cover rounded-full border-2 border-slate-600"
                 />
               </div>
             )}
-            
+
             <div className="flex items-center gap-2">
               <Input
                 id={`team-image-${index}`}
@@ -144,7 +178,7 @@ export default function TeamMemberFormCard({
                 )}
               </Button>
             </div>
-            {form.imageFile && (
+            {form.imageFile && !form.imageUrl && (
               <p className="text-xs text-slate-400">
                 Selected: {form.imageFile.name}
               </p>
@@ -160,46 +194,46 @@ export default function TeamMemberFormCard({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor={`team-linkedin-${index}`}>LinkedIn</Label>
-              <Input 
-                id={`team-linkedin-${index}`} 
-                type="url" 
-                value={form.linkedin} 
-                onChange={(e) => onChange('linkedin', e.target.value)} 
-                placeholder="https://linkedin.com/in/..." 
-                className="focus-ring" 
+              <Input
+                id={`team-linkedin-${index}`}
+                type="url"
+                value={form.linkedin}
+                onChange={(e) => onChange('linkedin', e.target.value)}
+                placeholder="https://linkedin.com/in/..."
+                className="focus-ring"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor={`team-twitter-${index}`}>Twitter</Label>
-              <Input 
-                id={`team-twitter-${index}`} 
-                type="url" 
-                value={form.twitter} 
-                onChange={(e) => onChange('twitter', e.target.value)} 
-                placeholder="https://twitter.com/..." 
-                className="focus-ring" 
+              <Input
+                id={`team-twitter-${index}`}
+                type="url"
+                value={form.twitter}
+                onChange={(e) => onChange('twitter', e.target.value)}
+                placeholder="https://twitter.com/..."
+                className="focus-ring"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor={`team-github-${index}`}>GitHub</Label>
-              <Input 
-                id={`team-github-${index}`} 
-                type="url" 
-                value={form.github} 
-                onChange={(e) => onChange('github', e.target.value)} 
-                placeholder="https://github.com/..." 
-                className="focus-ring" 
+              <Input
+                id={`team-github-${index}`}
+                type="url"
+                value={form.github}
+                onChange={(e) => onChange('github', e.target.value)}
+                placeholder="https://github.com/..."
+                className="focus-ring"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor={`team-website-${index}`}>Website</Label>
-              <Input 
-                id={`team-website-${index}`} 
-                type="url" 
-                value={form.website} 
-                onChange={(e) => onChange('website', e.target.value)} 
-                placeholder="https://example.com" 
-                className="focus-ring" 
+              <Input
+                id={`team-website-${index}`}
+                type="url"
+                value={form.website}
+                onChange={(e) => onChange('website', e.target.value)}
+                placeholder="https://example.com"
+                className="focus-ring"
               />
             </div>
           </div>

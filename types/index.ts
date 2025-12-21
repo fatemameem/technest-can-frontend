@@ -299,13 +299,14 @@ export interface EventForm {
   title: string;
   topic: string;
   description: string;
-  date: string;
-  time: string;
+  date: string;        // YYYY-MM-DD
+  time: string;        // HH:mm or HH:mm AM/PM
+  timeEnd?: string;    // Optional end time
+  timeZone?: string;   // IANA timezone (defaults to America/Toronto)
   location: string;
   lumaLink: string;
   zoomLink: string;
   sponsors: string[];
-    // Add these
   thumbnail: string;
   thumbnailUrl?: string;
   thumbnailFile?: File | null;

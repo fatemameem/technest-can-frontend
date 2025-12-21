@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Shield, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ const mobileNavigation = [
 ];
 
 export function Header() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { data: session } = useSession();
   const role = (session?.user as any)?.role as "admin" | "moderator" | undefined;
@@ -37,7 +39,12 @@ export function Header() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 focus-ring rounded-lg">
+          <Link
+            href="/"
+            prefetch={false}
+            onMouseEnter={() => router.prefetch('/')}
+            className="flex items-center space-x-2 focus-ring rounded-lg"
+          >
             <Shield className="h-8 w-8 text-cyan-400" />
             <span className="text-xl font-bold">TECH-NEST</span>
           </Link>
@@ -48,6 +55,8 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={false}
+                onMouseEnter={() => router.prefetch(item.href)}
                 className="text-slate-300 hover:text-cyan-400 transition-colors focus-ring rounded px-2 py-1"
               >
                 {item.name}
@@ -57,6 +66,8 @@ export function Header() {
               <Link
                 key="Admin"
                 href="/admin"
+                prefetch={false}
+                onMouseEnter={() => router.prefetch('/admin')}
                 className="text-slate-300 hover:text-cyan-400 transition-colors focus-ring rounded px-2 py-1"
               >
                 Admin
@@ -78,6 +89,8 @@ export function Header() {
                   <Link
                     key={item.name}
                     href={item.href}
+                    prefetch={false}
+                    onMouseEnter={() => router.prefetch(item.href)}
                     onClick={() => setIsOpen(false)}
                     className="text-slate-300 hover:text-cyan-400 transition-colors focus-ring rounded px-2 py-2"
                   >
@@ -88,6 +101,8 @@ export function Header() {
                   <Link
                     key="AdminMobile"
                     href="/admin"
+                    prefetch={false}
+                    onMouseEnter={() => router.prefetch('/admin')}
                     onClick={() => setIsOpen(false)}
                     className="text-slate-300 hover:text-cyan-400 transition-colors focus-ring rounded px-2 py-2"
                   >

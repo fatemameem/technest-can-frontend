@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Plus, Save, ChevronLeft, ChevronRight, HardDriveIcon, LinkedinIcon, InstagramIcon, FacebookIcon, LinkIcon, Loader, Loader2 } from 'lucide-react';
 import PodcastFormCard from '@/components/admin/forms/PodcastFormCard';
@@ -80,14 +80,14 @@ export default function PodcastsTab({
 												<div className="flex items-center space-x-3">
 													<div
 														className="w-12 h-12 flex-shrink-0 bg-cover bg-center rounded-lg"
-														style={{ 
+														style={{
 															backgroundImage: `url(${
 																// Check if thumbnail is an object with cloudinary data
 																podcast.thumbnail && typeof podcast.thumbnail === 'object' && podcast.thumbnail.cloudinary
 																	? podcast.thumbnail.cloudinary.secureUrl
 																	// Fallback for backward compatibility or missing thumbnails
 																	: 'https://placehold.co/100x100/444/fff?text=Podcast'
-															})`
+																})`
 														}}
 													></div>
 													<p className="text-white font-medium">{podcast.title}</p>
@@ -146,18 +146,7 @@ export default function PodcastsTab({
 														variant="ghost"
 														size="sm"
 														className="text-blue-400 hover:text-blue-300 hover:bg-blue-600/20"
-														onClick={() => actions.handleEditPodcast(podcast.id, {
-															title: podcast.title || '',
-															description: podcast.description || '',
-															linkedin: podcast.linkedin || '',
-															instagram: podcast.instagram || '',
-															drive: podcast.drive || '',
-															facebook: podcast.facebook || '',
-															thumbnail: podcast.thumbnail || '',
-															thumbnailFile: null,
-															learnMoreLinks: podcast.learnMoreLinks || [],
-															resourcesLinks: podcast.resourcesLinks || []
-														})}
+														onClick={() => actions.handleEditPodcast(podcast.id, podcast)}
 														disabled={isSubmittingPodcasts || deletingItemId !== null}
 													>
 														<Edit className="h-4 w-4" />
@@ -199,59 +188,59 @@ export default function PodcastsTab({
 				</div>
 			)}
 
-		{/* Podcast Form Section */}
-		{showPodcastForm && (
-		<div id="podcast-form-section" className="mt-8 pt-8 border-t border-slate-800">
-			<div className="flex items-center justify-between">
-			<h2 className="text-2xl font-bold text-white">
-				{editMode.podcasts ? "Edit Podcast" : "Add New Podcasts"}
-			</h2>
-			<div className="flex gap-2">
-				{!editMode.podcasts && (
-				<Button onClick={actions.addPodcastForm} variant="outline" className="btn-secondary">
-					<Plus className="mr-2 h-4 w-4" />
-					Add Another Podcast
-				</Button>
-				)}
-				<Button onClick={actions.handlePodcastSubmit} className="btn-primary" disabled={isSubmittingPodcasts}>
-				<Save className="mr-2 h-4 w-4" />
-				{editMode.podcasts ? "Save Changes" : `Submit All (${podcastForms.length})`}
-				</Button>
-				<Button
-				onClick={actions.cancelPodcastEdit}
-				variant="outline"
-				className="border-slate-600 text-slate-400 hover:bg-slate-800"
-				>
-				Cancel
-				</Button>
-			</div>
-			</div>
+			{/* Podcast Form Section */}
+			{showPodcastForm && (
+				<div id="podcast-form-section" className="mt-8 pt-8 border-t border-slate-800">
+					<div className="flex items-center justify-between">
+						<h2 className="text-2xl font-bold text-white">
+							{editMode.podcasts ? "Edit Podcast" : "Add New Podcasts"}
+						</h2>
+						<div className="flex gap-2">
+							{!editMode.podcasts && (
+								<Button onClick={actions.addPodcastForm} variant="outline" className="btn-secondary">
+									<Plus className="mr-2 h-4 w-4" />
+									Add Another Podcast
+								</Button>
+							)}
+							<Button onClick={actions.handlePodcastSubmit} className="btn-primary" disabled={isSubmittingPodcasts}>
+								<Save className="mr-2 h-4 w-4" />
+								{editMode.podcasts ? "Save Changes" : `Submit All (${podcastForms.length})`}
+							</Button>
+							<Button
+								onClick={actions.cancelPodcastEdit}
+								variant="outline"
+								className="border-slate-600 text-slate-400 hover:bg-slate-800"
+							>
+								Cancel
+							</Button>
+						</div>
+					</div>
 
-			<div className="space-y-6 mt-6">
-			{podcastForms.map((form, index) => (
-				<PodcastFormCard
-				key={index}
-				index={index}
-				form={form}
-				canRemove={podcastForms.length > 1 && !editMode.podcasts}
-				onRemove={() => actions.removePodcastForm(index)}
-				onChange={(field, value) => actions.updatePodcastForm(index, field, value)}
-				// Add new props
-				onAddLearnMoreLink={() => actions.addLearnMoreLink(index)}
-				onRemoveLearnMoreLink={(linkIndex) => actions.removeLearnMoreLink(index, linkIndex)}
-				onUpdateLearnMoreLink={(linkIndex, field, value) => 
-      actions.updateLearnMoreLink(index, linkIndex, field, value)
-    }
-				onAddResourceLink={() => actions.addResourceLink(index)}
-				onRemoveResourceLink={(linkIndex) => actions.removeResourceLink(index, linkIndex)}
-				onUpdateResourceLink={(linkIndex, field, value) => 
-      actions.updateResourceLink(index, linkIndex, field, value)
-    }
-				/>
-			))}
-			</div>
+					<div className="space-y-6 mt-6">
+						{podcastForms.map((form, index) => (
+							<PodcastFormCard
+								key={index}
+								index={index}
+								form={form}
+								canRemove={podcastForms.length > 1 && !editMode.podcasts}
+								onRemove={() => actions.removePodcastForm(index)}
+								onChange={(field, value) => actions.updatePodcastForm(index, field, value)}
+								// Add new props
+								onAddLearnMoreLink={() => actions.addLearnMoreLink(index)}
+								onRemoveLearnMoreLink={(linkIndex) => actions.removeLearnMoreLink(index, linkIndex)}
+								onUpdateLearnMoreLink={(linkIndex, field, value) =>
+									actions.updateLearnMoreLink(index, linkIndex, field, value)
+								}
+								onAddResourceLink={() => actions.addResourceLink(index)}
+								onRemoveResourceLink={(linkIndex) => actions.removeResourceLink(index, linkIndex)}
+								onUpdateResourceLink={(linkIndex, field, value) =>
+									actions.updateResourceLink(index, linkIndex, field, value)
+								}
+							/>
+						))}
+					</div>
+				</div>
+			)}
 		</div>
-		)}
-	</div>
 	);
 }
