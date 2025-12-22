@@ -30,12 +30,19 @@ function ContactInner() {
 
   // Pre-fill subject based on URL parameter
   useEffect(() => {
+    // Handle service parameter (existing functionality)
     const serviceParam = searchParams.get('service');
     if (serviceParam) {
       const service = sampleData.services.find(s => s.id === serviceParam);
       if (service) {
         setFormData(prev => ({ ...prev, subject: service.title }));
       }
+    }
+    
+    // Handle direct subject parameter (new for promotional popup)
+    const subjectParam = searchParams.get('subject');
+    if (subjectParam) {
+      setFormData(prev => ({ ...prev, subject: subjectParam }));
     }
   }, [searchParams]);
 
@@ -155,6 +162,7 @@ function ContactInner() {
                           <SelectValue placeholder="Select a subject" />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="Request a Free Trial of Tech-Nest Care Demo">Request a Free Trial of Tech-Nest Care Demo</SelectItem>
                           <SelectItem value="general">General Inquiry</SelectItem>
                           {sampleData.services.map((service) => (
                             <SelectItem key={service.id} value={service.title}>
