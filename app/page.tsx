@@ -483,7 +483,7 @@ export default function Home() {
         </div>
       </section>
       {/* Tech-Nest Care Promotional Popup */}
-      <TechNestCarePopup />
+      {/* <TechNestCarePopup /> */}
     </>
   );
 }
